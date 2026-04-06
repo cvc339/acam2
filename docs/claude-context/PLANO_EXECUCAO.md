@@ -15,15 +15,21 @@ Referencia de ferramentas e nomenclatura: `01_COMPENSACOES.md`
 **Entregas:**
 - [x] Decisoes arquiteturais finalizadas (Next.js, Supabase Auth, Railway)
 - [x] Compensacoes e modalidades documentadas (01_COMPENSACOES.md)
-- [ ] Projeto criado com /vc-init (Next.js + Supabase + Railway)
-- [ ] Design system criado com /vc-design (/styleguide funcionando)
-- [ ] Tabelas core criadas com RLS: perfis, configuracoes
-- [ ] Auth funcionando (cadastro, login, verificacao email, recuperacao senha)
-- [ ] Layout base: header, navegacao, footer
-- [ ] CLAUDE.md escrito com convencoes do projeto
-- [ ] /vc-security: RLS verificado nas tabelas core
+- [x] Projeto criado com /vc-init (Next.js + Supabase + Railway)
+- [x] Design system criado com /vc-design (/styleguide funcionando)
+- [x] CLAUDE.md escrito com convencoes do projeto
+- [x] Layout base: header, navegacao, footer
+- [x] Tabelas core criadas com RLS: perfis, configuracoes, transacoes_creditos, pagamentos, consultas, documentos, leads, registro_uso
+- [x] Schema documentado em 04_BANCO_DADOS.md
+- [x] Auth funcionando (cadastro, login, verificacao email, recuperacao senha)
+- [x] /vc-security: RLS verificado (8/8 tabelas, 0 issues) — 2026-04-06
+- [x] Styleguide aprovado pelo fundador (16 showcases, 100% cobertura, zero inline) — 2026-04-06
+- [x] Tabelas normas, normas_compensacoes, documentos_protocolo criadas com RLS — 2026-04-06
+- [x] /vc-security: re-verificacao (11/11 tabelas, 0 issues) — 2026-04-06
+- [x] Skill /vc-design atualizada com licoes aprendidas
 
 **Criterio para avancar:** Build funcional, auth OK, styleguide aprovado, RLS OK.
+**Status: FASE 0 CONCLUIDA — 2026-04-06**
 
 ---
 

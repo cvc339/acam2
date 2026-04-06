@@ -4,127 +4,1490 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
+/* ============================================
+   ACAM Design System — Migrado do ACAM1
+   Fonte da verdade para toda a identidade visual
+   ============================================ */
 
+/* ============================================
+   1. VARIÁVEIS CSS (Custom Properties)
+   Copiadas integralmente do ACAM1 styles.css
+   ============================================ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+    /* Cores Primárias (Verde Floresta — Paleta Vieira Castro) */
+    --primary-50: #f0ebe3;
+    --primary-100: #e3d9cd;
+    --primary-200: #c9b99f;
+    --primary-300: #8a9e7a;
+    --primary-400: #4d7a5a;
+    --primary-500: #2d5a3f;
+    --primary-600: #1a3a2a;
+    --primary-700: #142e21;
+    --primary-800: #0f2318;
+    --primary-900: #0a1910;
+
+    /* Acento (Cobre) */
+    --accent: #c17f59;
+    --accent-hover: #a96d4a;
+    --accent-foreground: #ffffff;
+
+    /* Texto sobre escuro */
+    --text-on-dark: #f5f0e8;
+    --text-muted-dark: rgba(245,240,232,0.6);
+
+    /* Cores Neutras (Cinza) */
+    --neutral-50: #fafafa;
+    --neutral-100: #f5f5f5;
+    --neutral-200: #e5e5e5;
+    --neutral-300: #d4d4d4;
+    --neutral-400: #a3a3a3;
+    --neutral-500: #737373;
+    --neutral-600: #525252;
+    --neutral-700: #404040;
+    --neutral-800: #262626;
+    --neutral-900: #171717;
+
+    /* Cores Semânticas */
+    --success: #16a34a;
+    --error: #dc2626;
+    --warning: #f59e0b;
+    --info: #2563eb;
+
+    /* Cores de Apoio */
+    --green-50: #f0fdf4;
+    --green-100: #dcfce7;
+    --green-200: #bbf7d0;
+    --green-600: #16a34a;
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fecaca;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+    --green-700: #15803d;
+    --amber-700: #92400e;
+    --blue-100: #dbeafe;
+    --blue-600: #2563eb;
+    --amber-100: #fef3c7;
+    --amber-600: #d97706;
+    --amber-700: #92400e;
+    --lime-100: #ecfccb;
+    --lime-600: #65a30d;
+
+    /* Tipografia */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    --font-size-5xl: 3rem;
+
+    /* Espaçamentos */
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-5: 1.25rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --spacing-10: 2.5rem;
+    --spacing-12: 3rem;
+    --spacing-16: 4rem;
+
+    /* Bordas */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    /* Transições */
+    --transition-fast: 150ms ease;
+    --transition-normal: 200ms ease;
+    --transition-slow: 300ms ease;
+
+    /* Larguras máximas */
+    --max-width-sm: 24rem;
+    --max-width-md: 28rem;
+    --max-width-lg: 32rem;
+    --max-width-xl: 36rem;
+    --max-width-2xl: 42rem;
+    --max-width-4xl: 56rem;
+    --max-width-5xl: 64rem;
+    --max-width-6xl: 72rem;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* ============================================
+   Mapeamento shadcn/ui → tokens ACAM1
+   shadcn usa variáveis próprias. Aqui mapeamos
+   para os tokens do ACAM1 como fonte da verdade.
+   ============================================ */
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-family);
+    --font-mono: var(--font-geist-mono);
+    --font-heading: var(--font-family);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --radius-sm: var(--radius-sm);
+    --radius-md: var(--radius-md);
+    --radius-lg: var(--radius-lg);
+    --radius-xl: var(--radius-xl);
+    --radius-2xl: calc(var(--radius-xl) * 1.4);
+    --radius-3xl: calc(var(--radius-xl) * 1.8);
+    --radius-4xl: calc(var(--radius-xl) * 2.2);
+
+    /* Cores semânticas ACAM */
+    --color-success: var(--success);
+    --color-success-foreground: #ffffff;
+    --color-warning: var(--warning);
+    --color-warning-foreground: #ffffff;
+    --color-info: var(--info);
+    --color-info-foreground: #ffffff;
+    --color-offline: var(--error);
+    --color-offline-foreground: #ffffff;
+
+    /* Cor cobre */
+    --color-copper: var(--accent);
+    --color-copper-foreground: var(--accent-foreground);
 }
 
+/* shadcn/ui semantic tokens → ACAM1 */
+:root {
+    --background: var(--neutral-50);
+    --foreground: var(--neutral-800);
+    --card: #ffffff;
+    --card-foreground: var(--neutral-800);
+    --popover: #ffffff;
+    --popover-foreground: var(--neutral-800);
+    --primary: var(--primary-600);
+    --primary-foreground: var(--text-on-dark);
+    --secondary: var(--primary-50);
+    --secondary-foreground: var(--primary-600);
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-500);
+    --accent-foreground: var(--primary-600);
+    --destructive: var(--error);
+    --border: var(--neutral-200);
+    --input: var(--neutral-300);
+    --ring: var(--primary-500);
+
+    /* Charts */
+    --chart-1: var(--primary-500);
+    --chart-2: var(--accent);
+    --chart-3: var(--info);
+    --chart-4: var(--warning);
+    --chart-5: var(--success);
+
+    --radius: var(--radius-lg);
+
+    /* Sidebar */
+    --sidebar: var(--primary-600);
+    --sidebar-foreground: var(--text-on-dark);
+    --sidebar-primary: var(--primary-400);
+    --sidebar-primary-foreground: var(--text-on-dark);
+    --sidebar-accent: var(--primary-700);
+    --sidebar-accent-foreground: var(--text-on-dark);
+    --sidebar-border: var(--primary-700);
+    --sidebar-ring: var(--primary-400);
+}
+
+/* ============================================
+   2. BASE
+   ============================================ */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        background-color: var(--neutral-50);
+        color: var(--neutral-800);
+        font-family: var(--font-family);
+    }
+    html {
+        font-family: var(--font-family);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 600;
+        line-height: 1.25;
+        color: var(--neutral-900);
+    }
+}
+
+/* ============================================
+   Página pública (landing, compensações)
+   ============================================ */
+body.page-public {
+    background-color: #f5f0e8;
+}
+
+/* ============================================
+   3. COMPONENTES ACAM1
+   Classes utilitárias que complementam Tailwind
+   para manter compatibilidade com o design ACAM1
+   ============================================ */
+
+/* --- Cards --- */
+.acam-card {
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+}
+
+.acam-card-hover {
+    transition: all var(--transition-normal);
+}
+
+.acam-card-hover:hover {
+    border-color: var(--neutral-300);
+    box-shadow: var(--shadow-md);
+}
+
+.acam-card-primary {
+    background: var(--primary-50);
+    border-color: var(--primary-200);
+}
+
+.acam-card-dark {
+    background: var(--neutral-800);
+    border-color: var(--neutral-700);
+    color: white;
+}
+
+.acam-card-dark h1,
+.acam-card-dark h2,
+.acam-card-dark h3 {
+    color: white;
+}
+
+.acam-card-compact {
+    padding: var(--spacing-4);
+}
+
+.acam-card-disabled {
+    background: var(--neutral-100);
+    border-color: var(--neutral-300);
+}
+
+/* --- Botões --- */
+.acam-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+
+.acam-btn-lg {
+    padding: var(--spacing-3) var(--spacing-6);
+    font-size: var(--font-size-base);
+}
+
+.acam-btn-sm {
+    padding: var(--spacing-1) var(--spacing-3);
+    font-size: var(--font-size-xs);
+}
+
+.acam-btn-primary {
+    background: var(--primary-600);
+    color: white;
+}
+
+.acam-btn-primary:hover {
+    background: var(--primary-700);
+}
+
+.acam-btn-secondary {
+    background: white;
+    color: var(--neutral-700);
+    border: 1px solid var(--neutral-300);
+}
+
+.acam-btn-secondary:hover {
+    border-color: var(--neutral-400);
+    background: var(--neutral-50);
+}
+
+.acam-btn-outline {
+    background: transparent;
+    color: var(--primary-600);
+    border: 1px solid var(--primary-600);
+}
+
+.acam-btn-outline:hover {
+    background: var(--primary-50);
+}
+
+.acam-btn-ghost {
+    background: transparent;
+    color: var(--neutral-600);
+}
+
+.acam-btn-ghost:hover {
+    background: var(--neutral-100);
+    color: var(--neutral-800);
+}
+
+.acam-btn-danger {
+    background: var(--error);
+    color: white;
+}
+
+.acam-btn-danger:hover {
+    background: var(--red-700);
+}
+
+.acam-btn-accent {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.acam-btn-accent:hover {
+    background: var(--accent-hover);
+}
+
+.acam-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Formulários --- */
+.acam-form-group {
+    margin-bottom: var(--spacing-4);
+}
+
+.acam-form-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--neutral-700);
+    margin-bottom: var(--spacing-1);
+}
+
+.acam-form-input {
+    width: 100%;
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+    background: white;
+}
+
+.acam-form-input:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.acam-form-input::placeholder {
+    color: var(--neutral-400);
+}
+
+.acam-form-input-error {
+    border-color: var(--error);
+}
+
+.acam-form-input-error:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.acam-form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23737373'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+}
+
+.acam-form-help {
+    font-size: var(--font-size-xs);
+    color: var(--neutral-500);
+    margin-top: var(--spacing-1);
+}
+
+.acam-form-error {
+    font-size: var(--font-size-xs);
+    color: var(--error);
+    margin-top: var(--spacing-1);
+}
+
+/* --- Alertas --- */
+.acam-alert {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+}
+
+.acam-alert-success {
+    background: var(--green-50);
+    border: 1px solid var(--green-200);
+    color: #15803d;
+}
+
+.acam-alert-error {
+    background: var(--red-50);
+    border: 1px solid var(--red-200);
+    color: var(--red-700);
+}
+
+.acam-alert-warning {
+    background: var(--amber-100);
+    border: 1px solid #fcd34d;
+    color: var(--amber-700);
+}
+
+.acam-alert-info {
+    background: var(--blue-100);
+    border: 1px solid #93c5fd;
+    color: #1e40af;
+}
+
+/* --- Badges --- */
+.acam-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+}
+
+.acam-badge-primary {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
+
+.acam-badge-secondary {
+    background: var(--neutral-100);
+    color: var(--neutral-600);
+}
+
+.acam-badge-success {
+    background: var(--green-100);
+    color: #15803d;
+}
+
+.acam-badge-warning {
+    background: var(--amber-100);
+    color: var(--amber-600);
+}
+
+.acam-badge-error {
+    background: var(--red-50);
+    color: var(--red-700);
+}
+
+.acam-badge-accent {
+    background: var(--primary-50);
+    color: var(--accent);
+}
+
+/* Badges dentro do <Badge> shadcn — classes para usar com className */
+.badge-success { background: var(--green-100) !important; color: var(--green-700) !important; }
+.badge-warning { background: var(--amber-100) !important; color: var(--amber-600) !important; }
+.badge-error { background: var(--red-50) !important; color: var(--red-700) !important; }
+.badge-info { background: var(--blue-100) !important; color: var(--blue-600) !important; }
+.badge-primary { background: var(--primary-100) !important; color: var(--primary-700) !important; }
+.badge-accent { background: var(--primary-50) !important; color: var(--accent) !important; }
+.badge-dev { background: var(--amber-100) !important; color: var(--amber-600) !important; }
+
+.acam-badge-development {
+    background: var(--amber-100);
+    color: var(--amber-600);
+}
+
+/* --- Header --- */
+.acam-header {
+    background: white;
+    border-bottom: 1px solid var(--neutral-200);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.acam-header-content {
+    max-width: var(--max-width-6xl);
+    margin: 0 auto;
+    padding: var(--spacing-4) var(--spacing-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.acam-header-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    text-decoration: none;
+}
+
+.acam-header-logo-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--primary-100);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-600);
+}
+
+.acam-header-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.acam-header-nav-link {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-600);
+    padding: var(--spacing-2) var(--spacing-4);
+    transition: color var(--transition-fast);
+}
+
+.acam-header-nav-link:hover {
+    color: var(--neutral-800);
+}
+
+.acam-header-credits {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+}
+
+/* --- Page Header --- */
+.acam-page-header {
+    background: white;
+    border-bottom: 1px solid var(--neutral-200);
+    padding: var(--spacing-8) 0;
+}
+
+.acam-page-header-content {
+    max-width: var(--max-width-5xl);
+    margin: 0 auto;
+    padding: 0 var(--spacing-6);
+}
+
+/* --- Service Header --- */
+.acam-service-header {
+    background: linear-gradient(135deg, var(--neutral-100) 0%, white 100%);
+    border-bottom: 1px solid var(--neutral-200);
+    padding: var(--spacing-6) 0;
+}
+
+.acam-service-header-primary {
+    background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
+}
+
+.acam-service-header-content {
+    max-width: var(--max-width-4xl);
+    margin: 0 auto;
+    padding: 0 var(--spacing-6);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-6);
+}
+
+.acam-service-header-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    background: var(--primary-100);
+}
+
+.acam-service-header-cost-label {
+    font-size: var(--font-size-xs);
+    color: var(--neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.acam-service-header-cost-value {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--primary-600);
+}
+
+/* --- Footer --- */
+.acam-footer {
+    background: var(--neutral-900);
+    color: white;
+    padding: var(--spacing-12) 0;
+}
+
+.acam-footer-content {
+    max-width: var(--max-width-6xl);
+    margin: 0 auto;
+    padding: 0 var(--spacing-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+@media (min-width: 768px) {
+    .acam-footer-content {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+/* --- Tabela de Serviços --- */
+.acam-services-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.acam-services-table th {
+    text-align: left;
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--neutral-200);
+}
+
+.acam-services-table td {
+    padding: var(--spacing-4);
+    border-bottom: 1px solid var(--neutral-100);
+    vertical-align: middle;
+}
+
+.acam-services-table tr:hover {
+    background: var(--neutral-50);
+}
+
+/* --- Progress --- */
+.acam-progress {
+    width: 100%;
+    height: 0.5rem;
+    background: var(--neutral-200);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.acam-progress-bar {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.acam-progress-bar-primary { background: var(--primary-600); }
+.acam-progress-bar-success { background: var(--success); }
+.acam-progress-bar-warning { background: var(--warning); }
+.acam-progress-bar-error { background: var(--error); }
+
+/* --- Spinner --- */
+.acam-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--neutral-200);
+    border-top-color: var(--primary-600);
+    border-radius: 50%;
+    animation: acam-spin 0.8s linear infinite;
+}
+
+.acam-spinner-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+.acam-spinner-lg {
+    width: 2rem;
+    height: 2rem;
+    border-width: 3px;
+}
+
+@keyframes acam-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- Breadcrumb --- */
+.acam-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+}
+
+.acam-breadcrumb-link {
+    color: var(--neutral-500);
+    transition: color var(--transition-fast);
+}
+
+.acam-breadcrumb-link:hover {
+    color: var(--neutral-700);
+}
+
+.acam-breadcrumb-separator {
+    color: var(--neutral-300);
+}
+
+/* --- Divider --- */
+.acam-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    margin: var(--spacing-6) 0;
+}
+
+.acam-divider::before,
+.acam-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--neutral-200);
+}
+
+/* --- List Item --- */
+.acam-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-lg);
+    transition: background var(--transition-fast);
+}
+
+.acam-list-item:hover {
+    background: var(--neutral-100);
+}
+
+/* --- Upload de Documentos --- */
+.acam-documento-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding: var(--spacing-3) 0;
+    border-bottom: 1px solid var(--neutral-100);
+}
+
+.acam-documento-item:last-child {
+    border-bottom: none;
+}
+
+.acam-documento-status {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--neutral-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    color: var(--neutral-500);
+    flex-shrink: 0;
+}
+
+.acam-documento-status-ok {
+    background: var(--primary-500);
+    color: white;
+}
+
+.acam-documento-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.acam-documento-nome {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.acam-documento-arquivo {
+    font-size: var(--font-size-xs);
+    color: var(--neutral-500);
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --- Upload Zone (KML/SHP) --- */
+.acam-upload-zone {
+    border: 2px dashed var(--neutral-300);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-5);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.acam-upload-zone:hover {
+    border-color: var(--neutral-400);
+}
+
+.acam-upload-zone-success {
+    border-style: solid;
+    border-color: var(--primary-500);
+    background: var(--primary-50);
+}
+
+.acam-upload-zone-error {
+    border-color: var(--error);
+    background: var(--red-50);
+}
+
+/* --- Legislação Aplicável --- */
+.acam-legislacao-item {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-left: 3px solid var(--primary-500);
+    margin-bottom: var(--spacing-3);
+}
+
+/* Estado selecionado (aplicar quando norma está ativa/selecionada) */
+.acam-legislacao-item-active {
+    background: var(--primary-50);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.acam-legislacao-titulo {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--neutral-900);
+    margin: 0;
+}
+
+.acam-legislacao-desc {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-500);
+    margin: var(--spacing-1) 0 0 0;
+}
+
+/* --- Modalidades de Cumprimento --- */
+.acam-modalidade-card {
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    position: relative;
+    text-align: center;
+}
+
+.acam-modalidade-badge {
+    display: inline-block;
+    background: var(--primary-600);
+    color: white;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: absolute;
+    top: -0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.acam-modalidade-titulo {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--neutral-900);
+    margin: var(--spacing-4) 0 var(--spacing-1);
+}
+
+.acam-modalidade-subtitulo {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-500);
+    margin: 0 0 var(--spacing-4);
+}
+
+.acam-modalidade-desc {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-700);
+    text-align: left;
+    line-height: 1.6;
+}
+
+.acam-modalidade-requisitos {
+    text-align: left;
+    margin-top: var(--spacing-3);
+}
+
+.acam-modalidade-requisitos h4 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin: 0 0 var(--spacing-2);
+}
+
+.acam-modalidade-requisitos ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    font-size: var(--font-size-sm);
+    color: var(--neutral-600);
+    line-height: 1.6;
+}
+
+.acam-modalidade-destaque {
+    text-align: left;
+    margin-top: var(--spacing-3);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: var(--primary-50);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+/* --- Wizard (formulários multi-etapa) --- */
+.acam-wizard {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.acam-wizard-step {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    background: var(--neutral-100);
+    color: var(--neutral-400);
+}
+
+.acam-wizard-step-active {
+    background: var(--neutral-900);
+    color: white;
+}
+
+.acam-wizard-step-completed {
+    background: var(--neutral-200);
+    color: var(--neutral-600);
+}
+
+.acam-wizard-num {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--neutral-300);
+    color: white;
+}
+
+.acam-wizard-step-active .acam-wizard-num {
+    background: white;
+    color: var(--neutral-900);
+}
+
+.acam-wizard-step-completed .acam-wizard-num {
+    background: var(--neutral-400);
+    color: white;
+}
+
+.acam-wizard-sep {
+    width: 24px;
+    height: 1px;
+    background: var(--neutral-200);
+    align-self: center;
+}
+
+/* --- Wizard navigation buttons --- */
+.acam-wizard-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--neutral-100);
+}
+
+/* --- Section title (dentro de formulários) --- */
+.acam-section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--neutral-900);
+    margin-bottom: var(--spacing-1);
+}
+
+.acam-section-desc {
+    font-size: 0.8rem;
+    color: var(--neutral-500);
+    margin-bottom: var(--spacing-6);
+}
+
+/* --- Field label padrão (dentro de grids) --- */
+.acam-field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--neutral-700);
+    margin-bottom: 0.375rem;
+}
+
+.acam-field .req {
+    color: var(--error);
+}
+
+.acam-field .hint {
+    font-size: 0.7rem;
+    color: var(--neutral-400);
+    margin-top: 0.25rem;
+}
+
+/* --- Input com botão lateral (CNPJ, CEP) --- */
+.acam-input-with-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.acam-input-with-action .acam-form-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.acam-input-with-action .acam-btn {
+    flex-shrink: 0;
+}
+
+/* --- Summary card (etapa final do wizard) --- */
+.acam-summary-card {
+    background: var(--neutral-50);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-5);
+    margin-bottom: var(--spacing-6);
+}
+
+.acam-summary-title {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-3);
+}
+
+.acam-summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: var(--font-size-sm);
+}
+
+.acam-summary-label {
+    color: var(--neutral-600);
+}
+
+.acam-summary-value {
+    color: var(--neutral-900);
+    font-weight: 500;
+}
+
+/* --- Form grid (colunas de formulário) --- */
+.acam-fg { display: grid; gap: 1rem; margin-bottom: 1rem; }
+.acam-fg-2 { grid-template-columns: 1fr 1fr; }
+.acam-fg-3 { grid-template-columns: 1fr 1fr 1fr; }
+.acam-fg-4 { grid-template-columns: 2fr 1fr 1fr 1.5fr; }
+
+@media (max-width: 768px) {
+    .acam-fg-2, .acam-fg-3, .acam-fg-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Radio group --- */
+.acam-radio-group {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0.5rem 0;
+}
+
+.acam-radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: var(--font-size-sm);
+    color: var(--neutral-700);
+    cursor: pointer;
+}
+
+.acam-radio-group input[type="radio"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--neutral-900);
+}
+
+/* --- Tabela de normas (legislação) --- */
+.acam-normas-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.acam-normas-table thead tr {
+    background: var(--primary-50);
+    border-bottom: 2px solid var(--primary-200);
+}
+
+.acam-normas-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--primary-600);
+}
+
+.acam-normas-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--neutral-100);
+}
+
+.acam-normas-table tbody tr:nth-child(even) {
+    background: var(--neutral-50);
+}
+
+.acam-normas-table .col-decision {
+    text-align: center;
+    font-weight: 600;
+    color: var(--primary-600);
+}
+
+.acam-normas-table .col-decision-no {
+    text-align: center;
+    font-weight: 600;
+    color: var(--neutral-500);
+}
+
+/* --- Botão accent (cobre) --- */
+.acam-btn-accent {
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.acam-btn-accent:hover {
+    background: var(--accent-hover);
+}
+
+/* --- Icon box (ícone em caixa colorida) --- */
+/* Base */
+.acam-icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    background: var(--primary-100);
+    color: var(--primary-600);
+}
+
+/* Tamanhos */
+.acam-icon-box-sm {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--font-size-xs);
+}
+
+.acam-icon-box-md {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: var(--font-size-sm);
+}
+
+.acam-icon-box-lg {
+    width: 3rem;
+    height: 3rem;
+    font-size: var(--font-size-base);
+}
+
+.acam-icon-box-xl {
+    width: 4rem;
+    height: 4rem;
+    font-size: 2rem;
+    border-radius: var(--radius-xl);
+}
+
+/* Cores */
+.acam-icon-box-amber {
+    background: var(--amber-100);
+    color: var(--amber-600);
+}
+
+.acam-icon-box-blue {
+    background: var(--blue-100);
+    color: var(--blue-600);
+}
+
+.acam-icon-box-red {
+    background: var(--red-100);
+    color: var(--red-600);
+}
+
+.acam-icon-box-green {
+    background: var(--green-100);
+    color: var(--green-600);
+}
+
+/* --- Upload zone: texto e estados --- */
+.acam-upload-zone p {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-500);
+}
+
+.acam-upload-zone-success p {
+    color: var(--primary-600);
+    font-weight: 500;
+}
+
+/* --- Dados extraídos (após upload geoespacial) --- */
+.acam-dados-extraidos {
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--neutral-100);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-sm);
+}
+
+.acam-dados-extraidos-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.acam-dados-extraidos-label {
+    color: var(--neutral-500);
+}
+
+/* --- Upload card (container para seção de upload) --- */
+.acam-upload-card {
+    padding: var(--spacing-5);
+}
+
+.acam-upload-card h2 {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-1);
+}
+
+.acam-upload-card > p {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-500);
+    margin-bottom: var(--spacing-4);
+}
+
+/* --- Documento upload section header --- */
+.acam-doc-section-title {
+    margin-bottom: var(--spacing-4);
+}
+
+/* --- Grid 2 colunas para upload geoespacial --- */
+.acam-upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-6);
+}
+
+@media (max-width: 768px) {
+    .acam-upload-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Header: logo text --- */
+.acam-header-logo-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--neutral-800);
+}
+
+.acam-header-logo-subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--neutral-500);
+}
+
+/* --- Header credits display --- */
+.acam-header-credits-label {
+    color: var(--neutral-500);
+    font-size: var(--font-size-sm);
+}
+
+.acam-header-credits-value {
+    font-weight: 500;
+    color: var(--neutral-800);
+    font-size: var(--font-size-sm);
+}
+
+/* --- Service header layout --- */
+.acam-service-header-info {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+}
+
+.acam-service-header-text h1 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin: 0;
+}
+
+.acam-service-header-text p {
+    color: var(--neutral-600);
+    font-size: var(--font-size-sm);
+    margin: var(--spacing-1) 0 0 0;
+}
+
+.acam-service-header-cost {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* --- Footer text --- */
+.acam-footer-text {
+    font-size: var(--font-size-sm);
+    color: var(--neutral-500);
+}
+
+/* --- Normas table: cell variants --- */
+.acam-normas-table .cell-name {
+    font-weight: 500;
+}
+
+.acam-normas-table .cell-detail {
+    color: var(--neutral-600);
+}
+
+/* --- Nota legal (rodapé de tabelas) --- */
+.acam-legal-note {
+    font-size: var(--font-size-xs);
+    color: var(--neutral-500);
+    margin-top: var(--spacing-4);
+    font-style: italic;
+}
+
+/* --- Progress: dimension labels --- */
+.acam-progress-label {
+    font-weight: 500;
+    color: var(--neutral-700);
+}
+
+.acam-progress-value {
+    font-weight: 600;
+    color: var(--neutral-800);
+}
+
+/* --- Alerta neutro com badge (resultado de análise) --- */
+.acam-alert-result {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+}
+
+.acam-alert-result .badge-inline {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* --- Texto auxiliar (muted, light) --- */
+.acam-text-muted { color: var(--neutral-500); }
+.acam-text-light { color: var(--neutral-400); }
+.acam-text-body { color: var(--neutral-600); }
+
+/* --- Animações --- */
+.acam-fade-in {
+    animation: acam-fadeIn 0.3s ease-out;
+}
+
+@keyframes acam-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.acam-slide-up {
+    animation: acam-slideUp 0.3s ease-out;
+}
+
+@keyframes acam-slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   4. RESPONSIVIDADE
+   ============================================ */
+@media (max-width: 768px) {
+    :root {
+        --font-size-4xl: 1.875rem;
+        --font-size-5xl: 2.25rem;
+    }
+
+    .acam-card {
+        padding: var(--spacing-4);
+    }
+
+    .acam-header-content {
+        padding: var(--spacing-3) var(--spacing-4);
+    }
+
+    .acam-service-header-content {
+        flex-direction: column;
+    }
 }

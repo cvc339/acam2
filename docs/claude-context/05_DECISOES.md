@@ -145,3 +145,44 @@ limitacao de tempo de execucao, diferente do Vercel.
 - (+) Bom para processos longos
 - (+) Custo ja coberto pela assinatura existente
 - (-) Deploy um pouco menos automatizado que Vercel (mas funcional)
+
+---
+
+## [2026-04-06] Tabelas editaveis de legislacao e documentos — PENDENTE
+
+**Contexto:** Cada compensacao tem legislacao aplicavel e documentos exigidos
+para protocolo. No ACAM1, essas informacoes estao hardcoded no HTML.
+Quando uma norma muda, e preciso alterar o codigo. Os links usados
+sao majoritariamente da Assembleia Legislativa de MG, o que garante
+atualizacao em caso de alteracao parcial da norma.
+
+**Opcoes:**
+1. Tabelas no banco (editaveis pelo admin): legislacao_por_compensacao,
+   documentos_por_compensacao. Admin atualiza sem mexer em codigo.
+2. Manter no codigo (como no ACAM1): mais simples, mas exige deploy
+   para cada alteracao de norma.
+
+**Decisao:** A avaliar. A frequencia de mudanca de normas determinara.
+Se raro (1-2x por ano), pode ficar no codigo. Se frequente, vale tabela.
+
+---
+
+## [2026-04-06] PDFs devem incluir documentos para protocolo
+
+**Contexto:** No ACAM1, a lista de documentos necessarios para protocolar
+a compensacao aparece na tela de resultado, mas nao e reproduzida no PDF.
+O usuario perde essa informacao ao salvar apenas o PDF.
+
+**Decisao:** Os PDFs gerados pelo ACAM2 devem incluir uma secao
+"Documentos necessarios para protocolo" com a lista completa.
+Essa informacao e parte do resultado da consulta.
+
+---
+
+## [2026-04-06] Botao de gerar PDF padronizado
+
+**Contexto:** No ACAM1, o botao de gerar PDF era uma barra verde enorme.
+Desnecessario e inconsistente com os demais botoes.
+
+**Decisao:** Usar botao padrao (acam-btn-primary, tamanho default)
+em todas as paginas onde o PDF sera gerado. Sem barra gigante.
