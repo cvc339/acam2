@@ -45,10 +45,10 @@ export function ServicesTable({ ferramentas }: ServicesTableProps) {
             <td>
               {f.href ? (
                 <Link href={f.href}>
-                  <Button size="sm">Acessar</Button>
+                  <Button size="sm" style={{ cursor: "pointer" }}>Acessar</Button>
                 </Link>
               ) : (
-                <Button size="sm" disabled>Acessar</Button>
+                <Button size="sm" disabled style={{ cursor: "not-allowed" }}>Acessar</Button>
               )}
             </td>
           </tr>

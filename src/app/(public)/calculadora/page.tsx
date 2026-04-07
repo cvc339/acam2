@@ -9,6 +9,14 @@ import {
   type Produto,
 } from "@/lib/calculo/intervencao"
 
+function OpcaoBtn({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} className={`acam-opcao-btn${selected ? " acam-opcao-btn-selected" : ""}`}>
+      {children}
+    </button>
+  )
+}
+
 function fmt(v: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
 }
@@ -324,10 +332,9 @@ export default function CalculadoraPage() {
                 { valor: "plantada", texto: "Floresta plantada" },
                 { valor: "ambas", texto: "Ambas" },
               ].map((op) => (
-                <button key={op.valor} onClick={() => selecionar("tipoVegetacao", op.valor)}
-                  style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.tipoVegetacao === op.valor ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.tipoVegetacao === op.valor ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.tipoVegetacao === op.valor ? 600 : 400, transition: "all 0.15s" }}>
+                <OpcaoBtn key={op.valor} selected={state.tipoVegetacao === op.valor} onClick={() => selecionar("tipoVegetacao", op.valor)}>
                   {op.texto}
-                </button>
+                </OpcaoBtn>
               ))}
             </div>
           )}
@@ -336,10 +343,9 @@ export default function CalculadoraPage() {
             <div>
               <h2 className="text-lg font-semibold mb-4">A vegetação nativa está sob plano de manejo sustentável?</h2>
               {[{ valor: true, texto: "Sim, possui plano de manejo" }, { valor: false, texto: "Não" }].map((op) => (
-                <button key={String(op.valor)} onClick={() => selecionar("temManejo", op.valor)}
-                  style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.temManejo === op.valor ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.temManejo === op.valor ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.temManejo === op.valor ? 600 : 400 }}>
+                <OpcaoBtn key={String(op.valor)} selected={state.temManejo === op.valor} onClick={() => selecionar("temManejo", op.valor)}>
                   {op.texto}
-                </button>
+                </OpcaoBtn>
               ))}
             </div>
           )}
@@ -348,10 +354,9 @@ export default function CalculadoraPage() {
             <div>
               <h2 className="text-lg font-semibold mb-4">A intervenção atinge Área de Preservação Permanente (APP)?</h2>
               {[{ valor: true, texto: "Sim" }, { valor: false, texto: "Não" }].map((op) => (
-                <button key={String(op.valor)} onClick={() => selecionar("temAPP", op.valor)}
-                  style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.temAPP === op.valor ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.temAPP === op.valor ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.temAPP === op.valor ? 600 : 400 }}>
+                <OpcaoBtn key={String(op.valor)} selected={state.temAPP === op.valor} onClick={() => selecionar("temAPP", op.valor)}>
                   {op.texto}
-                </button>
+                </OpcaoBtn>
               ))}
             </div>
           )}
@@ -365,10 +370,9 @@ export default function CalculadoraPage() {
                 { valor: "sem_supressao", texto: "Intervenção em APP sem supressão de vegetação" },
                 { valor: "plantada_app", texto: "Supressão de floresta plantada em APP" },
               ].map((op) => (
-                <button key={op.valor} onClick={() => toggleArray("tiposAPP", op.valor)}
-                  style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.tiposAPP.includes(op.valor) ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.tiposAPP.includes(op.valor) ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.tiposAPP.includes(op.valor) ? 600 : 400 }}>
+                <OpcaoBtn key={op.valor} selected={state.tiposAPP.includes(op.valor)} onClick={() => toggleArray("tiposAPP", op.valor)}>
                   {op.texto}
-                </button>
+                </OpcaoBtn>
               ))}
             </div>
           )}
@@ -390,10 +394,9 @@ export default function CalculadoraPage() {
                 <p style={{ fontSize: "0.75rem", color: "var(--neutral-400)" }}>Base legal: Art. 5° da Resolução Conjunta SEMAD/IEF n° 3.102/2021</p>
               </div>
               {[{ valor: true, texto: "Sim" }, { valor: false, texto: "Não" }].map((op) => (
-                <button key={String(op.valor)} onClick={() => selecionar("temAproveitamento", op.valor)}
-                  style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.temAproveitamento === op.valor ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.temAproveitamento === op.valor ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.temAproveitamento === op.valor ? 600 : 400 }}>
+                <OpcaoBtn key={String(op.valor)} selected={state.temAproveitamento === op.valor} onClick={() => selecionar("temAproveitamento", op.valor)}>
                   {op.texto}
-                </button>
+                </OpcaoBtn>
               ))}
             </div>
           )}
@@ -427,10 +430,9 @@ export default function CalculadoraPage() {
               <h2 className="text-lg font-semibold mb-4">A intervenção gerará produtos florestais?</h2>
               <p className="text-sm text-muted-foreground mb-3">Lenha, madeira, carvão ou produtos não madeireiros.</p>
               {[{ valor: true, texto: "Sim" }, { valor: false, texto: "Não" }].map((op) => (
-                <button key={String(op.valor)} onClick={() => selecionar("temProdutos", op.valor)}
-                  style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.temProdutos === op.valor ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.temProdutos === op.valor ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.temProdutos === op.valor ? 600 : 400 }}>
+                <OpcaoBtn key={String(op.valor)} selected={state.temProdutos === op.valor} onClick={() => selecionar("temProdutos", op.valor)}>
                   {op.texto}
-                </button>
+                </OpcaoBtn>
               ))}
             </div>
           )}
@@ -443,10 +445,9 @@ export default function CalculadoraPage() {
                 <div key={grupo} style={{ marginBottom: "1rem" }}>
                   <h4 style={{ fontSize: "0.8rem", color: "var(--neutral-500)", textTransform: "uppercase", marginBottom: "0.5rem" }}>{grupo}</h4>
                   {prods.map((p) => (
-                    <button key={p.id} onClick={() => toggleArray("produtosSelecionados", p.id)}
-                      style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.produtosSelecionados.includes(p.id) ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.produtosSelecionados.includes(p.id) ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.produtosSelecionados.includes(p.id) ? 600 : 400 }}>
+                    <OpcaoBtn key={p.id} selected={state.produtosSelecionados.includes(p.id)} onClick={() => toggleArray("produtosSelecionados", p.id)}>
                       {p.nome}
-                    </button>
+                    </OpcaoBtn>
                   ))}
                 </div>
               ))}
@@ -475,10 +476,9 @@ export default function CalculadoraPage() {
               <h2 className="text-lg font-semibold mb-4">A intervenção está dentro de processo de licenciamento ambiental?</h2>
               <p className="text-sm text-muted-foreground mb-3">Isso define o órgão de destino do DAE.</p>
               {[{ valor: true, texto: "Sim, faz parte de licenciamento" }, { valor: false, texto: "Não, é pedido avulso (IEF)" }].map((op) => (
-                <button key={String(op.valor)} onClick={() => selecionar("dentroLicenciamento", op.valor)}
-                  style={{ display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem", border: state.dentroLicenciamento === op.valor ? "2px solid var(--primary-600)" : "2px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", background: state.dentroLicenciamento === op.valor ? "var(--primary-50)" : "white", textAlign: "left", cursor: "pointer", fontSize: "0.95rem", fontWeight: state.dentroLicenciamento === op.valor ? 600 : 400 }}>
+                <OpcaoBtn key={String(op.valor)} selected={state.dentroLicenciamento === op.valor} onClick={() => selecionar("dentroLicenciamento", op.valor)}>
                   {op.texto}
-                </button>
+                </OpcaoBtn>
               ))}
             </div>
           )}
