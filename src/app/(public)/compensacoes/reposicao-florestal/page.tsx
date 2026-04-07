@@ -47,6 +47,13 @@ export default function ReposicaoFlorestalPage() {
       </div>
 
       <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+        <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-3)" }}>Base de Cálculo</h2>
+        <p className="text-sm" style={{ lineHeight: 1.8, color: "var(--neutral-700)" }}>
+          A reposição florestal é calculada com base no volume de matéria-prima florestal suprimido ou consumido. O recolhimento deve ser realizado no ano da supressão, conforme Lei Estadual nº 20.922/2013.
+        </p>
+      </div>
+
+      <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-3)" }}>Nossa Ferramenta</h2>
         <h3 className="font-semibold mb-2">Cálculo de Reposição Florestal (gratuita)</h3>
         <p className="text-sm text-muted-foreground">Cálculo com base nos quantitativos de lenha nativa, madeira nativa e carvão vegetal de floresta nativa.</p>

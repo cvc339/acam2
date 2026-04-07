@@ -59,31 +59,31 @@ export default function MataAtlanticaPage() {
               <tr>
                 <td className="cell-name">Utilidade Pública</td>
                 <td>Primária, Secundária Avançada e Média</td>
-                <td className="cell-detail">Caráter excepcional; inexistência de alternativa técnica e locacional</td>
+                <td className="cell-detail">Caráter excepcional; inexistência de alternativa técnica e locacional; EIA/RIMA para primária (Art. 14, 20, 21, 22)</td>
                 <td className="col-decision">Sim (Art. 17)</td>
               </tr>
               <tr>
                 <td className="cell-name">Interesse Social</td>
                 <td>Secundária Média</td>
-                <td className="cell-detail">Caráter excepcional; inexistência de alternativa técnica e locacional</td>
+                <td className="cell-detail">Caráter excepcional; inexistência de alternativa técnica e locacional (Art. 14, 23, 24)</td>
                 <td className="col-decision">Sim (Art. 17)</td>
               </tr>
               <tr>
                 <td className="cell-name">Mineração</td>
                 <td>Secundária Avançada e Média</td>
-                <td className="cell-detail">EIA/RIMA obrigatório; inexistência de alternativa técnica e locacional</td>
-                <td className="col-decision">Sim (Art. 32)</td>
+                <td className="cell-detail">EIA/RIMA obrigatório; inexistência de alternativa técnica e locacional (Art. 32, I)</td>
+                <td className="col-decision">Sim (Art. 32, II)</td>
               </tr>
               <tr>
                 <td className="cell-name">Loteamento (perímetro até a Lei)</td>
                 <td>Secundária Avançada e Média</td>
-                <td className="cell-detail">Preservar mínimo de 50% (avançada) ou 30% (média); atender Plano Diretor</td>
+                <td className="cell-detail">Preservar mínimo de 50% (avançada) ou 30% (média); atender Plano Diretor (Art. 30, 31 §1º)</td>
                 <td className="col-decision">Sim (Art. 17)</td>
               </tr>
               <tr>
                 <td className="cell-name">Loteamento (perímetro após a Lei)</td>
                 <td>Secundária Média</td>
-                <td className="cell-detail">Preservar mínimo de 50% da vegetação; atender Plano Diretor</td>
+                <td className="cell-detail">Preservar mínimo de 50% da vegetação; atender Plano Diretor (Art. 31, §2º)</td>
                 <td className="col-decision">Sim (Art. 17)</td>
               </tr>
               <tr>
@@ -93,15 +93,27 @@ export default function MataAtlanticaPage() {
                 <td className="col-decision-no">Em regra, não</td>
               </tr>
               <tr>
+                <td className="cell-name">Pesquisa Científica</td>
+                <td>Primária, Avançada, Média</td>
+                <td className="cell-detail">Corte eventual; regulamentado pelo CONAMA; autorizado pelo SISNAMA (Art. 19, 20, 21, 23)</td>
+                <td className="col-decision-no">Não</td>
+              </tr>
+              <tr>
                 <td className="cell-name">Pequeno Produtor</td>
                 <td>Secundária Média</td>
-                <td className="cell-detail">Atividades imprescindíveis à subsistência; respeitar APP e Reserva Legal</td>
+                <td className="cell-detail">Atividades imprescindíveis à subsistência; respeitar APP e Reserva Legal (Art. 23, III e Art. 24)</td>
+                <td className="col-decision-no">Não (Art. 17, §2º)</td>
+              </tr>
+              <tr>
+                <td className="cell-name">Populações Tradicionais</td>
+                <td>Todos os estágios</td>
+                <td className="cell-detail">Sem propósito comercial; consumo na propriedade; independe de autorização (Art. 9º)</td>
                 <td className="col-decision-no">Não</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p className="acam-legal-note">Art. 17 da Lei 11.428/2006: A compensação consiste na destinação de área equivalente à desmatada, com as mesmas características ecológicas, na mesma bacia hidrográfica.</p>
+        <p className="acam-legal-note">Art. 17 da Lei 11.428/2006: A compensação consiste na destinação de área equivalente à desmatada, com as mesmas características ecológicas, na mesma bacia hidrográfica (preferencialmente na mesma microbacia).</p>
       </div>
 
       {/* Modalidades */}
@@ -152,7 +164,7 @@ export default function MataAtlanticaPage() {
                 <li>Espécies nativas do bioma</li>
               </ul>
             </div>
-            <div className="acam-modalidade-destaque"><strong>Atenção:</strong> Exige plantio, monitoramento e vistoria</div>
+            <div className="acam-modalidade-destaque"><strong>Atenção:</strong> Exige PRADA (Projeto de Recomposição de Áreas Degradadas), plantio, monitoramento e vistoria. Consulte a ferramenta WebAmbiente (Embrapa) para orientação sobre recomposição.</div>
           </div>
         </div>
       </div>
