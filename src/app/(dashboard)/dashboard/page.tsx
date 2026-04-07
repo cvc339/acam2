@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 
 const ferramentas = [
-  { nome: "Calculadora de Intervenção Ambiental", descricao: "Taxa de expediente, taxa florestal e reposição florestal", compensacao: "Todas", creditos: "Gratuita", ativo: true },
-  { nome: "Cálculo de Reposição Florestal", descricao: "Cálculo com base nos quantitativos de nativa", compensacao: "Reposição Florestal", creditos: "Gratuita", ativo: true },
+  { nome: "Calculadora de Intervenção Ambiental", descricao: "Taxa de expediente, taxa florestal e reposição florestal", compensacao: "Todas", creditos: "Gratuita", ativo: true, href: "/calculadora" },
+  { nome: "Cálculo de Reposição Florestal", descricao: "Cálculo com base nos quantitativos de nativa", compensacao: "Reposição Florestal", creditos: "Gratuita", ativo: true, href: "/reposicao-florestal" },
   { nome: "Destinação em UC — Base", descricao: "Análise completa de viabilidade", compensacao: "Minerária / Reserva Legal", creditos: "5", ativo: true },
   { nome: "Cálculo Implantação/Manutenção UC", descricao: "Cálculo com UFEMG vigente", compensacao: "Minerária", creditos: "2", ativo: true },
   { nome: "Requerimento Minerária", descricao: "Preenchimento assistido + PDF", compensacao: "Minerária", creditos: "0,5", ativo: true },

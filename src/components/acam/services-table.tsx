@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "./status-badge"
 
@@ -42,10 +43,12 @@ export function ServicesTable({ ferramentas }: ServicesTableProps) {
               )}
             </td>
             <td>
-              {f.ativo ? (
-                <Button size="sm">Acessar</Button>
+              {f.href ? (
+                <Link href={f.href}>
+                  <Button size="sm">Acessar</Button>
+                </Link>
               ) : (
-                <StatusBadge variant="dev">Em breve</StatusBadge>
+                <Button size="sm" disabled>Acessar</Button>
               )}
             </td>
           </tr>
