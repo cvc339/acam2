@@ -60,11 +60,14 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 - [ ] /vc-security: isolamento verificado
 
 ### Bloco 1B — Conteudo gratuito
-- [ ] Avaliacao de Compensacoes (checklist 13 perguntas)
-- [ ] Resultado com compensacoes aplicaveis → modalidades → ferramentas
-- [ ] 8 paginas informativas (uma por compensacao, com modalidades)
-- [ ] Link externo para WebAmbiente (1.3) — verificar URL atualizada
-- [ ] Calculadora de Intervencao Ambiental (taxa expediente, florestal, reposicao)
+- [x] Avaliacao de Compensacoes (checklist 14 perguntas, logica condicional, SNUC verificar)
+- [x] Resultado no dashboard com badges (Provavel/Verificar) + refazer avaliacao
+- [x] 8 paginas informativas (compensacoes com modalidades, legislacao com links)
+- [x] Auditoria normativa: tabela MA completa, base calculo reposicao, PRADA/WebAmbiente
+- [x] Links de legislacao: 16 normas com fontes verificadas (Planalto, ALMG, SIAM, CONAMA)
+- [x] Calculadora de Intervencao Ambiental (taxa expediente, florestal, reposicao)
+- [x] Calculo de Reposicao Florestal (ferramenta gratuita separada)
+**Status: BLOCO 1B CONCLUIDO — 2026-04-07**
 
 ### Bloco 1C — Engine de analise (servicos internos)
 - [ ] Analise Documental (Claude API): matricula 20+ campos, CCIR, ITR, CAR, CND

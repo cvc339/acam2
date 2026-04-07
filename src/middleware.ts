@@ -11,6 +11,8 @@ const publicRoutes = [
   '/styleguide',
   '/compensacoes',
   '/checklist',
+  '/calculadora',
+  '/reposicao-florestal',
   '/termos',
   '/privacidade',
   '/auth/callback',
