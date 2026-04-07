@@ -1458,31 +1458,7 @@ body.page-public {
 .acam-text-light { color: var(--neutral-400); }
 .acam-text-body { color: var(--neutral-600); }
 
-/* --- Botão de opção do wizard (calculadora, checklist) --- */
-.acam-opcao-btn {
-    display: block;
-    width: 100%;
-    padding: 1rem 1.25rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid var(--neutral-200);
-    border-radius: var(--radius-lg);
-    background: white;
-    text-align: left;
-    cursor: pointer;
-    font-size: 0.95rem;
-    transition: all 0.15s;
-}
-
-.acam-opcao-btn:hover {
-    border-color: var(--primary-200);
-    background: var(--primary-50);
-}
-
-.acam-opcao-btn-selected {
-    border-color: var(--primary-200);
-    background: var(--primary-50);
-    font-weight: 600;
-}
+/* Botão de opção do wizard — movido para inline no componente (Tailwind v4 purga classes custom) */
 
 /* --- Animações --- */
 .acam-fade-in {

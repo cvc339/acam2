@@ -11,7 +11,15 @@ import {
 
 function OpcaoBtn({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className={`acam-opcao-btn${selected ? " acam-opcao-btn-selected" : ""}`}>
+    <button onClick={onClick} style={{
+      display: "block", width: "100%", padding: "1rem 1.25rem", marginBottom: "0.5rem",
+      border: selected ? "1px solid var(--primary-200)" : "1px solid var(--neutral-200)",
+      borderRadius: "var(--radius-lg)",
+      background: selected ? "var(--primary-50)" : "white",
+      textAlign: "left", cursor: "pointer", fontSize: "0.95rem",
+      fontWeight: selected ? 600 : 400,
+      transition: "all 0.15s",
+    }}>
       {children}
     </button>
   )
