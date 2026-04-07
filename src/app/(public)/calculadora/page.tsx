@@ -680,19 +680,30 @@ export default function CalculadoraPage() {
                 {/* Botões */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   <button className="acam-btn acam-btn-primary" style={{ width: "100%" }} onClick={async () => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const html2pdf = (await import("html2pdf.js") as any).default
-                    const elemento = document.getElementById("wizard-container")
-                    if (!elemento) return
-                    const opcoes = {
-                      margin: [15, 15, 20, 15],
-                      filename: "ACAM-Calculadora-Intervencao-" + new Date().toISOString().slice(0, 10) + ".pdf",
-                      image: { type: "jpeg", quality: 0.95 },
-                      html2canvas: { scale: 2, useCORS: true, allowTaint: true, scrollY: 0 },
-                      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-                      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+                    try {
+                      const res = await fetch("/api/pdf/calculadora", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          ...resultado,
+                          ufemgAno: ufemg.ano,
+                          ufemgValor: ufemg.valor,
+                          nome, documento, municipio, processo,
+                          dentroLicenciamento: state.dentroLicenciamento,
+                        }),
+                      })
+                      if (res.ok) {
+                        const blob = await res.blob()
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement("a")
+                        a.href = url
+                        a.download = "ACAM-Calculadora-Intervencao-" + new Date().toISOString().slice(0, 10) + ".pdf"
+                        a.click()
+                        URL.revokeObjectURL(url)
+                      }
+                    } catch (err) {
+                      console.error("Erro ao gerar PDF:", err)
                     }
-                    await html2pdf().set(opcoes).from(elemento).save()
                   }}>Salvar PDF</button>
                   <button className="acam-btn acam-btn-ghost" style={{ width: "100%" }} onClick={reiniciar}>Nova Simulação</button>
                 </div>
