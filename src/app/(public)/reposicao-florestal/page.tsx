@@ -122,6 +122,40 @@ export default function ReposicaoFlorestalPage() {
             <p className="text-xs text-muted-foreground mt-4">
               UFEMG {ufemg.ano}: R$ {ufemg.valor.toFixed(4)} — Valores estimados, sujeitos a atualização.
             </p>
+
+            <button className="acam-btn acam-btn-primary mt-4" style={{ width: "100%" }} onClick={async () => {
+              try {
+                const res = await fetch("/api/pdf/reposicao", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    itens: itens.map((i) => ({
+                      nome: i.produto.nome,
+                      volume: i.volume,
+                      unidade: i.produto.unidade,
+                      arvores: i.produto.arvores,
+                      totalArvores: i.arvores,
+                      valor: i.valor,
+                    })),
+                    totalValor,
+                    totalArvores,
+                    ufemgAno: ufemg.ano,
+                    ufemgValor: ufemg.valor,
+                  }),
+                })
+                if (res.ok) {
+                  const blob = await res.blob()
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement("a")
+                  a.href = url
+                  a.download = "ACAM-Reposicao-Florestal-" + new Date().toISOString().slice(0, 10) + ".pdf"
+                  a.click()
+                  URL.revokeObjectURL(url)
+                }
+              } catch (err) {
+                console.error("Erro ao gerar PDF:", err)
+              }
+            }}>Salvar PDF</button>
           </div>
         )}
 
