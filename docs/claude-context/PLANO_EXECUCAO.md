@@ -67,7 +67,14 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 - [x] Links de legislacao: 16 normas com fontes verificadas (Planalto, ALMG, SIAM, CONAMA)
 - [x] Calculadora de Intervencao Ambiental (taxa expediente, florestal, reposicao)
 - [x] Calculo de Reposicao Florestal (ferramenta gratuita separada)
+- [x] Template PDF profissional (React-PDF: capa, tabelas, fichas DAE, paginacao)
+- [x] Accordion nas orientacoes DAE
 **Status: BLOCO 1B CONCLUIDO — 2026-04-07**
+
+**Pendencias para proxima sessao:**
+- Enriquecer PDF de reposicao florestal com conteudo normativo (1 pagina max)
+- Fontes Source Serif/Sans no PDF (URLs a corrigir)
+- Responsividade mobile (ajuste fino da landing page)
 
 ### Bloco 1C — Engine de analise (servicos internos)
 - [ ] Analise Documental (Claude API): matricula 20+ campos, CCIR, ITR, CAR, CND
