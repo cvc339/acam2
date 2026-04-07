@@ -3,13 +3,12 @@ import { cn } from "@/lib/utils"
 interface LegislacaoItemProps {
   titulo: string
   descricao: string
-  ativo?: boolean
   linkUrl?: string
 }
 
-export function LegislacaoItem({ titulo, descricao, ativo = false, linkUrl }: LegislacaoItemProps) {
+export function LegislacaoItem({ titulo, descricao, linkUrl }: LegislacaoItemProps) {
   const content = (
-    <div className={cn("acam-legislacao-item", ativo && "acam-legislacao-item-active")}>
+    <div className={cn("acam-legislacao-item", linkUrl && "acam-legislacao-item-clickable")}>
       <p className="acam-legislacao-titulo">{titulo}</p>
       <p className="acam-legislacao-desc">{descricao}</p>
     </div>
@@ -17,7 +16,7 @@ export function LegislacaoItem({ titulo, descricao, ativo = false, linkUrl }: Le
 
   if (linkUrl) {
     return (
-      <a href={linkUrl} target="_blank" rel="noopener noreferrer">
+      <a href={linkUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
         {content}
       </a>
     )

@@ -18,15 +18,16 @@ export default function LegislacaoShowcase() {
         <CardContent>
           <div className="acam-card acam-upload-card">
             <h2 className="font-semibold text-xl acam-doc-section-title">Legislação Aplicável</h2>
-            <LegislacaoItem titulo="Lei Federal nº 11.428/2006" descricao="Dispõe sobre a utilização e proteção da vegetação nativa do Bioma Mata Atlântica" />
-            <LegislacaoItem titulo="Decreto Federal nº 6.660/2008" descricao="Regulamenta a Lei nº 11.428/2006" ativo />
-            <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" />
+            <LegislacaoItem titulo="Lei Federal nº 11.428/2006" descricao="Dispõe sobre a utilização e proteção da vegetação nativa do Bioma Mata Atlântica" linkUrl="https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/lei/l11428.htm" />
+            <LegislacaoItem titulo="Decreto Federal nº 6.660/2008" descricao="Regulamenta a Lei nº 11.428/2006" linkUrl="https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2008/decreto/d6660.htm" />
+            <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
             <LegislacaoItem titulo="Portaria IEF nº 30/2015" descricao="Estabelece diretrizes e procedimentos para cumprimento da compensação" />
           </div>
 
           <div className="text-sm mt-4 space-y-1 acam-text-body">
-            <p><strong>Estado ativo:</strong> Fundo creme indica norma selecionada. Prop: ativo=true.</p>
-            <p><strong>Link:</strong> Prop linkUrl abre a norma no site da ALMG.</p>
+            <p><strong>Hover:</strong> Fundo creme aparece ao passar o mouse sobre norma com link. Indica que é clicável.</p>
+            <p><strong>Link:</strong> Prop linkUrl abre a norma em nova aba. Sem link, norma fica sem hover.</p>
+            <p>Passe o mouse sobre as 3 primeiras normas acima (com link) para ver o efeito.</p>
           </div>
         </CardContent>
       </Card>

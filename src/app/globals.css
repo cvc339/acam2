@@ -897,8 +897,13 @@ body.page-public {
     margin-bottom: var(--spacing-3);
 }
 
-/* Estado selecionado (aplicar quando norma está ativa/selecionada) */
-.acam-legislacao-item-active {
+/* Hover: fundo creme quando o mouse passa sobre norma clicável */
+.acam-legislacao-item-clickable {
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.acam-legislacao-item-clickable:hover {
     background: var(--primary-50);
     border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
