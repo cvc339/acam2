@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import Link from "next/link"
 import {
   ATIVIDADES,
   PRODUTOS,
@@ -248,6 +249,15 @@ export default function CalculadoraPage() {
 
   return (
     <div>
+      <div style={{ maxWidth: "40rem", margin: "0 auto", padding: "var(--spacing-4) var(--spacing-6) 0" }}>
+        <Link href="/dashboard" className="text-sm text-muted-foreground inline-flex items-center gap-1" style={{ textDecoration: "none" }}>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+          </svg>
+          Voltar ao dashboard
+        </Link>
+      </div>
+
       {/* Service Header */}
       <div className="acam-service-header acam-service-header-primary">
         <div className="acam-service-header-content">
@@ -300,7 +310,7 @@ export default function CalculadoraPage() {
             <div>
               <h2 className="text-xl font-semibold mb-2">Taxa de Expediente para Intervenção Ambiental</h2>
               <p className="text-sm text-muted-foreground mb-4">Esta calculadora determina os valores de <strong>Taxa de Expediente</strong>, <strong>Taxa Florestal</strong> e <strong>Reposição Florestal</strong> para processos de intervenção ambiental em Minas Gerais.</p>
-              <div className="acam-alert acam-alert-info">
+              <div className="acam-alert-result">
                 <strong>Como funciona:</strong> Responda às perguntas sobre a sua intervenção e a calculadora determinará automaticamente as atividades aplicáveis e os valores devidos.
               </div>
             </div>
