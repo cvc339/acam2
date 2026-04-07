@@ -40,6 +40,13 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 
 **Entregas:**
 
+### Bloco 0 — Componentes React + Paginas base (pré-requisito)
+- [ ] Criar componentes React reutilizaveis em src/components/ baseados no styleguide
+- [ ] Styleguide importa e usa esses componentes (nao replica classes)
+- [ ] Landing page (funcao de marketing, fora do design system interno)
+- [ ] Login, registro, recuperar senha usando componentes do design system
+- [ ] Dashboard usando componentes do design system
+
 ### Bloco 1A — Creditos e Pagamento
 - [ ] Tabelas: transacoes_creditos, pagamentos (com RLS)
 - [ ] Compra de creditos via Mercado Pago (pacotes: 10/25/50)
