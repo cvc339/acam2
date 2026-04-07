@@ -52,7 +52,10 @@ export async function POST(request: Request) {
     ).join("; ")
 
     function montarInfo(desc: string) {
-      return `Nome: ${nome || "[NOME DO EMPREENDIMENTO]"}\nCPF/CNPJ: ${documento || "[CPF/CNPJ]"}\nMunicípio: ${municipio ? municipio + "/MG" : "[MUNICÍPIO]"}\nProcesso: ${processo || "[Nº DO PROCESSO]"}\n\nDescrição da solicitação:\n${desc}`
+      let texto = `Nome: ${nome || "[NOME DO EMPREENDIMENTO]"}\nCPF/CNPJ: ${documento || "[CPF/CNPJ]"}\nMunicípio: ${municipio ? municipio + "/MG" : "[MUNICÍPIO]"}`
+      if (processo) texto += `\nProcesso: ${processo}`
+      texto += `\n\nDescrição da solicitação:\n${desc}`
+      return texto
     }
 
     const pdf = (

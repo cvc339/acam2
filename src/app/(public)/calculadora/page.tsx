@@ -9,6 +9,28 @@ import {
   type Produto,
 } from "@/lib/calculo/intervencao"
 
+function Accordion({ titulo, children, defaultOpen = false }: { titulo: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [aberto, setAberto] = useState(defaultOpen)
+  return (
+    <div className="acam-card mb-4" style={{ padding: 0, overflow: "hidden" }}>
+      <button onClick={() => setAberto(!aberto)} style={{
+        width: "100%", padding: "var(--spacing-4) var(--spacing-5)",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        background: "var(--neutral-50)", border: "none", cursor: "pointer",
+        fontSize: "var(--font-size-sm)", fontWeight: 600, color: "var(--neutral-700)",
+      }}>
+        {titulo}
+        <span style={{ transition: "transform 0.2s", transform: aberto ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
+      </button>
+      {aberto && (
+        <div style={{ padding: "var(--spacing-5)" }}>
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function OpcaoBtn({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button onClick={onClick} style={{
@@ -39,7 +61,7 @@ function montarInfoComplementares(nome: string, doc: string, municipio: string, 
   texto += "Nome: " + (nome || "[NOME DO EMPREENDIMENTO]") + "\n"
   texto += "CPF/CNPJ: " + (doc || "[CPF/CNPJ]") + "\n"
   texto += "Município: " + (municipio ? municipio + "/MG" : "[MUNICÍPIO]") + "\n"
-  texto += "Processo: " + (processo || "[Nº DO PROCESSO - se houver]") + "\n"
+  if (processo) texto += "Processo: " + processo + "\n"
   texto += "\n"
   texto += "Descrição da solicitação:\n"
   texto += descricao
@@ -579,8 +601,7 @@ export default function CalculadoraPage() {
                 )}
 
                 {/* Orientações DAE */}
-                <div className="acam-card mb-4" style={{ padding: "var(--spacing-5)" }}>
-                  <h3 className="font-semibold mb-4">Orientações para emissão do DAE</h3>
+                <Accordion titulo="Orientações para emissão do DAE">
                   <div className="text-center mb-6">
                     <a href="https://daeonline1.fazenda.mg.gov.br/daeonline/executeReceitaOrgaosEstaduais.action" target="_blank" rel="noopener noreferrer" className="acam-btn acam-btn-primary">
                       Acessar DAE Online — SEF/MG
@@ -669,7 +690,7 @@ export default function CalculadoraPage() {
                       </div>
                     </div>
                   )}
-                </div>
+                </Accordion>
 
                 {/* UFEMG ref */}
                 <p className="text-xs text-muted-foreground text-center mb-4">
