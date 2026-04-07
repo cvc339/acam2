@@ -2,21 +2,12 @@ import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { StatusBadge, IconBox, ServicesTable, AlertResult } from "@/components/acam"
+import { ChecklistResultado } from "@/components/acam/checklist-resultado"
 
 export const metadata: Metadata = {
   title: "Dashboard",
 }
 
-const compensacoes = [
-  { nome: "Minerária", lei: "Lei 20.922/2013" },
-  { nome: "Mata Atlântica", lei: "Lei 11.428/2006" },
-  { nome: "APP", lei: "Decreto 47.749/2019" },
-  { nome: "SNUC", lei: "Lei 9.985/2000" },
-  { nome: "Reserva Legal", lei: "Lei 12.651/2012" },
-  { nome: "Reposição Florestal", lei: "Lei 20.308/2012" },
-  { nome: "Espécies Ameaçadas", lei: "DN COPAM 147/2010" },
-  { nome: "Espécies Imunes", lei: "Lei 12.651/2012" },
-]
 
 const ferramentas = [
   { nome: "Calculadora de Intervenção Ambiental", descricao: "Taxa de expediente, taxa florestal e reposição florestal", compensacao: "Todas", creditos: "Gratuita", ativo: true },
@@ -52,32 +43,8 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Compensações */}
-      <section>
-        <h3 className="mb-2">Compensações Ambientais</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Conheça as modalidades de compensação previstas na legislação de MG.
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {compensacoes.map((c) => (
-            <div key={c.nome} className="acam-card acam-card-hover acam-card-compact cursor-pointer">
-              <IconBox size="lg" className="mb-3">{c.nome.substring(0, 2)}</IconBox>
-              <h4 className="font-medium text-sm">{c.nome}</h4>
-              <p className="text-xs text-muted-foreground mt-1">{c.lei}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="acam-card acam-card-primary mt-4 flex items-center justify-between" style={{ padding: "var(--spacing-4)" }}>
-          <div>
-            <p className="font-medium">Quais compensações se aplicam ao seu empreendimento?</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Responda gratuitamente ao checklist e descubra.
-            </p>
-          </div>
-          <button className="acam-btn acam-btn-primary acam-btn-sm">Fazer avaliação gratuita</button>
-        </div>
-      </section>
+      {/* Compensações — componente client que lê resultado do checklist */}
+      <ChecklistResultado />
 
       {/* Ferramentas */}
       <section className="acam-card" style={{ padding: "var(--spacing-6)" }}>
@@ -98,11 +65,13 @@ export default async function DashboardPage() {
 
       {/* Ações rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
-          <IconBox className="mx-auto mb-3">✓</IconBox>
-          <h4 className="font-medium text-sm">Checklist</h4>
-          <p className="text-xs text-muted-foreground mt-1">Avaliação gratuita</p>
-        </div>
+        <Link href="/checklist" className="no-underline">
+          <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer h-full">
+            <IconBox className="mx-auto mb-3">✓</IconBox>
+            <h4 className="font-medium text-sm">Checklist</h4>
+            <p className="text-xs text-muted-foreground mt-1">Avaliação gratuita</p>
+          </div>
+        </Link>
         <Link href="/creditos" className="no-underline">
           <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer h-full">
             <IconBox color="amber" className="mx-auto mb-3">$</IconBox>

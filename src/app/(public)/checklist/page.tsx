@@ -22,37 +22,19 @@ export default function ChecklistPage() {
   const totalPerguntas = perguntasVisiveis.length
   const progresso = totalPerguntas > 0 ? ((perguntaAtualIdx + 1) / totalPerguntas) * 100 : 0
 
-  // Persistir em localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("checklist_acam2")
-    if (saved) {
-      try {
-        const data = JSON.parse(saved)
-        if (data.respostas && Object.keys(data.respostas).length > 0) {
-          const continuar = window.confirm("Você tem um questionário em andamento. Deseja continuar de onde parou?")
-          if (continuar) {
-            setRespostas(data.respostas)
-            setHistorico(data.historico || [])
-            setPerguntaAtualIdx(data.perguntaAtualIdx || 0)
-          } else {
-            localStorage.removeItem("checklist_acam2")
-          }
-        }
-      } catch {
-        localStorage.removeItem("checklist_acam2")
-      }
-    }
-  }, [])
+  function avancar(novasRespostas: Record<string, string | string[]>) {
+    // Recalcular perguntas visíveis com as NOVAS respostas
+    const novasVisiveis = perguntas.filter(
+      (p) => !p.condicao || p.condicao(novasRespostas)
+    )
+    const novoTotal = novasVisiveis.length
 
-  useEffect(() => {
-    if (Object.keys(respostas).length > 0) {
-      localStorage.setItem("checklist_acam2", JSON.stringify({
-        respostas,
-        historico,
-        perguntaAtualIdx,
-      }))
+    if (perguntaAtualIdx + 1 >= novoTotal) {
+      finalizar(novasRespostas)
+    } else {
+      setPerguntaAtualIdx(perguntaAtualIdx + 1)
     }
-  }, [respostas, historico, perguntaAtualIdx])
+  }
 
   function responder(valor: string) {
     if (!perguntaAtual) return
@@ -60,12 +42,7 @@ export default function ChecklistPage() {
     const novasRespostas = { ...respostas, [perguntaAtual.campo]: valor }
     setRespostas(novasRespostas)
     setHistorico([...historico, perguntaAtualIdx])
-
-    if (perguntaAtualIdx + 1 >= totalPerguntas) {
-      finalizar(novasRespostas)
-    } else {
-      setPerguntaAtualIdx(perguntaAtualIdx + 1)
-    }
+    avancar(novasRespostas)
   }
 
   function responderMultiplo() {
@@ -75,12 +52,7 @@ export default function ChecklistPage() {
     setRespostas(novasRespostas)
     setHistorico([...historico, perguntaAtualIdx])
     setMultiSelecao([])
-
-    if (perguntaAtualIdx + 1 >= totalPerguntas) {
-      finalizar(novasRespostas)
-    } else {
-      setPerguntaAtualIdx(perguntaAtualIdx + 1)
-    }
+    avancar(novasRespostas)
   }
 
   function voltar() {
@@ -97,14 +69,13 @@ export default function ChecklistPage() {
       setHistorico([])
       setPerguntaAtualIdx(0)
       setMultiSelecao([])
-      localStorage.removeItem("checklist_acam2")
     }
   }
 
   function finalizar(respostasFinais: Record<string, string | string[]>) {
     localStorage.setItem("checklist_resultado", JSON.stringify(respostasFinais))
     localStorage.removeItem("checklist_acam2")
-    router.push("/checklist/resultado")
+    router.push("/dashboard")
   }
 
   function toggleMulti(valor: string) {
@@ -125,7 +96,7 @@ export default function ChecklistPage() {
           <HeaderLogo />
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
-              <strong>{perguntaAtualIdx + 1}</strong> de {totalPerguntas}
+              Pergunta <strong>{perguntaAtualIdx + 1}</strong>
             </span>
             <button onClick={reiniciar} className="acam-btn acam-btn-ghost acam-btn-sm">
               Reiniciar
@@ -145,10 +116,15 @@ export default function ChecklistPage() {
 
       {/* Pergunta */}
       <main style={{
-        flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "2rem",
+        flex: 1, display: "flex", justifyContent: "center",
+        padding: "4rem 2rem 2rem",
       }}>
-        <div style={{ width: "100%", maxWidth: "40rem" }} className="acam-slide-up" key={perguntaAtual.id}>
+        <div style={{ width: "100%", maxWidth: "40rem", paddingTop: "2rem" }} className="acam-slide-up" key={perguntaAtual.id}>
+          {perguntaAtualIdx === 0 && (
+            <div className="acam-alert-result" style={{ marginBottom: "32px" }}>
+              Responda ao questionário. O resultado será exibido no seu painel principal.
+            </div>
+          )}
           <h2 style={{
             fontFamily: "var(--font-family-heading)",
             fontSize: "1.5rem", fontWeight: 600,

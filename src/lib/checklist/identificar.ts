@@ -1,12 +1,16 @@
-// Lógica de identificação de compensações — replicada fielmente do ACAM1
-// NÃO alterar sem consulta ao fundador
+// Lógica de identificação de compensações — replicada do ACAM1
+// Alteração aprovada pelo fundador: SNUC com status "verificar" para licenciados sem EIA/RIMA
 
 import type { Compensacao } from "@/components/acam/compensacao-icon"
 
-interface CompensacaoIdentificada {
+export type StatusCompensacao = "provavel" | "verificar"
+
+export interface CompensacaoIdentificada {
   id: Compensacao
   nome: string
   motivo: string
+  status: StatusCompensacao
+  nota?: string
 }
 
 export function identificarCompensacoes(
@@ -24,6 +28,7 @@ export function identificarCompensacoes(
       id: "mineraria",
       nome: "Compensação Minerária",
       motivo: "Empreendimento minerário em MG com supressão de vegetação nativa",
+      status: "provavel",
     })
   }
 
@@ -36,6 +41,7 @@ export function identificarCompensacoes(
       id: "mata-atlantica",
       nome: "Compensação Mata Atlântica",
       motivo: "Supressão de vegetação nativa no Bioma Mata Atlântica",
+      status: "provavel",
     })
   }
 
@@ -44,10 +50,24 @@ export function identificarCompensacoes(
     respostas.licenciamento === "sim" &&
     respostas.impacto_significativo === "sim"
   ) {
+    // Caso 1: EIA/RIMA exigido — lei é clara
     resultado.push({
       id: "snuc",
       nome: "Compensação SNUC",
       motivo: "Empreendimento de significativo impacto ambiental (EIA/RIMA exigido)",
+      status: "provavel",
+    })
+  } else if (
+    respostas.licenciamento === "sim" &&
+    (respostas.impacto_significativo === "nao" || respostas.impacto_significativo === "analise")
+  ) {
+    // Caso 2: Licenciado mas sem EIA/RIMA — prática do Estado de MG diverge da lei
+    resultado.push({
+      id: "snuc",
+      nome: "Compensação SNUC",
+      motivo: "Empreendimento licenciado sem EIA/RIMA",
+      status: "verificar",
+      nota: "Pela legislação (Lei 9.985, Art. 36 e Lei 20.922, Art. 48), a compensação SNUC é exigida para empreendimentos com EIA/RIMA. No entanto, o Estado de MG tem cobrado essa compensação também de empreendimentos licenciados sem EIA/RIMA. Recomenda-se verificar com o órgão ambiental licenciador.",
     })
   }
 
@@ -57,6 +77,7 @@ export function identificarCompensacoes(
       id: "reserva-legal",
       nome: "Compensação de Reserva Legal",
       motivo: "Intervenção em Reserva Legal averbada ou declarada no CAR",
+      status: "provavel",
     })
   }
 
@@ -66,6 +87,7 @@ export function identificarCompensacoes(
       id: "app",
       nome: "Compensação APP",
       motivo: "Intervenção em Área de Preservação Permanente",
+      status: "provavel",
     })
   }
 
@@ -78,6 +100,7 @@ export function identificarCompensacoes(
       id: "ameacadas",
       nome: "Compensação de Espécies Ameaçadas",
       motivo: "Espécies ameaçadas de extinção identificadas na área de supressão",
+      status: "provavel",
     })
   }
 
@@ -90,6 +113,7 @@ export function identificarCompensacoes(
       id: "imunes",
       nome: "Compensação de Espécies Imunes",
       motivo: "Espécies imunes de corte identificadas na área de supressão",
+      status: "provavel",
     })
   }
 
@@ -102,6 +126,7 @@ export function identificarCompensacoes(
       id: "reposicao-florestal",
       nome: "Reposição Florestal",
       motivo: "Supressão de vegetação nativa em Minas Gerais",
+      status: "provavel",
     })
   }
 
