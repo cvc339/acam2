@@ -15,25 +15,8 @@ import {
   Font,
 } from "@react-pdf/renderer"
 
-// Registrar fontes do Google Fonts — mesmas do site
-Font.register({
-  family: "Source Sans 3",
-  fonts: [
-    { src: "https://fonts.gstatic.com/s/sourcesans3/v15/nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Ky461EN_io6npfB.ttf", fontWeight: 400 },
-    { src: "https://fonts.gstatic.com/s/sourcesans3/v15/nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Kya5FEN_io6npfB.ttf", fontWeight: 500 },
-    { src: "https://fonts.gstatic.com/s/sourcesans3/v15/nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8KxW41EN_io6npfB.ttf", fontWeight: 600 },
-    { src: "https://fonts.gstatic.com/s/sourcesans3/v15/nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Kxv41EN_io6npfB.ttf", fontWeight: 700 },
-  ],
-})
-
-Font.register({
-  family: "Source Serif 4",
-  fonts: [
-    { src: "https://fonts.gstatic.com/s/sourceserif4/v8/vEFy2_tTDB4M7-auWDN0ahZJW3IX2ih5nk3AucvUHf64.ttf", fontWeight: 400 },
-    { src: "https://fonts.gstatic.com/s/sourceserif4/v8/vEFy2_tTDB4M7-auWDN0ahZJW3IX2ih5nk3Aucvu_f64.ttf", fontWeight: 600 },
-    { src: "https://fonts.gstatic.com/s/sourceserif4/v8/vEFy2_tTDB4M7-auWDN0ahZJW3IX2ih5nk3AucvHHf64.ttf", fontWeight: 700 },
-  ],
-})
+// Fontes Google Fonts — TODO: corrigir URLs quando testar em produção
+// Por enquanto usa Helvetica (nativa do PDF) como fallback seguro
 
 // Cores do design system ACAM
 const cores = {
@@ -56,7 +39,7 @@ const cores = {
 
 const styles = StyleSheet.create({
   page: {
-    fontFamily: "Source Sans 3",
+    fontFamily: "Helvetica",
     fontSize: 9,
     color: cores.neutral800,
     paddingTop: 60,
@@ -72,7 +55,7 @@ const styles = StyleSheet.create({
   },
   capaLogo: {
     fontSize: 28,
-    fontFamily: "Source Serif 4",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 700,
     color: cores.primary600,
     letterSpacing: 4,
@@ -85,7 +68,7 @@ const styles = StyleSheet.create({
   },
   capaTitulo: {
     fontSize: 18,
-    fontFamily: "Source Serif 4",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 700,
     color: cores.primary600,
     textAlign: "center",
@@ -131,7 +114,7 @@ const styles = StyleSheet.create({
   },
   headerLogo: {
     fontSize: 10,
-    fontFamily: "Source Sans 3", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: cores.primary600,
     letterSpacing: 2,
   },
@@ -166,7 +149,7 @@ const styles = StyleSheet.create({
   },
   secaoTitulo: {
     fontSize: 12,
-    fontFamily: "Source Serif 4",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 600,
     color: cores.primary600,
     marginBottom: 8,
@@ -176,7 +159,7 @@ const styles = StyleSheet.create({
   },
   secaoSubtitulo: {
     fontSize: 10,
-    fontFamily: "Source Sans 3", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: cores.neutral700,
     marginBottom: 6,
   },
@@ -201,7 +184,7 @@ const styles = StyleSheet.create({
   },
   tabelaHeaderTexto: {
     fontSize: 8,
-    fontFamily: "Source Sans 3", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: cores.primary600,
   },
   tabelaLinha: {
@@ -217,7 +200,7 @@ const styles = StyleSheet.create({
   },
   tabelaValor: {
     fontSize: 8,
-    fontFamily: "Source Sans 3", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: cores.primary700,
     textAlign: "right",
   },
@@ -237,7 +220,7 @@ const styles = StyleSheet.create({
   },
   cardDestaqueValor: {
     fontSize: 22,
-    fontFamily: "Source Sans 3", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: "white",
   },
   // Ficha DAE
@@ -251,7 +234,7 @@ const styles = StyleSheet.create({
   },
   fichaTitulo: {
     fontSize: 10,
-    fontFamily: "Source Serif 4",
+    fontFamily: "Helvetica-Bold",
     fontWeight: 600,
     color: cores.primary600,
     marginBottom: 8,
@@ -271,12 +254,12 @@ const styles = StyleSheet.create({
   },
   fichaConteudo: {
     fontSize: 9,
-    fontFamily: "Source Sans 3", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: cores.neutral800,
   },
   fichaValorDestaque: {
     fontSize: 14,
-    fontFamily: "Source Sans 3", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: cores.primary600,
   },
 })
