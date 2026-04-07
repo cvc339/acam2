@@ -179,6 +179,22 @@ Essa informacao e parte do resultado da consulta.
 
 ---
 
+## [2026-04-07] Ferramenta gratuita de Reposicao Florestal
+
+**Contexto:** A calculadora de intervencao ambiental ja calcula a reposicao
+florestal, mas como parte de um fluxo maior (taxa expediente + taxa florestal
++ reposicao). O profissional que busca reposicao florestal quer calcular
+apenas a reposicao, com base nos quantitativos de lenha nativa, madeira nativa
+e carvao vegetal de floresta nativa.
+
+**Decisao:** Criar ferramenta gratuita separada para a compensacao de Reposicao
+Florestal. Duas ou tres perguntas sobre quantitativos + calculo. Manter a
+calculadora de intervencao como esta (nao mexer). As duas coexistem:
+- Calculadora de intervencao: fluxo completo do requerimento
+- Calculo de reposicao: ferramenta especifica da compensacao
+
+---
+
 ## [2026-04-06] Botao de gerar PDF padronizado
 
 **Contexto:** No ACAM1, o botao de gerar PDF era uma barra verde enorme.

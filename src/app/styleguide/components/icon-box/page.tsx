@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { IconBox } from "@/components/acam"
 
 export default function IconBoxShowcase() {
   return (
@@ -8,8 +9,7 @@ export default function IconBoxShowcase() {
       <div>
         <h1 className="text-2xl font-semibold">Icon Box</h1>
         <p className="text-sm mt-1 text-muted-foreground">
-          Caixa com fundo colorido para ícones. Usado em cards de ações rápidas, compensações e service headers.
-          Classes: acam-icon-box + tamanho + cor.
+          Componente: IconBox. Caixa com fundo colorido para ícones e iniciais.
         </p>
       </div>
 
@@ -17,19 +17,19 @@ export default function IconBoxShowcase() {
         <CardHeader><CardTitle className="text-sm">Tamanhos</CardTitle></CardHeader>
         <CardContent className="flex items-end gap-4">
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-sm">A</div>
+            <IconBox size="sm">A</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">sm</div>
           </div>
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-md">A</div>
+            <IconBox size="md">A</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">md</div>
           </div>
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-lg">A</div>
+            <IconBox size="lg">A</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">lg</div>
           </div>
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-xl">UC</div>
+            <IconBox size="xl">UC</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">xl</div>
           </div>
         </CardContent>
@@ -39,23 +39,23 @@ export default function IconBoxShowcase() {
         <CardHeader><CardTitle className="text-sm">Cores</CardTitle></CardHeader>
         <CardContent className="flex items-center gap-4">
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-lg">M</div>
-            <div className="text-xs mt-1 text-muted-foreground">primary (padrão)</div>
+            <IconBox>M</IconBox>
+            <div className="text-xs mt-1 text-muted-foreground">primary</div>
           </div>
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-lg acam-icon-box-amber">A</div>
+            <IconBox color="amber">A</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">amber</div>
           </div>
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-lg acam-icon-box-blue">I</div>
+            <IconBox color="blue">I</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">blue</div>
           </div>
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-lg acam-icon-box-green">S</div>
+            <IconBox color="green">S</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">green</div>
           </div>
           <div className="text-center">
-            <div className="acam-icon-box acam-icon-box-lg acam-icon-box-red">E</div>
+            <IconBox color="red">E</IconBox>
             <div className="text-xs mt-1 text-muted-foreground">red</div>
           </div>
         </CardContent>
@@ -65,44 +65,32 @@ export default function IconBoxShowcase() {
         <CardHeader><CardTitle className="text-sm">No contexto ACAM</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-4 gap-4">
-            <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
-              <div className="acam-icon-box acam-icon-box-lg mx-auto mb-3">✓</div>
-              <h4 className="font-medium text-sm">Checklist</h4>
-              <p className="text-xs text-muted-foreground mt-1">Avaliação gratuita</p>
-            </div>
-            <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
-              <div className="acam-icon-box acam-icon-box-lg acam-icon-box-amber mx-auto mb-3">$</div>
-              <h4 className="font-medium text-sm">Créditos</h4>
-              <p className="text-xs text-muted-foreground mt-1">Comprar créditos</p>
-            </div>
-            <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
-              <div className="acam-icon-box acam-icon-box-lg acam-icon-box-blue mx-auto mb-3">R</div>
-              <h4 className="font-medium text-sm">Extrato</h4>
-              <p className="text-xs text-muted-foreground mt-1">Histórico de uso</p>
-            </div>
-            <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
-              <div className="acam-icon-box acam-icon-box-lg mx-auto mb-3">UC</div>
-              <h4 className="font-medium text-sm">Destinação</h4>
-              <p className="text-xs text-muted-foreground mt-1">Análise de imóvel</p>
-            </div>
+            {[
+              { icon: "✓", nome: "Checklist", desc: "Avaliação gratuita" },
+              { icon: "$", nome: "Créditos", desc: "Comprar créditos", color: "amber" as const },
+              { icon: "R", nome: "Extrato", desc: "Histórico de uso", color: "blue" as const },
+              { icon: "UC", nome: "Destinação", desc: "Análise de imóvel" },
+            ].map((item) => (
+              <div key={item.nome} className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
+                <IconBox color={item.color} className="mx-auto mb-3">{item.icon}</IconBox>
+                <h4 className="font-medium text-sm">{item.nome}</h4>
+                <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-sm">Classes disponíveis</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">Código</CardTitle></CardHeader>
         <CardContent>
-          <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto">{`/* Tamanhos */
-<div className="acam-icon-box acam-icon-box-sm">...</div>
-<div className="acam-icon-box acam-icon-box-md">...</div>
-<div className="acam-icon-box acam-icon-box-lg">...</div>
-<div className="acam-icon-box acam-icon-box-xl">...</div>
+          <pre className="bg-muted p-4 rounded-lg text-sm overflow-auto">{`import { IconBox } from "@/components/acam"
 
-/* Cores (padrão é primary) */
-<div className="acam-icon-box acam-icon-box-lg acam-icon-box-amber">...</div>
-<div className="acam-icon-box acam-icon-box-lg acam-icon-box-blue">...</div>
-<div className="acam-icon-box acam-icon-box-lg acam-icon-box-green">...</div>
-<div className="acam-icon-box acam-icon-box-lg acam-icon-box-red">...</div>`}</pre>
+<IconBox size="sm">A</IconBox>
+<IconBox size="lg">UC</IconBox>
+<IconBox size="xl">UC</IconBox>
+<IconBox color="amber">$</IconBox>
+<IconBox color="blue">R</IconBox>`}</pre>
         </CardContent>
       </Card>
     </div>

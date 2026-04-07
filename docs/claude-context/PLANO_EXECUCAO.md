@@ -1,4 +1,4 @@
-# ACAM 2 — Plano de Execucao
+o # ACAM 2 — Plano de Execucao
 
 Este documento e o mapa do projeto. Ao iniciar cada sessao de trabalho,
 leia este plano para saber onde o projeto esta e o que fazer em seguida.
@@ -41,11 +41,15 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 **Entregas:**
 
 ### Bloco 0 — Componentes React + Paginas base (pré-requisito)
-- [ ] Criar componentes React reutilizaveis em src/components/ baseados no styleguide
-- [ ] Styleguide importa e usa esses componentes (nao replica classes)
-- [ ] Landing page (funcao de marketing, fora do design system interno)
-- [ ] Login, registro, recuperar senha usando componentes do design system
-- [ ] Dashboard usando componentes do design system
+- [x] Criar componentes React reutilizaveis em src/components/acam/ (11 componentes)
+- [x] Styleguide importa e usa esses componentes (nao replica classes)
+- [x] Landing page (storytelling: dores reais, 8 compensacoes + ferramentas, cenarios, creditos, autoridade)
+- [x] Login, registro, recuperar senha usando componentes do design system
+- [x] Dashboard usando componentes do design system
+- [x] Termos de uso e politica de privacidade
+- [x] Tipografia: Source Serif 4 (titulos) + Source Sans 3 (corpo)
+- [x] Icones SVG de compensacoes (CompensacaoIcon)
+**Status: BLOCO 0 CONCLUIDO — 2026-04-07**
 
 ### Bloco 1A — Creditos e Pagamento
 - [ ] Tabelas: transacoes_creditos, pagamentos (com RLS)

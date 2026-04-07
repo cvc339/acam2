@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { HeaderLogo } from "@/components/acam"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -43,35 +44,23 @@ export default function LoginPage() {
   }
 
   return (
-    <body className="page-public" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
+    <div className="page-public" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <header className="acam-header">
         <div className="acam-header-content">
-          <Link href="/" className="acam-header-logo">
-            <div className="acam-header-logo-icon">
-              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-              </svg>
-            </div>
-            <div>
-              <div style={{ fontSize: "var(--font-size-xl)", fontWeight: 600, color: "var(--neutral-800)" }}>ACAM</div>
-              <div style={{ fontSize: "var(--font-size-xs)", color: "var(--neutral-500)" }}>Compensações Ambientais</div>
-            </div>
-          </Link>
+          <HeaderLogo />
           <nav className="acam-header-nav">
-            <span style={{ fontSize: "var(--font-size-sm)", color: "var(--neutral-500)" }}>Não tem conta?</span>
+            <span className="text-sm text-muted-foreground">Não tem conta?</span>
             <Link href="/registro" className="acam-btn acam-btn-primary">Criar conta</Link>
           </nav>
         </div>
       </header>
 
-      {/* Main */}
       <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-        <div style={{ width: "100%", maxWidth: "28rem" }}>
+        <div style={{ width: "100%", maxWidth: "var(--max-width-md)" }}>
           <div className="acam-card" style={{ padding: "var(--spacing-8)" }}>
-            <div style={{ textAlign: "center", marginBottom: "var(--spacing-6)" }}>
-              <h2 style={{ marginBottom: "var(--spacing-1)" }}>Entrar</h2>
-              <p style={{ color: "var(--neutral-500)", fontSize: "var(--font-size-sm)" }}>Acesse sua conta</p>
+            <div className="text-center mb-6">
+              <h2 className="mb-1">Entrar</h2>
+              <p className="text-sm text-muted-foreground">Acesse sua conta</p>
             </div>
 
             <form onSubmit={handleLogin}>
@@ -101,37 +90,28 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--spacing-4)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-2)" }}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
                   <input type="checkbox" className="acam-form-checkbox" id="lembrar" />
-                  <label htmlFor="lembrar" style={{ fontSize: "var(--font-size-sm)", color: "var(--neutral-500)" }}>Lembrar de mim</label>
+                  <label htmlFor="lembrar" className="text-sm text-muted-foreground">Lembrar de mim</label>
                 </div>
-                <Link href="/recuperar-senha" style={{ fontSize: "var(--font-size-sm)", color: "var(--primary-600)" }}>
+                <Link href="/recuperar-senha" className="text-sm" style={{ color: "var(--primary-600)" }}>
                   Esqueci a senha
                 </Link>
               </div>
 
-              {erro && (
-                <div className="acam-alert acam-alert-error" style={{ marginBottom: "var(--spacing-4)" }}>
-                  {erro}
-                </div>
-              )}
+              {erro && <div className="acam-alert acam-alert-error mb-4">{erro}</div>}
 
               {sucesso && (
-                <div className="acam-alert acam-alert-success" style={{ marginBottom: "var(--spacing-4)", display: "flex", alignItems: "center", gap: "var(--spacing-2)" }}>
-                  <span className="acam-spinner" style={{ width: "1rem", height: "1rem" }} />
+                <div className="acam-alert acam-alert-success mb-4 flex items-center gap-2">
+                  <span className="acam-spinner acam-spinner-sm" />
                   <span>{sucesso}</span>
                 </div>
               )}
 
-              <button
-                type="submit"
-                className="acam-btn acam-btn-primary"
-                style={{ width: "100%" }}
-                disabled={loading}
-              >
+              <button type="submit" className="acam-btn acam-btn-primary w-full" disabled={loading}>
                 {loading ? (
-                  <><span className="acam-spinner" style={{ width: "1rem", height: "1rem" }} /> Entrando...</>
+                  <><span className="acam-spinner acam-spinner-sm" /> Entrando...</>
                 ) : (
                   "Entrar"
                 )}
@@ -139,16 +119,16 @@ export default function LoginPage() {
             </form>
 
             <div className="acam-divider">
-              <span style={{ fontSize: "var(--font-size-xs)", color: "var(--neutral-400)", padding: "0 var(--spacing-2)" }}>ou</span>
+              <span className="text-xs text-muted-foreground px-2">ou</span>
             </div>
 
-            <Link href="/registro" className="acam-btn acam-btn-secondary" style={{ width: "100%", textAlign: "center" }}>
+            <Link href="/registro" className="acam-btn acam-btn-secondary w-full text-center">
               Criar nova conta
             </Link>
           </div>
 
-          <div style={{ textAlign: "center", marginTop: "var(--spacing-6)" }}>
-            <Link href="/" style={{ fontSize: "var(--font-size-sm)", color: "var(--neutral-500)", display: "inline-flex", alignItems: "center", gap: "var(--spacing-1)" }}>
+          <div className="text-center mt-6">
+            <Link href="/" className="text-sm text-muted-foreground inline-flex items-center gap-1">
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
               </svg>
@@ -157,6 +137,6 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-    </body>
+    </div>
   )
 }

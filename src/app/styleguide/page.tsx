@@ -4,10 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
+import { StatusBadge, AlertResult } from "@/components/acam"
 
 const primaryScale = [
   { name: "50", hex: "#f0ebe3", desc: "Fundo de cards primary" },
@@ -57,7 +56,8 @@ export default function StyleguidePage() {
             <div><span className="font-medium">Tom:</span> Técnico, autoritativo</div>
             <div><span className="font-medium">Primária:</span> Verde Floresta (#1a3a2a)</div>
             <div><span className="font-medium">Acento:</span> Cobre (#c17f59)</div>
-            <div><span className="font-medium">Fonte:</span> System stack (-apple-system, Segoe UI, Roboto)</div>
+            <div><span className="font-medium">Títulos:</span> Source Serif 4 (serif, Google Fonts)</div>
+            <div><span className="font-medium">Corpo:</span> Source Sans 3 (sans-serif, Google Fonts)</div>
             <div><span className="font-medium">Radius padrão:</span> 0.75rem (lg)</div>
             <div><span className="font-medium">Público:</span> Profissionais técnicos, decisões rápidas</div>
             <div><span className="font-medium">Fundo público:</span> #f5f0e8 (creme quente)</div>
@@ -292,10 +292,10 @@ export default function StyleguidePage() {
           <Card>
             <CardHeader><CardTitle className="text-sm">Badges de Status</CardTitle></CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-              <Badge className="badge-success">Adequado</Badge>
-              <Badge className="badge-warning">Pendências</Badge>
-              <Badge className="badge-error">Inviável</Badge>
-              <Badge className="badge-primary">Minerária</Badge>
+              <StatusBadge variant="success">Adequado</StatusBadge>
+              <StatusBadge variant="warning">Pendências</StatusBadge>
+              <StatusBadge variant="error">Inviável</StatusBadge>
+              <StatusBadge variant="primary">Minerária</StatusBadge>
               <Badge variant="secondary">Pendente</Badge>
             </CardContent>
           </Card>
@@ -304,10 +304,10 @@ export default function StyleguidePage() {
           <Card>
             <CardHeader><CardTitle className="text-sm">Alertas</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <div className="acam-alert acam-alert-success">Imóvel adequado para destinação.</div>
-              <div className="acam-alert acam-alert-warning">Documentos pendentes.</div>
-              <div className="acam-alert acam-alert-error">VETO — Hipoteca ativa.</div>
-              <div className="acam-alert acam-alert-info">UFEMG 2026: R$ 5,7899.</div>
+              <AlertResult status="success" statusLabel="OK">Imóvel adequado.</AlertResult>
+              <AlertResult status="warning" statusLabel="Atenção">Documentos pendentes.</AlertResult>
+              <AlertResult status="error" statusLabel="VETO">Hipoteca ativa.</AlertResult>
+              <AlertResult>UFEMG 2026: R$ 5,7899.</AlertResult>
             </CardContent>
           </Card>
 
