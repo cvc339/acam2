@@ -1475,6 +1475,60 @@ body.page-public {
 /* ============================================
    4. RESPONSIVIDADE
    ============================================ */
+
+/* Landing page sections */
+.landing-section {
+    padding: 120px 48px;
+}
+
+.landing-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Grids responsivos da landing */
+.landing-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.landing-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+}
+
+.landing-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.landing-grid-autoridade {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.landing-grid-footer {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 48px;
+}
+
+/* Nav da landing */
+.landing-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 @media (max-width: 768px) {
     :root {
         --font-size-4xl: 1.875rem;
@@ -1489,7 +1543,83 @@ body.page-public {
         padding: var(--spacing-3) var(--spacing-4);
     }
 
+    .acam-header-nav {
+        gap: var(--spacing-2);
+    }
+
+    .acam-header-credits-label {
+        display: none;
+    }
+
     .acam-service-header-content {
         flex-direction: column;
+    }
+
+    /* Landing sections */
+    .landing-section {
+        padding: 80px 20px;
+    }
+
+    .landing-nav {
+        padding: 16px 20px;
+    }
+
+    /* Grids colapsam em 1 coluna */
+    .landing-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-grid-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .landing-grid-autoridade {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        text-align: center;
+    }
+
+    .landing-grid-autoridade img {
+        margin: 0 auto;
+    }
+
+    .landing-grid-footer {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    /* Cenários: 3 colunas → 1 coluna */
+    .landing-cenarios-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Créditos gratuitas cards */
+    .landing-gratuitas {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Compensações grid cell borders */
+    .landing-grid-2 > div {
+        border-right: none !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .landing-section {
+        padding: 60px 16px;
+    }
+
+    .landing-nav {
+        padding: 12px 16px;
+    }
+
+    .landing-grid-4 {
+        grid-template-columns: 1fr;
     }
 }

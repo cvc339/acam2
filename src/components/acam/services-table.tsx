@@ -16,6 +16,7 @@ interface ServicesTableProps {
 
 export function ServicesTable({ ferramentas }: ServicesTableProps) {
   return (
+    <div style={{ overflowX: "auto" }}>
     <table className="acam-services-table">
       <thead>
         <tr>
@@ -33,7 +34,13 @@ export function ServicesTable({ ferramentas }: ServicesTableProps) {
               <div className="text-xs text-muted-foreground">{f.descricao}</div>
             </td>
             <td><StatusBadge variant="primary">{f.compensacao}</StatusBadge></td>
-            <td className="font-semibold">{f.creditos}</td>
+            <td>
+              {f.creditos === "Gratuita" ? (
+                <StatusBadge variant="success">Gratuita</StatusBadge>
+              ) : (
+                <span className="font-semibold">{f.creditos}</span>
+              )}
+            </td>
             <td>
               {f.ativo ? (
                 <Button size="sm">Acessar</Button>
@@ -45,5 +52,6 @@ export function ServicesTable({ ferramentas }: ServicesTableProps) {
         ))}
       </tbody>
     </table>
+    </div>
   )
 }

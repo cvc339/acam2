@@ -105,11 +105,7 @@ export default function Home() {
     <div style={{ fontFamily: "var(--font-family)" }}>
 
       {/* NAV */}
-      <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
-        padding: "24px 48px",
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-      }}>
+      <nav className="landing-nav">
         <span style={{
           fontFamily: "var(--font-family)",
           fontWeight: 800, fontSize: "0.95rem",
@@ -130,13 +126,13 @@ export default function Home() {
       </nav>
 
       {/* 01 · HERO — Gradiente escuro → creme */}
-      <section style={{
+      <section className="landing-section" style={{
         minHeight: "100vh",
+        paddingTop: "120px", paddingBottom: "10vh",
         background: "linear-gradient(180deg, var(--primary-900) 0%, var(--primary-800) 80%, var(--primary-700) 92%, #f5f0e8 100%)",
         color: "var(--text-on-dark)",
         display: "flex", flexDirection: "column",
         justifyContent: "flex-end",
-        padding: "120px 48px 10vh",
         position: "relative",
       }}>
         <p style={{
@@ -184,11 +180,10 @@ export default function Home() {
       </section>
 
       {/* 02 · AS 8 COMPENSAÇÕES + FERRAMENTAS */}
-      <section id="compensacoes" style={{
+      <section id="compensacoes" className="landing-section" style={{
         background: "#f5f0e8", color: "var(--neutral-900)",
-        padding: "120px 48px",
       }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <div className="landing-inner">
           <p style={{
             fontSize: "0.72rem", fontWeight: 500,
             color: "var(--accent)",
@@ -215,9 +210,7 @@ export default function Home() {
             Cada compensação pode ser cumprida de diferentes formas. O ACAM oferece ferramentas de análise, cálculo e preenchimento para todas.
           </p>
 
-          <div style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr",
-            gap: "0",
+          <div className="landing-grid-2" style={{
             borderTop: "2px solid var(--primary-600)",
           }}>
             {compensacoes.map((c, i) => (
@@ -280,11 +273,10 @@ export default function Home() {
       </section>
 
       {/* 03 · CENÁRIOS REAIS — Por que o ACAM existe */}
-      <section style={{
+      <section className="landing-section" style={{
         background: "var(--primary-900)", color: "var(--text-on-dark)",
-        padding: "120px 48px",
       }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <div className="landing-inner">
           <p style={{
             fontSize: "0.72rem", fontWeight: 500,
             color: "var(--accent)",
@@ -312,7 +304,7 @@ export default function Home() {
             Compensações ambientais envolvem legislação complexa, cumulatividade de obrigações e decisões que afetam o empreendimento por anos. Profissionais que atuam nesse campo enfrentam situações como estas:
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0", borderTop: "1px solid rgba(245,240,232,0.08)" }}>
+          <div style={{ borderTop: "1px solid rgba(245,240,232,0.08)" }}>
             {[
               {
                 situacao: "Seu cliente não sabe quais compensações se aplicam ao empreendimento dele.",
@@ -335,7 +327,7 @@ export default function Home() {
                 solucao: "Cada compensação no ACAM apresenta as modalidades disponíveis com requisitos, vantagens e restrições — para que a escolha seja técnica, não intuitiva.",
               },
             ].map((item, i) => (
-              <div key={i} style={{
+              <div key={i} className="landing-cenarios-row" style={{
                 display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
                 borderBottom: "1px solid rgba(245,240,232,0.06)",
               }}>
@@ -397,11 +389,10 @@ export default function Home() {
       </section>
 
       {/* 04 · COMO FUNCIONA */}
-      <section style={{
+      <section className="landing-section" style={{
         background: "#f5f0e8", color: "var(--neutral-900)",
-        padding: "120px 48px",
       }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <div className="landing-inner">
           <p style={{
             fontSize: "0.72rem", fontWeight: 500,
             color: "var(--accent)",
@@ -421,10 +412,7 @@ export default function Home() {
             Três passos para a decisão certa.
           </h2>
 
-          <div style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-            gap: "0", borderTop: "2px solid var(--primary-600)",
-          }}>
+          <div className="landing-grid-3" style={{ borderTop: "2px solid var(--primary-600)" }}>
             {[
               {
                 num: "01",
@@ -473,11 +461,10 @@ export default function Home() {
       </section>
 
       {/* 05 · COMO USAR */}
-      <section style={{
+      <section className="landing-section" style={{
         background: "#f5f0e8", color: "var(--neutral-900)",
-        padding: "120px 48px",
       }}>
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <div className="landing-inner">
           <p style={{
             fontSize: "0.72rem", fontWeight: 500,
             color: "var(--accent)",
@@ -505,7 +492,7 @@ export default function Home() {
           </p>
 
           {/* Ferramentas gratuitas */}
-          <div style={{
+          <div className="landing-gratuitas" style={{
             display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
             gap: "24px", marginBottom: "64px",
           }}>
@@ -567,10 +554,7 @@ export default function Home() {
               Cada ferramenta consome uma quantidade de créditos. Quanto maior o pacote, menor o custo por crédito. Créditos não expiram.
             </p>
 
-            <div style={{
-              display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "16px",
-            }}>
+            <div className="landing-grid-4">
               {[
                 { tier: "Avulso", qtd: "1", preco: "R$ 12", per: "R$ 12/un", feat: false },
                 { tier: "Básico", qtd: "10", preco: "R$ 100", per: "R$ 10/un", feat: false },
@@ -627,16 +611,12 @@ export default function Home() {
       </section>
 
       {/* 06 · QUEM ESTÁ POR TRÁS */}
-      <section style={{
+      <section className="landing-section" style={{
         background: "white", color: "var(--neutral-900)",
-        padding: "120px 48px",
         borderTop: "1px solid var(--neutral-200)",
       }}>
         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-          <div style={{
-            display: "grid", gridTemplateColumns: "200px 1fr",
-            gap: "48px", alignItems: "center",
-          }}>
+          <div className="landing-grid-autoridade">
             {/* Foto */}
             <div>
               <img
@@ -685,9 +665,8 @@ export default function Home() {
       </section>
 
       {/* 07 · CTA FINAL */}
-      <section style={{
+      <section className="landing-section" style={{
         background: "var(--primary-900)", color: "var(--text-on-dark)",
-        padding: "100px 48px",
         display: "flex", flexDirection: "column",
         justifyContent: "center", alignItems: "center",
         textAlign: "center",
@@ -720,16 +699,12 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{
+      <footer className="landing-section" style={{
         background: "var(--primary-900)",
-        padding: "48px",
         borderTop: "1px solid rgba(245,240,232,0.06)",
+        paddingTop: "48px", paddingBottom: "0",
       }}>
-        <div style={{
-          maxWidth: "1100px", margin: "0 auto",
-          display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr",
-          gap: "48px",
-        }}>
+        <div className="landing-grid-footer" style={{ maxWidth: "1100px", margin: "0 auto" }}>
           {/* Coluna 1: Marca */}
           <div>
             <div style={{

@@ -19,15 +19,17 @@ const compensacoes = [
 ]
 
 const ferramentas = [
+  { nome: "Calculadora de Intervenção Ambiental", descricao: "Taxa de expediente, taxa florestal e reposição florestal", compensacao: "Todas", creditos: "Gratuita", ativo: true },
+  { nome: "Cálculo de Reposição Florestal", descricao: "Cálculo com base nos quantitativos de nativa", compensacao: "Reposição Florestal", creditos: "Gratuita", ativo: true },
   { nome: "Destinação em UC — Base", descricao: "Análise completa de viabilidade", compensacao: "Minerária / Reserva Legal", creditos: "5", ativo: true },
   { nome: "Cálculo Implantação/Manutenção UC", descricao: "Cálculo com UFEMG vigente", compensacao: "Minerária", creditos: "2", ativo: true },
   { nome: "Requerimento Minerária", descricao: "Preenchimento assistido + PDF", compensacao: "Minerária", creditos: "0,5", ativo: true },
   { nome: "Requerimento Mata Atlântica", descricao: "Preenchimento assistido + PDF", compensacao: "Mata Atlântica", creditos: "0,5", ativo: true },
   { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: "0,5", ativo: true },
-  { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: false },
-  { nome: "Destinação em UC — Mata Atlântica", descricao: "Análise com bacia, sub-bacia e bioma", compensacao: "Mata Atlântica", creditos: "7", ativo: false },
-  { nome: "Análise de Servidão/RPPN", descricao: "Análise para servidão ou RPPN", compensacao: "Mata Atlântica", creditos: "7", ativo: false },
-  { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: false },
+  { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: true },
+  { nome: "Destinação em UC — Mata Atlântica", descricao: "Análise com bacia, sub-bacia e bioma", compensacao: "Mata Atlântica", creditos: "7", ativo: true },
+  { nome: "Análise de Servidão/RPPN", descricao: "Análise para servidão ou RPPN", compensacao: "Mata Atlântica", creditos: "7", ativo: true },
+  { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: true },
 ]
 
 export default async function DashboardPage() {
@@ -95,7 +97,7 @@ export default async function DashboardPage() {
       </AlertResult>
 
       {/* Ações rápidas */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
           <IconBox className="mx-auto mb-3">✓</IconBox>
           <h4 className="font-medium text-sm">Checklist</h4>
