@@ -1,8 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import Link from "next/link"
-import { HeaderLogo } from "@/components/acam"
 import {
   ATIVIDADES,
   PRODUTOS,
@@ -249,20 +247,7 @@ export default function CalculadoraPage() {
     : etapaAtual === etapas.length - 2 ? "Ver Resultado" : "Próximo"
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
-      <header className="acam-header">
-        <div className="acam-header-content">
-          <HeaderLogo />
-          <nav className="acam-header-nav">
-            <Link href="/dashboard" className="acam-btn acam-btn-ghost acam-btn-sm">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
-              Voltar
-            </Link>
-          </nav>
-        </div>
-      </header>
-
+    <div>
       {/* Service Header */}
       <div className="acam-service-header acam-service-header-primary">
         <div className="acam-service-header-content">
@@ -300,7 +285,7 @@ export default function CalculadoraPage() {
         </div>
 
         {/* Wizard */}
-        <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+        <div id="wizard-container" className="acam-card" style={{ padding: "var(--spacing-6)" }}>
           {/* Progresso */}
           <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", padding: "1rem 0", fontSize: "0.8rem", color: "var(--neutral-400)" }}>
             <span style={parte === 1 ? { color: "var(--primary-600)", fontWeight: 600 } : {}}>1. Expediente</span>
@@ -676,6 +661,21 @@ export default function CalculadoraPage() {
 
                 {/* Botões */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  <button className="acam-btn acam-btn-primary" style={{ width: "100%" }} onClick={async () => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const html2pdf = (await import("html2pdf.js") as any).default
+                    const elemento = document.getElementById("wizard-container")
+                    if (!elemento) return
+                    const opcoes = {
+                      margin: [15, 15, 20, 15],
+                      filename: "ACAM-Calculadora-Intervencao-" + new Date().toISOString().slice(0, 10) + ".pdf",
+                      image: { type: "jpeg", quality: 0.95 },
+                      html2canvas: { scale: 2, useCORS: true, allowTaint: true, scrollY: 0 },
+                      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+                    }
+                    await html2pdf().set(opcoes).from(elemento).save()
+                  }}>Salvar PDF</button>
                   <button className="acam-btn acam-btn-ghost" style={{ width: "100%" }} onClick={reiniciar}>Nova Simulação</button>
                 </div>
               </div>
@@ -694,11 +694,6 @@ export default function CalculadoraPage() {
         </div>
       </main>
 
-      <footer className="acam-footer">
-        <div className="acam-footer-content">
-          <span className="acam-footer-text">© 2026 ACAM — Vieira Castro Advogados — acam.com.br</span>
-        </div>
-      </footer>
     </div>
   )
 }
