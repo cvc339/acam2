@@ -10,6 +10,7 @@ const publicRoutes = [
   '/recuperar-senha',
   '/styleguide',
   '/compensacoes',
+  '/checklist',
   '/termos',
   '/privacidade',
   '/auth/callback',
