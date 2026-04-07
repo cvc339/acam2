@@ -61,8 +61,8 @@ export default function ReposicaoFlorestalPage() {
 
       <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Legislação Aplicável</h2>
-        <LegislacaoItem titulo="Lei Estadual nº 20.922/2013" descricao="Dispõe sobre as políticas florestal e de proteção à biodiversidade (Art. 78)" />
-        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" />
+        <LegislacaoItem titulo="Lei Estadual nº 20.922/2013" descricao="Dispõe sobre as políticas florestal e de proteção à biodiversidade (Art. 78)" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/20922/2013/?cons=1" />
+        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
       </div>
     </div>
   )

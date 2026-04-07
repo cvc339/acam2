@@ -171,10 +171,10 @@ export default function MataAtlanticaPage() {
 
       <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Legislação Aplicável</h2>
-        <LegislacaoItem titulo="Lei Federal nº 11.428/2006" descricao="Dispõe sobre a utilização e proteção da vegetação nativa do Bioma Mata Atlântica" />
-        <LegislacaoItem titulo="Decreto Federal nº 6.660/2008" descricao="Regulamenta a Lei nº 11.428/2006" />
-        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" />
-        <LegislacaoItem titulo="Portaria IEF nº 30/2015" descricao="Estabelece diretrizes e procedimentos para cumprimento da compensação" />
+        <LegislacaoItem titulo="Lei Federal nº 11.428/2006" descricao="Dispõe sobre a utilização e proteção da vegetação nativa do Bioma Mata Atlântica" linkUrl="https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/lei/l11428.htm" />
+        <LegislacaoItem titulo="Decreto Federal nº 6.660/2008" descricao="Regulamenta a Lei nº 11.428/2006" linkUrl="https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2008/decreto/d6660.htm" />
+        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
+        <LegislacaoItem titulo="Portaria IEF nº 30/2015" descricao="Estabelece diretrizes e procedimentos para cumprimento da compensação" linkUrl="http://www.siam.mg.gov.br/sla/download.pdf?idNorma=37255" />
       </div>
     </div>
   )

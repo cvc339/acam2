@@ -104,11 +104,11 @@ export default function MinerariaPage() {
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>
           Legislação Aplicável
         </h2>
-        <LegislacaoItem titulo="Lei nº 20.922/2013" descricao="Dispõe sobre as políticas florestal e de proteção à biodiversidade no Estado" />
-        <LegislacaoItem titulo="Portaria IEF nº 27/2017" descricao="Estabelece procedimentos para cumprimento da compensação ambiental" />
-        <LegislacaoItem titulo="Decreto nº 46.953/2016" descricao="Regulamenta a Lei nº 20.922/2013" />
-        <LegislacaoItem titulo="Decreto nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" />
-        <LegislacaoItem titulo="Resolução Conjunta SEMAD/IEF nº 3.102/2021" descricao="Dispõe sobre procedimentos para compensação ambiental" />
+        <LegislacaoItem titulo="Lei nº 20.922/2013" descricao="Dispõe sobre as políticas florestal e de proteção à biodiversidade no Estado" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/20922/2013/?cons=1" />
+        <LegislacaoItem titulo="Portaria IEF nº 27/2017" descricao="Estabelece procedimentos para cumprimento da compensação ambiental" linkUrl="http://www.siam.mg.gov.br/sla/download.pdf?idNorma=44102" />
+        <LegislacaoItem titulo="Decreto nº 46.953/2016" descricao="Regulamenta a Lei nº 20.922/2013" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/46953/2016/?cons=1" />
+        <LegislacaoItem titulo="Decreto nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
+        <LegislacaoItem titulo="Resolução Conjunta SEMAD/IEF nº 3.102/2021" descricao="Dispõe sobre procedimentos para compensação ambiental" linkUrl="https://siam.mg.gov.br/sla/download.pdf?idNorma=54600" />
       </div>
     </div>
   )

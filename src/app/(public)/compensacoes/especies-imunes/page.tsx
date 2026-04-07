@@ -98,10 +98,10 @@ export default function EspeciesImunesPage() {
 
       <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Legislação Aplicável</h2>
-        <LegislacaoItem titulo="Lei Estadual nº 9.743/1988" descricao="Declara de interesse comum e imune de corte o Ipê-amarelo" />
-        <LegislacaoItem titulo="Lei Estadual nº 20.308/2012" descricao="Altera a Lei nº 13.965/2001, que dispõe sobre proteção do Pequizeiro" />
-        <LegislacaoItem titulo="Lei Estadual nº 13.635/2000" descricao="Declara de preservação permanente e imune de corte o Buriti" />
-        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" />
+        <LegislacaoItem titulo="Lei Estadual nº 9.743/1988" descricao="Declara de interesse comum e imune de corte o Ipê-amarelo" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/9743/1988/?cons=1" />
+        <LegislacaoItem titulo="Lei Estadual nº 20.308/2012" descricao="Altera a Lei nº 13.965/2001, que dispõe sobre proteção do Pequizeiro" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/20308/2012/?cons=1" />
+        <LegislacaoItem titulo="Lei Estadual nº 13.635/2000" descricao="Declara de preservação permanente e imune de corte o Buriti" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/13635/2000/?cons=1" />
+        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
       </div>
     </div>
   )

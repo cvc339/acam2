@@ -55,9 +55,9 @@ export default function AppPage() {
 
       <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Legislação Aplicável</h2>
-        <LegislacaoItem titulo="Resolução CONAMA nº 369/2006" descricao="Dispõe sobre os casos excepcionais de intervenção em APP" />
-        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" />
-        <LegislacaoItem titulo="Resolução Conjunta SEMAD/IEF nº 3.102/2021" descricao="Dispõe sobre procedimentos para compensação ambiental" />
+        <LegislacaoItem titulo="Resolução CONAMA nº 369/2006" descricao="Dispõe sobre os casos excepcionais de intervenção em APP" linkUrl="https://conama.mma.gov.br/?option=com_sisconama&task=arquivo.download&id=480" />
+        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
+        <LegislacaoItem titulo="Resolução Conjunta SEMAD/IEF nº 3.102/2021" descricao="Dispõe sobre procedimentos para compensação ambiental" linkUrl="https://siam.mg.gov.br/sla/download.pdf?idNorma=54600" />
       </div>
     </div>
   )

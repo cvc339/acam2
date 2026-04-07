@@ -50,9 +50,9 @@ export default function SnucPage() {
 
       <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Legislação Aplicável</h2>
-        <LegislacaoItem titulo="Lei Federal nº 9.985/2000" descricao="Institui o Sistema Nacional de Unidades de Conservação (SNUC)" />
-        <LegislacaoItem titulo="Decreto Federal nº 4.340/2002" descricao="Regulamenta artigos da Lei nº 9.985/2000" />
-        <LegislacaoItem titulo="Decreto Estadual nº 45.175/2009" descricao="Metodologia de gradação de impactos ambientais" />
+        <LegislacaoItem titulo="Lei Federal nº 9.985/2000" descricao="Institui o Sistema Nacional de Unidades de Conservação (SNUC)" linkUrl="https://www.planalto.gov.br/ccivil_03/leis/l9985.htm" />
+        <LegislacaoItem titulo="Decreto Federal nº 4.340/2002" descricao="Regulamenta artigos da Lei nº 9.985/2000" linkUrl="https://www.planalto.gov.br/ccivil_03/decreto/2002/d4340.htm" />
+        <LegislacaoItem titulo="Decreto Estadual nº 45.175/2009" descricao="Metodologia de gradação de impactos ambientais" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/45175/2009/?cons=1" />
       </div>
     </div>
   )

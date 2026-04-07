@@ -55,9 +55,9 @@ export default function ReservaLegalPage() {
 
       <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
         <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Legislação Aplicável</h2>
-        <LegislacaoItem titulo="Lei Federal nº 12.651/2012" descricao="Código Florestal — Dispõe sobre a proteção da vegetação nativa" />
-        <LegislacaoItem titulo="Lei Estadual nº 20.922/2013" descricao="Dispõe sobre as políticas florestal e de proteção à biodiversidade em MG" />
-        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" />
+        <LegislacaoItem titulo="Lei Federal nº 12.651/2012" descricao="Código Florestal — Dispõe sobre a proteção da vegetação nativa" linkUrl="https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2012/lei/l12651.htm" />
+        <LegislacaoItem titulo="Lei Estadual nº 20.922/2013" descricao="Dispõe sobre as políticas florestal e de proteção à biodiversidade em MG" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/20922/2013/?cons=1" />
+        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
       </div>
     </div>
   )
