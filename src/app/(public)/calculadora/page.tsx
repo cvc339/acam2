@@ -20,7 +20,9 @@ function Accordion({ titulo, children, defaultOpen = false }: { titulo: string; 
         fontSize: "var(--font-size-sm)", fontWeight: 600, color: "var(--neutral-700)",
       }}>
         {titulo}
-        <span style={{ transition: "transform 0.2s", transform: aberto ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ transition: "transform 0.2s", transform: aberto ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+        </svg>
       </button>
       {aberto && (
         <div style={{ padding: "var(--spacing-5)" }}>
