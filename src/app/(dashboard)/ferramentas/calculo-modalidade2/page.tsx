@@ -188,12 +188,6 @@ export default function CalculoModalidade2Page() {
             </button>
           </div>
 
-          {/* Badge UFEMG */}
-          <div>
-            <span className="acam-badge acam-badge-primary" style={{ fontSize: "0.85rem", padding: "0.4rem 1rem" }}>
-              UFEMG {ufemg.ano}: R$ {ufemg.valor.toFixed(4).replace(".", ",")}
-            </span>
-          </div>
 
           <div className="acam-alert-result">
             <strong>Importante.</strong> Esta é uma estimativa preliminar. O valor definitivo será apurado pelo órgão ambiental com base nos parâmetros vigentes na data da análise.

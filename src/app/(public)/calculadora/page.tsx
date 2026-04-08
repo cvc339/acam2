@@ -327,12 +327,6 @@ export default function CalculadoraPage() {
           </div>
         )}
 
-        {/* Badge UFEMG */}
-        <div className="text-center mb-4">
-          <span className="acam-badge acam-badge-primary" style={{ fontSize: "0.85rem", padding: "0.4rem 1rem" }}>
-            UFEMG {ufemg.ano}: R$ {ufemg.valor.toFixed(4).replace(".", ",")}
-          </span>
-        </div>
 
         {/* Wizard */}
         <div id="wizard-container" className="acam-card" style={{ padding: "var(--spacing-6)" }}>

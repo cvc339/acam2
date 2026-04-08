@@ -35,6 +35,15 @@ export default function ReposicaoFlorestalPage() {
 
   return (
     <div>
+      <div style={{ maxWidth: "40rem", margin: "0 auto", padding: "var(--spacing-4) var(--spacing-6) 0" }}>
+        <Link href="/dashboard" className="text-sm text-muted-foreground inline-flex items-center gap-1" style={{ textDecoration: "none" }}>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+          </svg>
+          Voltar ao dashboard
+        </Link>
+      </div>
+
       {/* Service Header */}
       <div className="acam-service-header acam-service-header-primary">
         <div className="acam-service-header-content">
@@ -57,11 +66,6 @@ export default function ReposicaoFlorestalPage() {
       </div>
 
       <main style={{ maxWidth: "40rem", margin: "0 auto", padding: "var(--spacing-8) var(--spacing-6)", width: "100%" }}>
-        <div className="mb-4">
-          <span className="acam-badge acam-badge-primary" style={{ fontSize: "0.85rem", padding: "0.4rem 1rem" }}>
-            UFEMG {ufemg.ano}: R$ {ufemg.valor.toFixed(4).replace(".", ",")}
-          </span>
-        </div>
 
         <div className="acam-alert-result mb-6">
           <strong>Gratuita.</strong> Esta ferramenta não consome créditos. Base legal: Lei 20.922/2013, Art. 78.
