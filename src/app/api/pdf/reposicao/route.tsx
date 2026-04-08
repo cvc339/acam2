@@ -7,6 +7,7 @@ import {
   Secao,
   CardDestaque,
   styles,
+  cores,
 } from "@/lib/pdf/template"
 import { Text, View } from "@react-pdf/renderer"
 
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
         />
 
         <Pagina ferramenta="Cálculo de Reposição Florestal">
+          {/* Resultado do cálculo */}
           <CardDestaque
             label="Valor Total da Reposição"
             valor={fmt(totalValor)}
@@ -55,7 +57,69 @@ export async function POST(request: Request) {
             ))}
           </Secao>
 
-          <View style={{ marginTop: 16 }}>
+          {/* Conteúdo informativo */}
+          <Secao titulo="O que é a Reposição Florestal">
+            <Text style={styles.texto}>
+              A reposição florestal é uma obrigação legal decorrente da supressão de vegetação nativa. Visa compensar o volume de matéria-prima florestal extraída. Diferente das taxas de expediente e florestal, que são pagas previamente à autorização, a reposição florestal é cumprida ao longo ou ao final do processo de intervenção ambiental.
+            </Text>
+          </Secao>
+
+          {/* Prazo — destaque */}
+          <View style={{
+            backgroundColor: cores.primary50,
+            borderRadius: 6,
+            padding: 12,
+            marginBottom: 14,
+            borderLeftWidth: 3,
+            borderLeftColor: cores.primary600,
+          }}>
+            <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.primary600, marginBottom: 4 }}>
+              Prazo
+            </Text>
+            <Text style={[styles.texto, { color: cores.neutral700 }]}>
+              O recolhimento ou a comprovação do cumprimento deve ser realizado no mesmo ano da supressão (Lei 20.922/2013, Art. 78).
+            </Text>
+          </View>
+
+          <Secao titulo="Formas de Cumprimento">
+            <View style={{ marginBottom: 6 }}>
+              <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.neutral800, marginBottom: 2 }}>
+                1. Formação de florestas
+              </Text>
+              <Text style={styles.texto}>
+                Plantio de espécies florestais em área própria ou fomentada, para fins de recomposição ou uso sustentável.
+              </Text>
+            </View>
+            <View style={{ marginBottom: 6 }}>
+              <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.neutral800, marginBottom: 2 }}>
+                2. Participação em associações de reflorestadores
+              </Text>
+              <Text style={styles.texto}>
+                Adesão a projetos coletivos de plantio, com contribuição proporcional ao volume suprimido.
+              </Text>
+            </View>
+            <View style={{ marginBottom: 6 }}>
+              <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.neutral800, marginBottom: 2 }}>
+                3. Recolhimento de valor ao erário
+              </Text>
+              <Text style={styles.texto}>
+                Pagamento do valor calculado acima à conta de arrecadação da reposição florestal. Esta é a forma mais comum de cumprimento.
+              </Text>
+            </View>
+          </Secao>
+
+          <Secao titulo="Próximos Passos">
+            <Text style={styles.texto}>
+              • Incluir o valor da reposição no planejamento financeiro do empreendimento{"\n"}
+              • Definir a forma de cumprimento antes da execução da supressão
+            </Text>
+          </Secao>
+
+          {/* Rodapé com legislação e disclaimer */}
+          <View style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: cores.neutral200 }}>
+            <Text style={[styles.textoMuted, { marginBottom: 4 }]}>
+              Legislação: Lei Estadual nº 20.922/2013, Art. 78 · Decreto Estadual nº 47.749/2019
+            </Text>
             <Text style={styles.textoMuted}>
               UFEMG {ufemgAno}: R$ {ufemgValor?.toFixed(4).replace(".", ",")} — Valores estimados, sujeitos a atualização.
               Os resultados não substituem análise de profissional qualificado, mediante responsabilidade técnica.
