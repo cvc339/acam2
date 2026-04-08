@@ -94,15 +94,17 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 - [ ] /vc-security: isolamento completo
 
 ### Bloco 1E — Calculo de Implantacao/Manutencao de UC (2cr) [modalidade 2.2]
-- [ ] Calculo com UFEMG vigente
-- [ ] Debito de creditos com reembolso
+- [x] Calculo com UFEMG vigente
+- [x] Debito de creditos com reembolso
+**Status: BLOCO 1E CONCLUIDO — 2026-04-08**
 
 ### Bloco 1F — Requerimentos (0.5cr cada)
-- [ ] Requerimento Mineraria (Anexo I, Lei 20.922/2013) — wizard + PDF
-- [ ] Requerimento Mata Atlantica (Portaria IEF 30/2015) — wizard + PDF
-- [ ] Requerimento SNUC (Portaria IEF 55) — wizard + PDF
-- [ ] Mascaras de campo (CPF, CNPJ, CEP, telefone, data)
-- [ ] Exportacao PDF
+- [x] Requerimento Mineraria (Anexo I, Lei 20.922/2013) — wizard + PDF
+- [x] Requerimento Mata Atlantica (Portaria IEF 30/2015) — wizard + PDF
+- [x] Requerimento SNUC (Portaria IEF 55) — wizard + PDF
+- [x] Mascaras de campo (CPF, CNPJ, CEP, telefone, data)
+- [x] Exportacao PDF
+**Status: BLOCO 1F CONCLUIDO — 2026-04-08**
 
 **Criterio para avancar:** Um usuario real consegue:
 1. Se cadastrar e verificar email

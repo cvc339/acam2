@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { StatusBadge } from "@/components/acam"
@@ -31,6 +32,7 @@ const FLUXO_ADMINISTRATIVO = [
 ]
 
 export default function CalculoModalidade2Page() {
+  const router = useRouter()
   const [ufemg, setUfemg] = useState({ ano: 2026, valor: 5.7899 })
   const [area, setArea] = useState("")
   const [tipoVegetacao, setTipoVegetacao] = useState<TipoVegetacao | "">("")
@@ -107,6 +109,7 @@ export default function CalculoModalidade2Page() {
       const calc = calcularModalidade2(areaNum, tipoVegetacao, ufemg.valor, ufemg.ano)
       setResultado(calc)
       setSaldo((prev) => (prev !== null ? prev - CUSTO_CREDITOS : null))
+      router.refresh() // atualiza saldo no header
     } catch {
       setErro("Erro ao processar. Tente novamente.")
     }

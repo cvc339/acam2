@@ -63,6 +63,9 @@ Documentacao completa em `docs/claude-context/`.
 5. **Sem secrets no codigo** — tudo em variaveis de ambiente
 6. **Nomenclatura de ferramentas** — usar IDs de `01_COMPENSACOES.md`
 7. **Acentuacao obrigatoria em portugues** — todo texto visivel ao usuario (titulos, botoes, labels, placeholders, mensagens, descricoes) deve ter acentuacao correta. Documentos internos (docs/, comentarios) podem ficar sem acento.
+8. **Ferramenta paga = debito obrigatorio** — toda ferramenta paga deve: (a) chamar POST /api/creditos/debitar ANTES de entregar resultado, (b) router.refresh() apos debito para atualizar saldo no header, (c) botao "Baixar Novamente" nao debita de novo
+9. **PDFs oficiais vs relatorios internos** — requerimentos e formularios oficiais do Estado usam jsPDF com layout posicional exato (modelo ACAM1). Relatorios internos do ACAM (calculadora, parecer) usam React-PDF com template ACAM2 (Capa, Pagina, Secao)
+10. **Layout publico auth-aware** — rotas (public) verificam sessao: logado mostra header com creditos, deslogado mostra Entrar/Criar conta
 
 ## Design system
 
