@@ -146,7 +146,7 @@ export default function CalculoModalidade2Page() {
       {!resultado ? (
         <>
           {/* Formulário */}
-          <div className="acam-card" style={{ padding: "var(--spacing-6)", maxWidth: "500px" }}>
+          <div className="acam-card" style={{ padding: "var(--spacing-6)", maxWidth: "40rem", margin: "0 auto" }}>
             <div className="acam-section-title">Dados da intervenção</div>
             <div className="acam-section-desc">Informe a área e o tipo de vegetação para calcular o valor da compensação.</div>
 
