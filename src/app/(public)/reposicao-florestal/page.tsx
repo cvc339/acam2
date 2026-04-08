@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { HeaderLogo } from "@/components/acam"
-import { PRODUTOS, calcularReposicaoItem, type Produto } from "@/lib/calculo/intervencao"
+import { PRODUTOS, calcularReposicaoItem } from "@/lib/calculo/intervencao"
 
 function formatarMoeda(valor: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor)
@@ -34,33 +34,33 @@ export default function ReposicaoFlorestalPage() {
   const totalArvores = itens.reduce((s, i) => s + i.arvores, 0)
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--neutral-50)" }}>
-      <header className="acam-header">
-        <div className="acam-header-content">
-          <HeaderLogo />
-          <div className="flex items-center gap-3">
-            <span className="acam-badge acam-badge-primary" style={{ fontSize: "var(--font-size-xs)" }}>
-              UFEMG {ufemg.ano}: R$ {ufemg.valor.toFixed(4)}
-            </span>
-            <Link href="/dashboard" className="acam-btn acam-btn-ghost acam-btn-sm">Dashboard</Link>
+    <div>
+      {/* Service Header */}
+      <div className="acam-service-header acam-service-header-primary">
+        <div className="acam-service-header-content">
+          <div className="acam-service-header-info">
+            <div className="acam-service-header-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22V12" /><path d="M8 18s1-3 4-3 4 3 4 3" /><path d="M7 12l5-8 5 8" />
+              </svg>
+            </div>
+            <div className="acam-service-header-text">
+              <h1>Cálculo de Reposição Florestal</h1>
+              <p>Cálculo com base nos quantitativos de matéria-prima florestal nativa</p>
+            </div>
+          </div>
+          <div className="acam-service-header-cost">
+            <div className="acam-service-header-cost-label">Custo</div>
+            <div className="acam-service-header-cost-value">Gratuito</div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "var(--spacing-8) var(--spacing-6)", width: "100%" }}>
-        <div className="mb-6">
-          <Link href="/dashboard" className="text-sm text-muted-foreground inline-flex items-center gap-1 mb-4" style={{ textDecoration: "none" }}>
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
-            </svg>
-            Voltar ao dashboard
-          </Link>
-          <h1 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-2xl)", fontWeight: 600 }}>
-            Cálculo de Reposição Florestal
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Calcule a reposição florestal com base nos quantitativos de matéria-prima florestal nativa.
-          </p>
+      <main style={{ maxWidth: "40rem", margin: "0 auto", padding: "var(--spacing-8) var(--spacing-6)", width: "100%" }}>
+        <div className="mb-4">
+          <span className="acam-badge acam-badge-primary" style={{ fontSize: "0.85rem", padding: "0.4rem 1rem" }}>
+            UFEMG {ufemg.ano}: R$ {ufemg.valor.toFixed(4).replace(".", ",")}
+          </span>
         </div>
 
         <div className="acam-alert-result mb-6">

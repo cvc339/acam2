@@ -179,18 +179,13 @@ export default function CalculoModalidade2Page() {
 
             {erro && <div className="acam-alert acam-alert-error mb-4">{erro}</div>}
 
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Saldo: {saldo !== null ? `${saldo} créditos` : "carregando..."}
-              </span>
-              <button
-                className="acam-btn acam-btn-primary"
-                onClick={handleCalcular}
-                disabled={loading}
-              >
-                {loading ? "Calculando..." : `Calcular (${CUSTO_CREDITOS} créditos)`}
-              </button>
-            </div>
+            <button
+              className="acam-btn acam-btn-primary"
+              onClick={handleCalcular}
+              disabled={loading}
+            >
+              {loading ? "Calculando..." : `Calcular (${CUSTO_CREDITOS} créditos)`}
+            </button>
           </div>
 
           {/* Badge UFEMG */}
