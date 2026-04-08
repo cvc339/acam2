@@ -161,7 +161,7 @@ export default function Home() {
         }}>
           Identifique obrigações, analise imóveis, calcule valores e prepare requerimentos — com segurança jurídica e baixo custo.
         </p>
-        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+        <div className="landing-cta-row">
           <Link href="/registro" style={{
             fontWeight: 700, fontSize: "0.85rem",
             letterSpacing: "0.04em", textTransform: "uppercase",
@@ -328,7 +328,6 @@ export default function Home() {
               },
             ].map((item, i) => (
               <div key={i} className="landing-cenarios-row" style={{
-                display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
                 borderBottom: "1px solid rgba(245,240,232,0.06)",
               }}>
                 <div style={{
@@ -493,8 +492,7 @@ export default function Home() {
 
           {/* Ferramentas gratuitas */}
           <div className="landing-gratuitas" style={{
-            display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-            gap: "24px", marginBottom: "64px",
+            marginBottom: "64px",
           }}>
             {[
               { nome: "Checklist de compensações", desc: "Descubra quais das 8 compensações se aplicam ao seu empreendimento." },
@@ -623,7 +621,7 @@ export default function Home() {
                 src="/images/claudio-vieira-castro.png"
                 alt="Cláudio Vieira Castro"
                 style={{
-                  width: "200px", height: "240px",
+                  width: "100%", maxWidth: "200px", height: "240px",
                   objectFit: "cover", objectPosition: "center top",
                   borderRadius: "var(--radius-xl)",
                   filter: "grayscale(20%)",
@@ -774,7 +772,7 @@ export default function Home() {
         </div>
 
         {/* Linha inferior */}
-        <div style={{
+        <div className="landing-footer-bottom" style={{
           maxWidth: "1100px", margin: "32px auto 0",
           paddingTop: "24px",
           borderTop: "1px solid rgba(245,240,232,0.06)",

@@ -12,11 +12,10 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer"
 
-// Fontes Google Fonts — TODO: corrigir URLs quando testar em produção
-// Por enquanto usa Helvetica (nativa do PDF) como fallback seguro
+// Registra fontes Source Sans 3 + Source Serif 4
+import "@/lib/pdf/fonts"
 
 // Cores do design system ACAM
 const cores = {
@@ -39,7 +38,7 @@ const cores = {
 
 const styles = StyleSheet.create({
   page: {
-    fontFamily: "Helvetica",
+    fontFamily: "Source Sans 3",
     fontSize: 9,
     color: cores.neutral800,
     paddingTop: 60,
@@ -55,8 +54,7 @@ const styles = StyleSheet.create({
   },
   capaLogo: {
     fontSize: 28,
-    fontFamily: "Helvetica-Bold",
-    fontWeight: 700,
+    fontFamily: "Source Serif 4", fontWeight: 700,
     color: cores.primary600,
     letterSpacing: 4,
     marginBottom: 8,
@@ -68,8 +66,7 @@ const styles = StyleSheet.create({
   },
   capaTitulo: {
     fontSize: 18,
-    fontFamily: "Helvetica-Bold",
-    fontWeight: 700,
+    fontFamily: "Source Serif 4", fontWeight: 700,
     color: cores.primary600,
     textAlign: "center",
     marginBottom: 12,
@@ -114,7 +111,7 @@ const styles = StyleSheet.create({
   },
   headerLogo: {
     fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Source Sans 3", fontWeight: 700,
     color: cores.primary600,
     letterSpacing: 2,
   },
@@ -149,8 +146,7 @@ const styles = StyleSheet.create({
   },
   secaoTitulo: {
     fontSize: 12,
-    fontFamily: "Helvetica-Bold",
-    fontWeight: 600,
+    fontFamily: "Source Serif 4", fontWeight: 600,
     color: cores.primary600,
     marginBottom: 8,
     paddingBottom: 4,
@@ -159,7 +155,7 @@ const styles = StyleSheet.create({
   },
   secaoSubtitulo: {
     fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Source Sans 3", fontWeight: 700,
     color: cores.neutral700,
     marginBottom: 6,
   },
@@ -184,7 +180,7 @@ const styles = StyleSheet.create({
   },
   tabelaHeaderTexto: {
     fontSize: 8,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Source Sans 3", fontWeight: 700,
     color: cores.primary600,
   },
   tabelaLinha: {
@@ -200,7 +196,7 @@ const styles = StyleSheet.create({
   },
   tabelaValor: {
     fontSize: 8,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Source Sans 3", fontWeight: 700,
     color: cores.primary700,
     textAlign: "right",
   },
@@ -220,7 +216,7 @@ const styles = StyleSheet.create({
   },
   cardDestaqueValor: {
     fontSize: 22,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Source Sans 3", fontWeight: 700,
     color: "white",
   },
   // Ficha DAE
@@ -234,8 +230,7 @@ const styles = StyleSheet.create({
   },
   fichaTitulo: {
     fontSize: 10,
-    fontFamily: "Helvetica-Bold",
-    fontWeight: 600,
+    fontFamily: "Source Serif 4", fontWeight: 600,
     color: cores.primary600,
     marginBottom: 8,
   },
@@ -254,12 +249,12 @@ const styles = StyleSheet.create({
   },
   fichaConteudo: {
     fontSize: 9,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Source Sans 3", fontWeight: 700,
     color: cores.neutral800,
   },
   fichaValorDestaque: {
     fontSize: 14,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Source Sans 3", fontWeight: 700,
     color: cores.primary600,
   },
 })

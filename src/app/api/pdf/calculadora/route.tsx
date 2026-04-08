@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { renderToBuffer } from "@react-pdf/renderer"
+import "@/lib/pdf/fonts"
 import {
   Document,
   Capa,
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
                 </View>
               ))}
               <View style={[styles.tabelaLinha, { borderBottomWidth: 0, paddingTop: 8 }]}>
-                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Helvetica-Bold" }]}>Subtotal Taxa de Expediente</Text>
+                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Source Sans 3", fontWeight: 700 }]}>Subtotal Taxa de Expediente</Text>
                 <Text style={[styles.tabelaValor, { flex: 1.5, fontSize: 10 }]}>{fmt(totalExpediente)}</Text>
               </View>
             </Secao>
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
                 </View>
               ))}
               <View style={[styles.tabelaLinha, { borderBottomWidth: 0, paddingTop: 8 }]}>
-                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Helvetica-Bold" }]}>Subtotal Taxa Florestal</Text>
+                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Source Sans 3", fontWeight: 700 }]}>Subtotal Taxa Florestal</Text>
                 <Text style={[styles.tabelaValor, { flex: 1.5, fontSize: 10 }]}>{fmt(totalFlorestal)}</Text>
               </View>
             </Secao>
@@ -141,7 +142,7 @@ export async function POST(request: Request) {
                 </View>
               ))}
               <View style={[styles.tabelaLinha, { borderBottomWidth: 0, paddingTop: 8 }]}>
-                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Helvetica-Bold" }]}>Subtotal Reposição Florestal</Text>
+                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Source Sans 3", fontWeight: 700 }]}>Subtotal Reposição Florestal</Text>
                 <Text style={[styles.tabelaValor, { flex: 1.5, fontSize: 10 }]}>{fmt(totalReposicao)}</Text>
               </View>
             </Secao>

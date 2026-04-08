@@ -1525,6 +1525,23 @@ body.page-public {
     gap: 48px;
 }
 
+.landing-cenarios-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.landing-gratuitas {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+}
+
+.landing-cta-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
 /* Nav da landing */
 .landing-nav {
     position: fixed;
@@ -1601,12 +1618,17 @@ body.page-public {
 
     /* Cenários: 3 colunas → 1 coluna */
     .landing-cenarios-row {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
+    }
+
+    .landing-cenarios-row > div {
+        border-right: none !important;
+        padding: 20px 0 !important;
     }
 
     /* Créditos gratuitas cards */
     .landing-gratuitas {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
     }
 
     /* Compensações grid cell borders */
@@ -1614,6 +1636,26 @@ body.page-public {
         border-right: none !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
+    }
+
+    /* CTA buttons stack on mobile */
+    .landing-cta-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    /* Grid-3 steps: remove right borders */
+    .landing-grid-3 > div {
+        border-right: none !important;
+        padding: 24px 0 !important;
+    }
+
+    /* Footer bottom row */
+    .landing-footer-bottom {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
     }
 }
 

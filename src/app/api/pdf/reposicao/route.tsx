@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { renderToBuffer } from "@react-pdf/renderer"
+import "@/lib/pdf/fonts"
 import {
   Document,
   Capa,
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
             borderLeftWidth: 3,
             borderLeftColor: cores.primary600,
           }}>
-            <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.primary600, marginBottom: 4 }}>
+            <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.primary600, marginBottom: 4 }}>
               Prazo
             </Text>
             <Text style={[styles.texto, { color: cores.neutral700 }]}>
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
 
           <Secao titulo="Formas de Cumprimento">
             <View style={{ marginBottom: 6 }}>
-              <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.neutral800, marginBottom: 2 }}>
+              <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.neutral800, marginBottom: 2 }}>
                 1. Formação de florestas
               </Text>
               <Text style={styles.texto}>
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
               </Text>
             </View>
             <View style={{ marginBottom: 6 }}>
-              <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.neutral800, marginBottom: 2 }}>
+              <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.neutral800, marginBottom: 2 }}>
                 2. Participação em associações de reflorestadores
               </Text>
               <Text style={styles.texto}>
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
               </Text>
             </View>
             <View style={{ marginBottom: 6 }}>
-              <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: cores.neutral800, marginBottom: 2 }}>
+              <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.neutral800, marginBottom: 2 }}>
                 3. Recolhimento de valor ao erário
               </Text>
               <Text style={styles.texto}>

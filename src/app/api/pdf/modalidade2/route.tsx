@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { renderToBuffer } from "@react-pdf/renderer"
+import "@/lib/pdf/fonts"
 import {
   Document,
   Capa,
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
               <Text style={[styles.tabelaValor, { flex: 1 }]}>{fmtNum(totalUFEMGs)} UFEMGs</Text>
             </View>
             <View style={[styles.tabelaLinha, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.tabelaTexto, { flex: 1, fontFamily: "Helvetica-Bold" }]}>Total em Reais</Text>
+              <Text style={[styles.tabelaTexto, { flex: 1, fontFamily: "Source Sans 3", fontWeight: 700 }]}>Total em Reais</Text>
               <Text style={[styles.tabelaValor, { flex: 1, fontSize: 12 }]}>{fmt(totalReais)}</Text>
             </View>
           </Secao>
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
               { t: "Execução e Prestação de Contas", p: "12-36 meses" },
             ].map((e, i) => (
               <View key={i} style={{ flexDirection: "row", marginBottom: 6, alignItems: "center" }}>
-                <Text style={{ fontSize: 8, fontFamily: "Helvetica-Bold", color: "#1a3a2a", width: 16 }}>{i + 1}.</Text>
+                <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: "#1a3a2a", width: 16 }}>{i + 1}.</Text>
                 <Text style={{ fontSize: 8, flex: 1 }}>{e.t}</Text>
                 <Text style={{ fontSize: 7, color: "#737373" }}>{e.p}</Text>
               </View>
