@@ -79,11 +79,13 @@ export default async function DashboardPage() {
             <p className="text-xs text-muted-foreground mt-1">Adquira créditos</p>
           </div>
         </Link>
-        <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer">
-          <IconBox color="blue" className="mx-auto mb-3">R</IconBox>
-          <h4 className="font-medium text-sm">Extrato de créditos</h4>
-          <p className="text-xs text-muted-foreground mt-1">Histórico de uso</p>
-        </div>
+        <Link href="/creditos/extrato" className="no-underline">
+          <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer h-full">
+            <IconBox color="blue" className="mx-auto mb-3">R</IconBox>
+            <h4 className="font-medium text-sm">Extrato de créditos</h4>
+            <p className="text-xs text-muted-foreground mt-1">Histórico de uso</p>
+          </div>
+        </Link>
       </div>
 
       {/* Consultas recentes */}

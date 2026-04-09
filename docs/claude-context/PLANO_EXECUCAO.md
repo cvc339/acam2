@@ -52,12 +52,13 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 **Status: BLOCO 0 CONCLUIDO — 2026-04-07**
 
 ### Bloco 1A — Creditos e Pagamento
-- [ ] Tabelas: transacoes_creditos, pagamentos (com RLS)
-- [ ] Compra de creditos via Mercado Pago (pacotes: 10/25/50)
-- [ ] Webhook de confirmacao
-- [ ] Extrato de creditos
-- [ ] Saldo no dashboard
-- [ ] /vc-security: isolamento verificado
+- [x] Tabelas: transacoes_creditos, pagamentos (com RLS)
+- [x] Compra de creditos via Mercado Pago (pacotes: 10/25/50)
+- [x] Webhook de confirmacao
+- [x] Extrato de creditos
+- [x] Saldo no dashboard
+- [x] /vc-security: isolamento verificado
+**Status: BLOCO 1A CONCLUIDO — 2026-04-09**
 
 ### Bloco 1B — Conteudo gratuito
 - [x] Avaliacao de Compensacoes (checklist 14 perguntas, logica condicional, SNUC verificar)

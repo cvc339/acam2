@@ -27,6 +27,12 @@ export default async function ExtratoPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-8)" }}>
+      <Link href="/dashboard" className="text-sm text-muted-foreground inline-flex items-center gap-1" style={{ textDecoration: "none" }}>
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+        </svg>
+        Voltar ao dashboard
+      </Link>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Extrato de Créditos</h1>
@@ -34,7 +40,7 @@ export default async function ExtratoPage() {
             Saldo atual: <strong>{creditosDisponiveis} créditos</strong>
           </p>
         </div>
-        <Link href="/creditos" className="acam-btn acam-btn-accent acam-btn-sm">
+        <Link href="/creditos" className="acam-btn acam-btn-primary acam-btn-sm">
           Comprar créditos
         </Link>
       </div>
