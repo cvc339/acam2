@@ -291,9 +291,100 @@ export async function POST(request: Request) {
       tokens: pm.tokens_consumidos,
     }
 
-    // 10. Gerar parecer PDF (por enquanto desabilitado — será adaptado ao pipeline)
+    // 10. Gerar parecer PDF (jsPDF simplificado)
     let parecerPdfPath: string | null = null
-    // TODO: adaptar parecer-pdf.tsx para a nova estrutura do pipeline
+    try {
+      const { jsPDF } = await import("jspdf")
+      const doc = new jsPDF()
+      const pw = doc.internal.pageSize.getWidth()
+      const m = 15
+      const cw = pw - 2 * m
+      let y = 20
+
+      const title = (t: string) => { doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text(t, m, y); y += 8 }
+      const text = (t: string) => { doc.setFontSize(9); doc.setFont("helvetica", "normal"); const l = doc.splitTextToSize(t, cw); doc.text(l, m, y); y += l.length * 4 + 2 }
+      const field = (l: string, v: string) => { doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.text(l + ": ", m, y); const lw = doc.getTextWidth(l + ": "); doc.setFont("helvetica", "normal"); doc.text(v || "—", m + lw, y); y += 5 }
+      const check = () => { if (y > 270) { doc.addPage(); y = 20 } }
+
+      // Header
+      doc.setFontSize(16); doc.setFont("helvetica", "bold")
+      doc.text("Análise Preliminar de Viabilidade", m, y); y += 10
+      doc.setFontSize(10); doc.setFont("helvetica", "normal")
+      doc.text(`Imóvel: ${parecer.imovel.nome || "N/I"} — ${parecer.imovel.municipio || "N/I"}/${parecer.imovel.estado}`, m, y); y += 6
+      doc.text(`Área: ${areaPadronizada.toFixed(2)} ha (fonte: ${areaFonte})`, m, y); y += 6
+      doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, m, y); y += 10
+
+      // Disclaimer
+      doc.setFontSize(8); doc.setFont("helvetica", "italic")
+      const disclaimer = "ANÁLISE PRELIMINAR — Este relatório é uma pré-avaliação automatizada e não constitui parecer jurídico ou técnico. Os dados extraídos por IA devem ser conferidos com os documentos originais."
+      const dl = doc.splitTextToSize(disclaimer, cw)
+      doc.text(dl, m, y); y += dl.length * 3.5 + 4
+      doc.setFont("helvetica", "normal")
+
+      // Semáforo
+      check(); title("Avaliação")
+      field("Semáforo", parecer.semaforo.toUpperCase())
+      text(parecer.semaforo_justificativa)
+
+      // Proprietários
+      check(); title("Proprietários Atuais")
+      for (const prop of parecer.proprietarios) {
+        field(prop.nome, `${prop.percentual || "?"}% — ${prop.estado_civil || ""} ${prop.conjuge ? "(cônjuge: " + prop.conjuge + ")" : ""}`)
+        check()
+      }
+
+      // Ônus
+      check(); title("Ônus e Gravames")
+      if (parecer.onus_gravames.length === 0) {
+        text("Nenhum ônus ou gravame ativo identificado.")
+      } else {
+        for (const o of parecer.onus_gravames) {
+          field(`${o.tipo} (Nível ${o.nivel})`, o.descricao)
+          check()
+        }
+      }
+
+      // UCs
+      check(); title("Unidades de Conservação")
+      if (parecer.ide_sisema.ucs.length === 0) {
+        text("Nenhuma UC identificada na área do imóvel.")
+      } else {
+        for (const uc of parecer.ide_sisema.ucs) {
+          field(uc.nome, `${uc.categoria} — ${uc.protecao_integral ? "Proteção Integral" : "Uso Sustentável"} — ${uc.percentual_sobreposicao ?? "?"}%`)
+          check()
+        }
+      }
+
+      // Recomendações
+      if (parecer.recomendacoes.length > 0) {
+        check(); title("Recomendações")
+        for (const r of parecer.recomendacoes) { text("• " + r); check() }
+      }
+
+      // VTN
+      if (parecer.vtn?.encontrado) {
+        check(); title("Valor de Referência (VTN)")
+        field("Município", parecer.vtn.municipio || "—")
+        field("R$/ha", `R$ ${parecer.vtn.valor_referencia?.toLocaleString("pt-BR") || "—"}`)
+        if (parecer.vtn.valor_estimado) field("Valor estimado", `R$ ${parecer.vtn.valor_estimado.toLocaleString("pt-BR")}`)
+      }
+
+      // Disclaimer final
+      check()
+      doc.setFontSize(7); doc.setFont("helvetica", "normal")
+      const df = "ACAM — Análise de Compensações Ambientais. Análise preliminar automatizada. Não constitui parecer jurídico ou técnico."
+      doc.text(doc.splitTextToSize(df, cw), m, y)
+
+      const pdfArrayBuffer = doc.output("arraybuffer")
+      const pdfPath = `${user.id}/${consultaId}/parecer.pdf`
+      await admin.storage.from("documentos").upload(pdfPath, Buffer.from(pdfArrayBuffer), {
+        contentType: "application/pdf",
+        upsert: true,
+      })
+      parecerPdfPath = pdfPath
+    } catch (erroPdf) {
+      console.error("Erro ao gerar parecer PDF:", erroPdf)
+    }
 
     // 15. Atualizar consulta com resultado
     await admin.from("consultas").update({

@@ -218,9 +218,18 @@ RETORNE APENAS JSON VÁLIDO.`
   const { json, tokens } = await chamarClaude(pdfBuffer, prompt, 8192)
   console.log(`[PIPELINE] Etapa 1 (Parsing): ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
 
+  const atos = json.atos as unknown as AtoRegistral[]
+
+  // Log dos adquirentes extraídos para debug
+  for (const ato of atos) {
+    if (ato.partes?.adquirentes && Array.isArray(ato.partes.adquirentes) && ato.partes.adquirentes.length > 0) {
+      console.log(`[PIPELINE] ${ato.numero} adquirentes:`, JSON.stringify(ato.partes.adquirentes))
+    }
+  }
+
   return {
     imovel: json.imovel as unknown as DadosImovel,
-    atos: json.atos as unknown as AtoRegistral[],
+    atos,
     tokens,
   }
 }
