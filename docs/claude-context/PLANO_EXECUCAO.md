@@ -152,6 +152,11 @@ admin, email e analytics.
 - [ ] Admin: estatisticas, precos, UFEMG, usuarios, consultas
 - [ ] Analytics: uso por ferramenta
 
+### Otimizacao da Engine de Analise (qualidade de extracao)
+- [x] Nivel 1: Segunda passada de verificacao na analise da matricula (multi-pass)
+- [ ] Nivel 2: Few-shot examples no prompt (exemplos reais anonimizados de extracao correta)
+- [ ] Nivel 3: Validacao de schema com Zod (rejeitar extracoes com campos impossiveis, re-extrair)
+
 ### Verificacao final V1
 - [ ] /vc-security: re-verificacao completa (todas as tabelas)
 - [ ] /vc-review: checklist pre-deploy aprovado

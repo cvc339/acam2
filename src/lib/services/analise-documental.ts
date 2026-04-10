@@ -296,11 +296,89 @@ RETORNE APENAS JSON VÁLIDO, SEM TEXTO ANTES OU DEPOIS.`
       dados.alertas.unshift("Documento parece ser escaneado (imagem). A extração por OCR pode ter precisão reduzida. Recomenda-se conferir os dados com o documento original.")
     }
 
+    // ============================================
+    // PASS 2: VERIFICAÇÃO E CORREÇÃO
+    // A IA relê o documento e valida os dados extraídos
+    // ============================================
+    try {
+      const dadosVerificados = await verificarExtracaoMatricula(pdfBuffer, dados)
+      if (dadosVerificados) {
+        return { sucesso: true, dados: dadosVerificados, tokens }
+      }
+    } catch (erroVerif) {
+      console.error("Erro na verificação (pass 2), usando dados da pass 1:", erroVerif)
+    }
+
     return { sucesso: true, dados, tokens }
   } catch (error) {
     console.error("Erro ao analisar matrícula:", error)
     throw error
   }
+}
+
+// ============================================
+// PASS 2: VERIFICAÇÃO DA EXTRAÇÃO
+// ============================================
+
+async function verificarExtracaoMatricula(
+  pdfBuffer: Buffer,
+  dadosExtraidos: DadosMatricula,
+): Promise<DadosMatricula | null> {
+  const promptVerificacao = `Você é um revisor especializado em matrículas de imóveis rurais.
+Recebi a seguinte extração automática desta matrícula. Sua tarefa é VERIFICAR se os dados estão corretos, relendo o documento original.
+
+## DADOS EXTRAÍDOS (a serem verificados):
+${JSON.stringify(dadosExtraidos, null, 2)}
+
+## VERIFICAÇÕES OBRIGATÓRIAS:
+
+1. **PROPRIETÁRIO ATUAL** — O mais crítico!
+   - Em um registro de COMPRA E VENDA, o TRANSMITENTE/VENDEDOR NÃO é o proprietário.
+   - O ADQUIRENTE/COMPRADOR é o proprietário atual.
+   - Verifique se o(s) proprietário(s) listado(s) são realmente os ADQUIRENTES do último registro de transmissão.
+   - Se estiver errado, CORRIJA com os nomes dos adquirentes reais.
+   - Se houver mais de um adquirente, TODOS devem estar listados.
+   - Percentuais DEVEM somar 100%.
+
+2. **ÁREA** — Confira se a área em hectares está correta conforme documento.
+
+3. **ÔNUS E GRAVAMES** — Verifique se os ônus listados realmente existem no documento.
+   - Ônus CANCELADOS não devem ser listados como ativos.
+   - Se nenhum ônus ativo foi encontrado, onus_gravames deve ser [].
+
+4. **CÓDIGOS** — Verifique:
+   - CCIR: NÃO confundir com CNS (código do cartório)
+   - NIRF/CIB: formato X.XXX.XXX-X
+   - Código INCRA: formato XXX.XXX.XXX.XXX-X
+
+5. **NÚMERO DA MATRÍCULA** — Confira se está completo.
+
+## INSTRUÇÕES:
+- Se TODOS os dados estiverem corretos, retorne o JSON idêntico ao que recebeu.
+- Se encontrar ERROS, retorne o JSON CORRIGIDO.
+- Adicione ao array "alertas" qualquer correção que fizer, ex: "Verificação: proprietário corrigido de TRANSMITENTE para ADQUIRENTE"
+- Se não tiver certeza sobre algum campo, mantenha o valor original e adicione alerta.
+- RETORNE APENAS JSON VÁLIDO.`
+
+  const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, promptVerificacao, 4096)
+  console.log(`[TOKENS] Matrícula (verificação): ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
+
+  const dadosVerificados = json as unknown as DadosMatricula
+
+  // Recalcular dias_desde_emissao
+  if (dadosVerificados.data_emissao) {
+    const dataEmissao = new Date(dadosVerificados.data_emissao)
+    const hoje = new Date()
+    const diffTime = Math.abs(hoje.getTime() - dataEmissao.getTime())
+    dadosVerificados.dias_desde_emissao = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  }
+
+  // Manter alertas de OCR da pass 1
+  const alertasOriginais = dadosExtraidos.alertas || []
+  const alertasVerificacao = dadosVerificados.alertas || []
+  dadosVerificados.alertas = [...alertasOriginais, ...alertasVerificacao]
+
+  return dadosVerificados
 }
 
 // ============================================
