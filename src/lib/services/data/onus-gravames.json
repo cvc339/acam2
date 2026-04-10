@@ -1,0 +1,131 @@
+{
+  "metadata": {
+    "descricao": "Tabela de ônus, gravames e situações registrais que afetam a viabilidade de aquisição",
+    "versao": "1.0",
+    "base_legal": "Lei 6.015/1973 (Lei de Registros Públicos)"
+  },
+  "onus_gravames": {
+    "IMPEDE": {
+      "descricao": "Situações que impedem a compra e venda",
+      "pontuacao_mvar": 0,
+      "itens": [
+        {"tipo": "Registro", "situacao": "Hipoteca", "observacao": "Impede transferência sem quitação"},
+        {"tipo": "Registro", "situacao": "Alienação fiduciária", "observacao": "Propriedade resolúvel"},
+        {"tipo": "Registro", "situacao": "Usufruto", "observacao": "Direito real de terceiro"},
+        {"tipo": "Averbação", "situacao": "Indisponibilidade judicial", "observacao": "Bloqueio judicial - VETO"},
+        {"tipo": "Averbação", "situacao": "Indisponibilidade administrativa", "observacao": "Bloqueio administrativo - VETO"},
+        {"tipo": "Averbação", "situacao": "Cláusula de inalienabilidade", "observacao": "Proíbe alienação"},
+        {"tipo": "Averbação", "situacao": "Promessa de compra e venda vigente", "observacao": "Compromisso com terceiro"},
+        {"tipo": "Averbação", "situacao": "Cessão ou promessa de cessão vigente", "observacao": "Direito de terceiro"},
+        {"tipo": "Averbação", "situacao": "Caução ou cessão fiduciária de direitos", "observacao": "Garantia a terceiro"},
+        {"tipo": "Averbação", "situacao": "Fideicomisso", "observacao": "Propriedade resolúvel"},
+        {"tipo": "Averbação", "situacao": "Penhora", "observacao": "Constrição judicial - VETO"},
+        {"tipo": "Averbação", "situacao": "Arresto", "observacao": "Constrição judicial - VETO"},
+        {"tipo": "Averbação", "situacao": "Sequestro", "observacao": "Constrição judicial - VETO"},
+        {"tipo": "Averbação", "situacao": "Bloqueio judicial", "observacao": "Constrição judicial - VETO"},
+        {"tipo": "Registro", "situacao": "Patrimônio rural em afetação", "observacao": "CPR afetada"},
+        {"tipo": "Averbação", "situacao": "Falta de CCIR atualizado", "observacao": "Exigido para alienação"},
+        {"tipo": "Averbação", "situacao": "Falta de ITR dos últimos 5 anos", "observacao": "Exigido para alienação"},
+        {"tipo": "Averbação", "situacao": "Descrição irregular sem especialidade", "observacao": "Necessita retificação"},
+        {"tipo": "Registro", "situacao": "Ação reivindicatória registrada", "observacao": "Litígio sobre propriedade"},
+        {"tipo": "Registro", "situacao": "Ação de usucapião registrada", "observacao": "Litígio sobre propriedade"}
+      ]
+    },
+    "DIFICULTA": {
+      "descricao": "Situações que dificultam mas não impedem a compra e venda",
+      "pontuacao_mvar": 10,
+      "itens": [
+        {"tipo": "Registro", "situacao": "Penhor rural", "observacao": "Afeta bens móveis vinculados"},
+        {"tipo": "Registro", "situacao": "Servidão administrativa", "observacao": "Restrição de uso"},
+        {"tipo": "Registro", "situacao": "Servidão convencional", "observacao": "Direito de passagem"},
+        {"tipo": "Averbação", "situacao": "Cláusula de impenhorabilidade", "observacao": "Afeta garantias"},
+        {"tipo": "Averbação", "situacao": "Cláusula de incomunicabilidade", "observacao": "Regime de bens"},
+        {"tipo": "Registro", "situacao": "Tombamento provisório", "observacao": "Restrições de uso"},
+        {"tipo": "Registro", "situacao": "Tombamento definitivo", "observacao": "Restrições de uso"},
+        {"tipo": "Averbação", "situacao": "Declaração de utilidade pública para desapropriação", "observacao": "Risco de perda"},
+        {"tipo": "Averbação", "situacao": "Reserva legal averbada", "observacao": "Restrição de uso - 20% da área"},
+        {"tipo": "Averbação", "situacao": "CAR averbado", "observacao": "Obrigações ambientais"},
+        {"tipo": "Averbação", "situacao": "Convenção antenupcial com regime específico", "observacao": "Anuência do cônjuge"},
+        {"tipo": "Averbação", "situacao": "Averbação premonitória", "observacao": "CPC art. 828 - Alerta de execução"},
+        {"tipo": "Averbação", "situacao": "Restabelecimento da sociedade conjugal", "observacao": "Regime de bens alterado"},
+        {"tipo": "Averbação", "situacao": "Unificação de matrículas", "observacao": "Verificar continuidade"},
+        {"tipo": "Averbação", "situacao": "Desmembramento", "observacao": "Verificar área remanescente"},
+        {"tipo": "Averbação", "situacao": "Fusão", "observacao": "Verificar nova descrição"},
+        {"tipo": "Registro", "situacao": "Contrato de pagamento por serviços ambientais", "observacao": "Obrigações propter rem"},
+        {"tipo": "Registro", "situacao": "Multipropriedade", "observacao": "Time-sharing"},
+        {"tipo": "Registro", "situacao": "Condomínio de lotes", "observacao": "Fração ideal"},
+        {"tipo": "Averbação", "situacao": "Notícia de decreto de desapropriação", "observacao": "Risco de perda"}
+      ]
+    },
+    "NAO_PREJUDICA": {
+      "descricao": "Situações que não afetam a viabilidade da compra e venda",
+      "pontuacao_mvar": 40,
+      "itens": [
+        {"tipo": "Averbação", "situacao": "Mudança de denominação do imóvel", "observacao": "Meramente cadastral"},
+        {"tipo": "Averbação", "situacao": "Alteração de numeração", "observacao": "Meramente cadastral"},
+        {"tipo": "Averbação", "situacao": "Alteração de nome civil do proprietário", "observacao": "Retificação de dados"},
+        {"tipo": "Averbação", "situacao": "Retificação de área", "observacao": "Ajuste técnico"},
+        {"tipo": "Averbação", "situacao": "Georreferenciamento", "observacao": "Melhoria da especialidade"},
+        {"tipo": "Averbação", "situacao": "Certificação SIGEF/INCRA", "observacao": "Conformidade técnica"},
+        {"tipo": "Registro", "situacao": "Hipoteca cancelada", "observacao": "Ônus extinto"},
+        {"tipo": "Registro", "situacao": "Alienação fiduciária cancelada", "observacao": "Ônus extinto"},
+        {"tipo": "Averbação", "situacao": "Penhora cancelada", "observacao": "Constrição extinta"},
+        {"tipo": "Averbação", "situacao": "Indisponibilidade cancelada", "observacao": "Bloqueio extinto"}
+      ]
+    }
+  },
+  "termos_cancelamento": [
+    "cancelado", "cancelada", "cancelamento", "baixa", "baixado", "baixada",
+    "extinção", "extinto", "extinta", "quitado", "quitada", "quitação",
+    "levantado", "levantada", "levantamento", "liberado", "liberada",
+    "cessado", "cessada", "cessação", "arquivado", "arquivada"
+  ],
+  "titularidade": {
+    "PROPRIETARIO_UNICO": {
+      "descricao": "Pessoa física única com capacidade plena",
+      "pontuacao": 20
+    },
+    "CASAL": {
+      "descricao": "Casal com regime de bens definido",
+      "pontuacao": 20
+    },
+    "PESSOA_JURIDICA": {
+      "descricao": "Empresa - exige análise societária",
+      "pontuacao": 15
+    },
+    "CONDOMINIO": {
+      "descricao": "Vários proprietários/herdeiros",
+      "pontuacao": 10
+    },
+    "ESPOLIO": {
+      "descricao": "Vendedor falecido sem inventário/partilha",
+      "pontuacao": 0,
+      "veto": true
+    },
+    "INCAPAZ": {
+      "descricao": "Proprietário menor ou interditado",
+      "pontuacao": 0,
+      "veto": true
+    }
+  },
+  "georreferenciamento": {
+    "base_legal": "Decreto 12.689/2025 - Nota Técnica CPRI/IRIB 03/2025",
+    "cenarios": {
+      "CERTIFICADO_SIGEF": {
+        "descricao": "Georreferenciado e certificado no SIGEF/INCRA",
+        "pontuacao": 10,
+        "observacao": "Melhor cenário - atende qualquer exigência futura"
+      },
+      "NAO_GEORREFERENCIADO_TRANSFERENCIA": {
+        "descricao": "Não georreferenciado - transferência simples",
+        "pontuacao": 5,
+        "observacao": "Permitido pelo Decreto 12.689/2025 até 21/10/2029"
+      },
+      "NAO_GEORREFERENCIADO_OBRIGATORIO": {
+        "descricao": "Não georreferenciado - desmembramento/parcelamento/remembramento",
+        "pontuacao": 0,
+        "observacao": "Obrigatório nesses casos - impede registro"
+      }
+    }
+  }
+}

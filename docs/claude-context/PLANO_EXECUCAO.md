@@ -78,12 +78,13 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 - Responsividade mobile (ajuste fino da landing page)
 
 ### Bloco 1C — Engine de analise (servicos internos)
-- [ ] Analise Documental (Claude API): matricula 20+ campos, CCIR, ITR, CAR, CND
-- [ ] Analise Geoespacial (IDE-Sisema WFS): UCs, bacias, MapBiomas
-- [ ] MVAR: pontuacao 0-100, classificacao de risco, vetos
-- [ ] Divergencias: cruzamento entre documentos
-- [ ] Parecer PDF: relatorio tecnico completo com mapa
-- [ ] Mapa interativo (Leaflet)
+- [x] Analise Documental (Claude API): matricula 20+ campos, CCIR, ITR, CAR, CND
+- [x] Analise Geoespacial (IDE-Sisema WFS): UCs, bacias, MapBiomas
+- [x] MVAR: pontuacao 0-100, classificacao de risco, vetos
+- [x] Divergencias: cruzamento entre documentos
+- [x] Parecer PDF: relatorio tecnico completo com mapa
+- [x] Mapa interativo (Leaflet)
+**Status: BLOCO 1C CONCLUIDO — 2026-04-10**
 
 ### Bloco 1D — Destinacao em UC — Base (5cr) [modalidades 2.1, 6.3]
 - [ ] Tabelas: consultas, documentos (com RLS)
