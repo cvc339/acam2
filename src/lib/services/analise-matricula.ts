@@ -389,6 +389,15 @@ Para CADA proprietário atual, extraia do DOCUMENTO ORIGINAL:
 - Se houve múltiplas transmissões, o proprietário é quem adquiriu na ÚLTIMA
 - Se parte do imóvel foi vendida e parte não, listar ambos os proprietários
 
+## EXEMPLO DE EXTRAÇÃO CORRETA:
+
+Texto do registro: "OUTORGADO COMPRADOR: MARIA SILVA, brasileira, adquiri 80% do presente imóvel; JOÃO SANTOS, brasileiro, adquiri 20% do presente imóvel. TRANSMITENTES: PEDRO SOUZA e ANA SOUZA."
+
+Extração correta:
+- MARIA SILVA → percentual: 80, ato_aquisitivo: "R-1-12345"
+- JOÃO SANTOS → percentual: 20, ato_aquisitivo: "R-1-12345"
+- PEDRO SOUZA e ANA SOUZA são TRANSMITENTES, NÃO proprietários
+
 RETORNE APENAS JSON VÁLIDO.`
 
   const { json, tokens } = await chamarClaude(pdfBuffer, prompt, 4096)
@@ -440,6 +449,7 @@ function etapa5Relatorio(
   } else {
     semaforo = "verde"
     semaforo_justificativa = "Nenhum impedimento ou ônus ativo identificado. Imóvel em condições favoráveis para transmissão."
+    recomendacoes.push("Sem ônus ou gravames ativos — situação registral favorável.")
   }
 
   // Verificações de documentos
