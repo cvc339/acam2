@@ -568,9 +568,23 @@ export async function consultarIDESisemaWFS(wkt: string, bbox: BBox): Promise<Re
 
     for (const feature of resultado.features) {
       const props = feature.properties as Record<string, unknown>
-      const nome = (props.nome as string) || (props.unidade as string) || (props.NM_UC as string) || "UC sem nome"
-      const categoria = (props.categoria as string) || (props.CATEGORI as string) || ""
-      const protecaoIntegral = verificarProtecaoIntegral(categoria, nome)
+      const nome = (props.nome_uc as string) || (props.NOME_UC as string) || (props.nome as string) || (props.NOME as string) || "UC sem nome"
+      const categoria = (props.categoria as string) || (props.CATEGORIA as string) || (props.tipo as string) || (props.TIPO as string) || ""
+      const grupo = (props.grupo as string) || (props.GRUPO as string) || ""
+
+      // Campo 'grupo' é fonte primária (contém "Proteção Integral" ou "Uso Sustentável")
+      const protecaoIntegral = grupo.toUpperCase().includes("PROTE") || verificarProtecaoIntegral(categoria, nome)
+
+      // Deduzir esfera pela layer
+      let esfera = (props.esfera_adm as string) || (props.ESFERA_ADM as string) || ""
+      if (!esfera) {
+        if (layer.includes("federal")) esfera = "Federal"
+        else if (layer.includes("estadual")) esfera = "Estadual"
+        else if (layer.includes("municipal")) esfera = "Municipal"
+      }
+
+      // Evitar duplicatas
+      if (ucsEncontradas.some((uc) => uc.nome === nome)) continue
 
       ucsEncontradas.push({
         nome,

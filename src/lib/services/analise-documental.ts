@@ -6,9 +6,13 @@
  * console.log→apenas erros, tipagem TypeScript
  */
 
-const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY || ""
-const CLAUDE_API_URL = process.env.CLAUDE_API_URL || "https://api.anthropic.com/v1/messages"
-const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514"
+function getClaudeConfig() {
+  return {
+    apiKey: process.env.CLAUDE_API_KEY || "",
+    apiUrl: process.env.CLAUDE_API_URL || "https://api.anthropic.com/v1/messages",
+    model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
+  }
+}
 
 // ============================================
 // TIPOS
@@ -98,17 +102,18 @@ async function chamarClaudeComPDF(
   prompt: string,
   maxTokens = 4096,
 ): Promise<{ json: Record<string, unknown>; tokens: { input_tokens: number; output_tokens: number } }> {
+  const { apiKey, apiUrl, model } = getClaudeConfig()
   const base64 = pdfBuffer.toString("base64")
 
-  const response = await fetch(CLAUDE_API_URL, {
+  const response = await fetch(apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": CLAUDE_API_KEY,
+      "x-api-key": apiKey,
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: CLAUDE_MODEL,
+      model,
       max_tokens: maxTokens,
       messages: [{
         role: "user",
@@ -121,9 +126,17 @@ async function chamarClaudeComPDF(
   })
 
   if (!response.ok) {
-    const errorData = await response.json() as { error?: { type?: string; message?: string } }
-    const errorType = errorData.error?.type
-    const errorMessage = errorData.error?.message
+    const text = await response.text()
+    let errorType = ""
+    let errorMessage = ""
+    try {
+      const errorData = JSON.parse(text) as { error?: { type?: string; message?: string } }
+      errorType = errorData.error?.type || ""
+      errorMessage = errorData.error?.message || ""
+    } catch {
+      console.error("Claude API retornou non-JSON:", response.status, text.substring(0, 200))
+      errorMessage = `HTTP ${response.status} — resposta não-JSON (verifique CLAUDE_API_KEY e CLAUDE_API_URL)`
+    }
 
     if (errorType === "insufficient_quota" || errorMessage?.includes("credit balance")) {
       throw new Error(`Saldo insuficiente na API Claude: ${errorMessage}`)

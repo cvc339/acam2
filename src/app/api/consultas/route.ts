@@ -187,9 +187,9 @@ export async function POST(request: Request) {
 
     // 12. Status final
     const statusFinal = gerarStatusFinal(cruzamento, resultadoGeo, {
-      ccir: resultadoCCIR ? { sucesso: true } : undefined,
-      itr: resultadoITR ? { sucesso: true } : undefined,
-      cnd: resultadoCND ? { sucesso: true } : undefined,
+      ccir: ccirBuffer ? { sucesso: !!resultadoCCIR } : undefined,
+      itr: itrBuffer ? { sucesso: !!resultadoITR } : undefined,
+      cnd: cndBuffer ? { sucesso: !!resultadoCND } : undefined,
     })
 
     // 13. Gerar parecer PDF

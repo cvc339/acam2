@@ -62,8 +62,6 @@ export default function DestinacaoUCBasePage() {
   const [municipio, setMunicipio] = useState("")
   const [matriculaFile, setMatriculaFile] = useState<File | null>(null)
   const [kmlFile, setKmlFile] = useState<File | null>(null)
-  const [ccirFile, setCcirFile] = useState<File | null>(null)
-  const [itrFile, setItrFile] = useState<File | null>(null)
   const [cndFile, setCndFile] = useState<File | null>(null)
 
   async function handleSubmit() {
@@ -81,8 +79,6 @@ export default function DestinacaoUCBasePage() {
       formData.append("municipio", municipio)
       formData.append("matricula", matriculaFile)
       formData.append("kml", kmlFile)
-      if (ccirFile) formData.append("ccir", ccirFile)
-      if (itrFile) formData.append("itr", itrFile)
       if (cndFile) formData.append("cnd", cndFile)
 
       const res = await fetch("/api/consultas", {
@@ -300,24 +296,15 @@ export default function DestinacaoUCBasePage() {
           </div>
         </div>
 
-        {/* Documentos opcionais */}
+        {/* Documento opcional */}
         <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
-          <div className="acam-section-title">Documentos Complementares</div>
-          <div className="acam-section-desc">Quanto mais documentos, mais precisa a análise.</div>
+          <div className="acam-section-title">Documento Complementar</div>
+          <div className="acam-section-desc">A CND-ITR melhora a precisão da análise fiscal.</div>
 
-          <div className="acam-fg acam-fg-3">
-            <div className="acam-field">
-              <label>CCIR</label>
-              <input type="file" className="acam-form-input" accept=".pdf" onChange={(e) => setCcirFile(e.target.files?.[0] || null)} />
-            </div>
-            <div className="acam-field">
-              <label>ITR</label>
-              <input type="file" className="acam-form-input" accept=".pdf" onChange={(e) => setItrFile(e.target.files?.[0] || null)} />
-            </div>
-            <div className="acam-field">
-              <label>CND-ITR</label>
-              <input type="file" className="acam-form-input" accept=".pdf" onChange={(e) => setCndFile(e.target.files?.[0] || null)} />
-            </div>
+          <div className="acam-field">
+            <label>CND-ITR (Certidão Negativa de Débitos)</label>
+            <input type="file" className="acam-form-input" accept=".pdf" onChange={(e) => setCndFile(e.target.files?.[0] || null)} />
+            <span className="hint">Certidão do imóvel rural emitida pela Receita Federal</span>
           </div>
         </div>
 
