@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
 import { jsPDF } from "jspdf"
 import { readFileSync } from "fs"
 import { join } from "path"
@@ -499,6 +500,13 @@ function gerarPDFSNUC(form: FormSNUC): ArrayBuffer {
 
 export async function POST(request: Request) {
   try {
+    // Autenticação obrigatória (ferramenta paga — regra 8 CLAUDE.md)
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ erro: "Não autenticado" }, { status: 401 })
+    }
+
     const body = await request.json()
     const { tipo, form } = body
 

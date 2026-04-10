@@ -36,12 +36,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true })
     }
 
-    // Extrair usuario_id do external_reference (formato: ACAM-{userId}-{timestamp})
-    const parts = externalReference.split("-")
+    // Extrair usuario_id do external_reference (formato: ACAM_{userId}_{timestamp})
+    // UUID contém hifens, então usamos _ como delimitador
+    const parts = externalReference.split("_")
     const usuarioId = parts[1]
 
     if (!usuarioId) {
-      console.error("Não foi possível extrair usuario_id")
+      console.error("Não foi possível extrair usuario_id de:", externalReference)
       return NextResponse.json({ received: true })
     }
 

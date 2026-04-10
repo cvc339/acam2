@@ -43,7 +43,8 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single()
 
-    const externalReference = `ACAM-${user.id}-${Date.now()}`
+    // Usar _ como delimitador (UUID contém hífens, - causaria parsing incorreto)
+    const externalReference = `ACAM_${user.id}_${Date.now()}`
 
     // Montar preferencia para Mercado Pago
     const preference: Record<string, unknown> = {
