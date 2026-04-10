@@ -93,8 +93,8 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 - [x] Debito de creditos com garantia de reembolso
 - [x] Status em tempo real
 - [x] Aparece em: Comp. Mineraria (2.1) e Comp. Reserva Legal (6.3)
-- [ ] /vc-security: isolamento completo
-**Status: BLOCO 1D CONCLUIDO — 2026-04-10 (pendente /vc-security)**
+- [x] /vc-security: isolamento completo (10 tabelas, 10 API routes, 0 critico)
+**Status: BLOCO 1D CONCLUIDO — 2026-04-10**
 
 ### Bloco 1E — Calculo de Implantacao/Manutencao de UC (2cr) [modalidade 2.2]
 - [x] Calculo com UFEMG vigente
