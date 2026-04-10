@@ -368,7 +368,12 @@ Para CADA proprietário atual, extraia do DOCUMENTO ORIGINAL:
 - estado_civil: somente se explícito (considerar averbações de casamento/divórcio posteriores)
 - conjuge: nome do cônjuge (considerar inclusões de cônjuge por averbação)
 - regime_bens: regime de bens do casamento
-- percentual: % de propriedade (se informado). Se "partes iguais" entre N proprietários = 100/N cada
+- percentual: NÚMERO de % de propriedade. LEIA O DOCUMENTO COM ATENÇÃO:
+  * Se diz "adquiri 80% deste imóvel" → percentual: 80
+  * Se diz "adquiri 20% deste imóvel" → percentual: 20
+  * Se diz "partes iguais" entre 2 → percentual: 50 cada
+  * Se diz "totalidade" e é único → percentual: 100
+  * Os percentuais DEVEM SOMAR 100
 - fracao: fração de propriedade se informada (ex: "31,6730/45,2680")
 - ato_aquisitivo: número do registro em que adquiriu (ex: "R-14")
 
@@ -377,9 +382,10 @@ Para CADA proprietário atual, extraia do DOCUMENTO ORIGINAL:
   "proprietarios": [ { ... } ]
 }
 
-IMPORTANTE:
-- TRANSMITENTE ≠ PROPRIETÁRIO
-- ADQUIRENTE/COMPRADOR/DONATÁRIO/HERDEIRO = PROPRIETÁRIO
+🚨 REGRAS ABSOLUTAS:
+- TRANSMITENTE ≠ PROPRIETÁRIO. NUNCA liste o transmitente como proprietário.
+- ADQUIRENTE/COMPRADOR/OUTORGADO COMPRADOR = PROPRIETÁRIO
+- O texto "adquiri X% deste imóvel" indica o PERCENTUAL do adquirente. Extraia esse número.
 - Se houve múltiplas transmissões, o proprietário é quem adquiriu na ÚLTIMA
 - Se parte do imóvel foi vendida e parte não, listar ambos os proprietários
 

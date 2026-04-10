@@ -86,6 +86,13 @@ interface Parecer {
     centroide: { lon: number; lat: number } | null
     geojson_imovel: GeoJSON.FeatureCollection | null
   }
+  vtn: {
+    encontrado: boolean
+    municipio?: string
+    valor_referencia?: number
+    valor_estimado?: number
+    exercicio?: string
+  } | null
 }
 
 // ============================================
@@ -452,7 +459,25 @@ export default function DestinacaoUCBasePage() {
             <p className="text-sm mb-3">{p.semaforo_justificativa}</p>
           </div>
 
-          {/* VTN — TODO: reimplementar com pipeline */}
+          {/* VTN */}
+          {p.vtn?.encontrado && (
+            <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+              <h3 className="font-semibold mb-2">Valor de Referência (VTN)</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Valor da Terra Nua por hectare (SIPT/Receita Federal). Referência para estimativa.
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-muted-foreground">Município:</span> <strong>{p.vtn.municipio}</strong></div>
+                <div><span className="text-muted-foreground">R$/ha:</span> <strong>R$ {p.vtn.valor_referencia?.toLocaleString("pt-BR")}</strong></div>
+                {p.vtn.valor_estimado && (
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <span className="text-muted-foreground">Valor estimado:</span>{" "}
+                    <strong style={{ fontSize: "1.1rem" }}>R$ {p.vtn.valor_estimado.toLocaleString("pt-BR")}</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Disclaimer final */}
           <div className="acam-alert-result">

@@ -6,8 +6,7 @@ import {
 } from "@/lib/services/analise-documental"
 import { analisarMatriculaPipeline } from "@/lib/services/analise-matricula"
 import { analisarImovelIDESisema, processarKML, processarGeoJSON } from "@/lib/services/analise-geoespacial"
-// import { calcularMVAR } from "@/lib/services/mvar"  // Substituído pelo pipeline
-// import { gerarParecerPDF } from "@/lib/services/parecer-pdf"  // TODO: adaptar ao pipeline
+import { consultarVTN } from "@/lib/services/mvar"
 
 const CUSTO_CREDITOS = 5
 
@@ -206,6 +205,14 @@ export async function POST(request: Request) {
     }
     console.log(`[AREA] Matrícula: ${areaMatricula}, CND: ${areaCND}, KML: ${areaKML} → Padronizada: ${areaPadronizada} (${areaFonte})`)
 
+    // 8. VTN
+    const municipioVTN = municipio || pipelineMatricula.imovel.municipio || ""
+    const vtn = consultarVTN(municipioVTN, "MG")
+    if (vtn.encontrado && vtn.valor_referencia && areaPadronizada > 0) {
+      vtn.valor_estimado = Math.round(vtn.valor_referencia * areaPadronizada * 100) / 100
+      vtn.area_hectares = areaPadronizada
+    }
+
     // 9. Montar parecer JSON com dados do pipeline
     const pm = pipelineMatricula
     const parecer = {
@@ -272,6 +279,14 @@ export async function POST(request: Request) {
         centroide: resultadoGeo.centroide,
         geojson_imovel: geojsonImovel,
       },
+      // VTN
+      vtn: vtn.encontrado ? {
+        encontrado: true,
+        municipio: vtn.municipio,
+        valor_referencia: vtn.valor_referencia,
+        valor_estimado: vtn.valor_estimado,
+        exercicio: vtn.exercicio,
+      } : null,
       // Tokens consumidos
       tokens: pm.tokens_consumidos,
     }
