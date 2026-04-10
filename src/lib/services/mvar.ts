@@ -522,7 +522,7 @@ export function analisarDimensaoTecnica(
 // ============================================
 
 export function analisarLocalizacaoUC(
-  ideSisema: { sucesso: boolean; ucs_encontradas?: Array<{ nome?: string; unidade?: string; categoria?: string; protecao_integral?: boolean; percentual_sobreposicao?: number; area_sobreposicao_ha?: number }> } | null,
+  ideSisema: { sucesso: boolean; ucs_encontradas?: Array<{ nome?: string; unidade?: string; categoria?: string; protecao_integral?: boolean; percentual_sobreposicao?: number | null; area_sobreposicao_ha?: number | null }> } | null,
 ): ResultadoLocalizacaoUC {
   const resultado: ResultadoLocalizacaoUC = {
     dimensao: "localizacao", nome: "Localização em UC",
@@ -616,7 +616,7 @@ function gerarResumoExecutivo(
 export async function calcularMVAR(
   dadosMatricula: ResultadoAnalise<DadosMatricula> | null,
   dadosCND: DadosCND | null,
-  ideSisema: { sucesso: boolean; ucs_encontradas?: Array<{ nome?: string; unidade?: string; categoria?: string; protecao_integral?: boolean; percentual_sobreposicao?: number; area_sobreposicao_ha?: number }> } | null,
+  ideSisema: { sucesso: boolean; ucs_encontradas?: Array<{ nome?: string; unidade?: string; categoria?: string; protecao_integral?: boolean; percentual_sobreposicao?: number | null; area_sobreposicao_ha?: number | null }> } | null,
   opcoes: { tipoOperacao?: string; municipio?: string } = {},
 ): Promise<ResultadoMVAR> {
   const inicio = Date.now()

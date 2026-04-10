@@ -599,7 +599,7 @@ export interface StatusFinal {
 
 export function gerarStatusFinal(
   cruzamento: ResultadoCruzamento,
-  ideSisema: { sucesso: boolean; ucs_encontradas?: Array<{ protecao_integral?: boolean; percentual_sobreposicao?: number }> },
+  ideSisema: { sucesso: boolean; ucs_encontradas?: Array<{ protecao_integral?: boolean; percentual_sobreposicao?: number | null }> },
   dadosDocumentos: { ccir?: { sucesso: boolean }; itr?: { sucesso: boolean }; cnd?: { sucesso: boolean } },
 ): StatusFinal {
   const impedimentos: string[] = []

@@ -87,13 +87,14 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 **Status: BLOCO 1C CONCLUIDO — 2026-04-10**
 
 ### Bloco 1D — Destinacao em UC — Base (5cr) [modalidades 2.1, 6.3]
-- [ ] Tabelas: consultas, documentos (com RLS)
-- [ ] Upload multi-documento (matricula + KML obrigatorios)
-- [ ] Orquestracao completa: docs → geo → MVAR → pontuacao → PDF
-- [ ] Debito de creditos com garantia de reembolso
-- [ ] Status em tempo real
-- [ ] Aparece em: Comp. Mineraria (2.1) e Comp. Reserva Legal (6.3)
+- [x] Tabelas: consultas, documentos (com RLS) — criadas na Fase 0
+- [x] Upload multi-documento (matricula + KML obrigatorios)
+- [x] Orquestracao completa: docs → geo → MVAR → pontuacao → PDF
+- [x] Debito de creditos com garantia de reembolso
+- [x] Status em tempo real
+- [x] Aparece em: Comp. Mineraria (2.1) e Comp. Reserva Legal (6.3)
 - [ ] /vc-security: isolamento completo
+**Status: BLOCO 1D CONCLUIDO — 2026-04-10 (pendente /vc-security)**
 
 ### Bloco 1E — Calculo de Implantacao/Manutencao de UC (2cr) [modalidade 2.2]
 - [x] Calculo com UFEMG vigente
