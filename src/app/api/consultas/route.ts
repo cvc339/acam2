@@ -2,17 +2,12 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import {
-  analisarMatricula,
-  analisarCCIR,
-  analisarITR,
   analisarCND,
-  validarECruzarDocumentos,
-  gerarStatusFinal,
-  cruzarDados,
 } from "@/lib/services/analise-documental"
+import { analisarMatriculaPipeline } from "@/lib/services/analise-matricula"
 import { analisarImovelIDESisema, processarKML, processarGeoJSON } from "@/lib/services/analise-geoespacial"
-import { calcularMVAR } from "@/lib/services/mvar"
-import { gerarParecerPDF } from "@/lib/services/parecer-pdf"
+// import { calcularMVAR } from "@/lib/services/mvar"  // Substituído pelo pipeline
+// import { gerarParecerPDF } from "@/lib/services/parecer-pdf"  // TODO: adaptar ao pipeline
 
 const CUSTO_CREDITOS = 5
 
@@ -148,8 +143,9 @@ export async function POST(request: Request) {
     const kmlContent = kmlBuffer.toString("utf-8")
     const kmlNome = kmlFile.name.toLowerCase()
 
-    const [resultadoMatricula, resultadoCND, resultadoKML, resultadoGeo] = await Promise.all([
-      analisarMatricula(matriculaBuffer),
+    // 7. Análise em PARALELO: Pipeline Matrícula + CND + KML + IDE-Sisema
+    const [pipelineMatricula, resultadoCND, resultadoKML, resultadoGeo] = await Promise.all([
+      analisarMatriculaPipeline(matriculaBuffer),
       cndBuffer ? analisarCND(cndBuffer) : Promise.resolve(null),
       kmlNome.endsWith(".geojson") || kmlNome.endsWith(".json")
         ? Promise.resolve(processarGeoJSON(kmlContent))
@@ -157,27 +153,22 @@ export async function POST(request: Request) {
       analisarImovelIDESisema(kmlContent),
     ])
 
-    const resultadoCCIR = null // Não usado no fluxo atual
-    const resultadoITR = null  // Não usado no fluxo atual
     const geojsonImovel = resultadoKML.sucesso ? resultadoKML.geojson : null
 
-    // Salvar dados extraídos nos documentos
-    if (resultadoMatricula.sucesso && resultadoMatricula.dados) {
-      await admin.from("documentos")
-        .update({ dados_extraidos: resultadoMatricula.dados })
-        .eq("consulta_id", consultaId)
-        .eq("tipo", "matricula")
-    }
+    // Salvar dados extraídos
+    await admin.from("documentos")
+      .update({ dados_extraidos: pipelineMatricula })
+      .eq("consulta_id", consultaId)
+      .eq("tipo", "matricula")
 
-    // Área padronizada: Matrícula (oficial) → CND-ITR (público) → KML (cálculo geométrico)
+    // Área padronizada por consenso
     const areaKML = resultadoKML.sucesso && resultadoKML.areaHa != null ? parseFloat(resultadoKML.areaHa.toFixed(2)) : null
-    const areaMatricula = resultadoMatricula.dados?.area_hectares ?? null
+    const areaMatricula = pipelineMatricula.imovel.area_ha ?? null
     const areaCND = resultadoCND?.area_hectares ?? null
 
-    // Lógica de consenso: se duas fontes concordam e uma diverge, a divergente é erro
     function diverge(a: number, b: number): boolean {
       if (a === 0 || b === 0) return true
-      return Math.abs((a - b) / Math.max(a, b)) > 0.10 // >10% de diferença
+      return Math.abs((a - b) / Math.max(a, b)) > 0.10
     }
 
     let areaPadronizada: number
@@ -185,20 +176,17 @@ export async function POST(request: Request) {
     const alertasArea: string[] = []
 
     if (areaMatricula != null && areaMatricula > 0) {
-      // Matrícula existe — verificar se faz sentido cruzando com outras fontes
       const cndConcorda = areaCND != null && areaCND > 0 && !diverge(areaMatricula, areaCND)
       const kmlConcorda = areaKML != null && areaKML > 0 && !diverge(areaMatricula, areaKML)
       const cndEKmlConcordam = areaCND != null && areaKML != null && areaCND > 0 && areaKML > 0 && !diverge(areaCND, areaKML)
 
       if (cndConcorda || kmlConcorda || (areaCND == null && areaKML == null)) {
-        // Matrícula é consistente com pelo menos uma fonte, ou é a única
         areaPadronizada = areaMatricula
         areaFonte = "Matrícula"
       } else if (cndEKmlConcordam) {
-        // CND e KML concordam entre si mas matrícula diverge → provável erro de OCR
         areaPadronizada = areaCND!
         areaFonte = "CND-ITR (matrícula com possível erro de leitura)"
-        alertasArea.push(`Área da matrícula (${areaMatricula} ha) diverge significativamente da CND (${areaCND} ha) e do KML (${areaKML} ha). Provável erro de OCR. Utilizando área da CND-ITR.`)
+        alertasArea.push(`Área da matrícula (${areaMatricula} ha) diverge da CND (${areaCND} ha) e KML (${areaKML} ha). Utilizando CND-ITR.`)
       } else if (areaCND != null && areaCND > 0) {
         areaPadronizada = areaCND
         areaFonte = "CND-ITR"
@@ -218,83 +206,56 @@ export async function POST(request: Request) {
     }
     console.log(`[AREA] Matrícula: ${areaMatricula}, CND: ${areaCND}, KML: ${areaKML} → Padronizada: ${areaPadronizada} (${areaFonte})`)
 
-    // 9. MVAR
-    const mvar = await calcularMVAR(
-      resultadoMatricula,
-      resultadoCND,
-      resultadoGeo,
-      { municipio: municipio || resultadoMatricula.dados?.municipio || undefined, areaPadronizada },
-    )
-
-    // 10. Validação cruzada
-    const validacao = validarECruzarDocumentos(
-      resultadoMatricula.dados || null,
-      resultadoCCIR,
-      resultadoITR,
-      resultadoCND,
-    )
-
-    // 11. Cruzamento de dados
-    const cruzamento = cruzarDados(resultadoMatricula, {
-      ccir: resultadoCCIR ? { sucesso: true, dados: resultadoCCIR as unknown as Record<string, unknown> } : undefined,
-      itr: resultadoITR ? { sucesso: true, dados: resultadoITR as unknown as Record<string, unknown> } : undefined,
-    })
-
-    // 12. Status final
-    const statusFinal = gerarStatusFinal(cruzamento, resultadoGeo, {
-      ccir: ccirBuffer ? { sucesso: !!resultadoCCIR } : undefined,
-      itr: itrBuffer ? { sucesso: !!resultadoITR } : undefined,
-      cnd: cndBuffer ? { sucesso: !!resultadoCND } : undefined,
-    })
-
-    // 13. Gerar parecer PDF
-    let parecerPdfPath: string | null = null
-    try {
-      const pdfBuffer = await gerarParecerPDF({
-        nomeImovel: nomeImovel || resultadoMatricula.dados?.municipio || "Imóvel",
-        municipio: municipio || resultadoMatricula.dados?.municipio || "",
-        estado: resultadoMatricula.dados?.estado || "MG",
-        areaHa: areaPadronizada,
-        ferramenta: "Destinação em UC — Base",
-        dadosMatricula: resultadoMatricula,
-        mvar,
-        ideSisema: resultadoGeo,
-        validacao,
-      })
-
-      const pdfPath = `${user.id}/${consultaId}/parecer.pdf`
-      await admin.storage.from("documentos").upload(pdfPath, pdfBuffer, {
-        contentType: "application/pdf",
-        upsert: true,
-      })
-      parecerPdfPath = pdfPath
-    } catch (erroPdf) {
-      console.error("Erro ao gerar parecer PDF:", erroPdf)
-    }
-
-    // 14. Montar parecer JSON (completo para exibição detalhada)
+    // 9. Montar parecer JSON com dados do pipeline
+    const pm = pipelineMatricula
     const parecer = {
       imovel: {
-        nome: nomeImovel,
-        municipio: municipio || resultadoMatricula.dados?.municipio,
-        estado: resultadoMatricula.dados?.estado || "MG",
+        nome: nomeImovel || pm.imovel.denominacao,
+        municipio: municipio || pm.imovel.municipio,
+        estado: "MG",
         area_hectares: areaPadronizada,
         area_fonte: areaFonte,
-        area_fontes: {
-          kml: areaKML,
-          matricula: areaMatricula,
-          cnd: areaCND,
-        },
-        matricula: resultadoMatricula.dados?.matricula,
-        cartorio: resultadoMatricula.dados?.cartorio,
-        data_emissao: resultadoMatricula.dados?.data_emissao,
-        dias_desde_emissao: resultadoMatricula.dados?.dias_desde_emissao,
-        ccir: resultadoMatricula.dados?.ccir,
-        nirf: resultadoMatricula.dados?.nirf,
+        area_fontes: { kml: areaKML, matricula: areaMatricula, cnd: areaCND },
+        matricula: pm.imovel.matricula,
+        cartorio: pm.imovel.cartorio,
+        ccir: pm.imovel.ccir,
+        nirf: pm.imovel.nirf,
+        codigo_incra: pm.imovel.codigo_incra,
+        car: pm.imovel.car,
+        georreferenciamento: pm.imovel.georreferenciamento,
+        data_emissao: null as string | null,
+        dias_desde_emissao: null as number | null,
       },
-      proprietarios: resultadoMatricula.dados?.proprietarios || [],
-      onus_gravames: resultadoMatricula.dados?.onus_gravames || [],
-      alertas_matricula: [...(resultadoMatricula.dados?.alertas || []), ...alertasArea],
+      // Pipeline: proprietários com estrutura rica
+      proprietarios: pm.proprietarios_atuais.map((p) => ({
+        nome: p.nome,
+        percentual: p.percentual || null,
+        fracao: p.fracao || null,
+        cpf_cnpj: p.cpf || null,
+        estado_civil: p.estado_civil || null,
+        conjuge: p.conjuge || null,
+        regime_bens: p.regime_bens || null,
+        ato_aquisitivo: p.ato_aquisitivo,
+      })),
+      // Pipeline: ônus ativos com classificação por nível
+      onus_gravames: pm.onus_ativos.map((o) => ({
+        tipo: o.tipo,
+        nivel: o.nivel,
+        nivel_descricao: o.nivel_descricao,
+        numero_averbacao: o.ato,
+        descricao: o.descricao,
+        impacto_compra_venda: o.impacto_transmissao,
+      })),
+      // Pipeline: todos os atos para transparência
+      atos_registrais: pm.atos,
+      cancelamentos: pm.cancelamentos,
+      // Semáforo do pipeline
+      semaforo: pm.semaforo,
+      semaforo_justificativa: pm.semaforo_justificativa,
+      recomendacoes: pm.recomendacoes,
+      documentos_faltantes: pm.documentos_faltantes,
+      alertas_matricula: [...pm.alertas, ...alertasArea],
+      // CND
       cnd: resultadoCND ? {
         tipo: resultadoCND.tipo,
         cib: resultadoCND.cib,
@@ -303,6 +264,7 @@ export async function POST(request: Request) {
         area_hectares: resultadoCND.area_hectares,
         nome_contribuinte: resultadoCND.nome_contribuinte,
       } : null,
+      // IDE-Sisema
       ide_sisema: {
         sucesso: resultadoGeo.sucesso,
         ucs: resultadoGeo.ucs_encontradas,
@@ -310,22 +272,20 @@ export async function POST(request: Request) {
         centroide: resultadoGeo.centroide,
         geojson_imovel: geojsonImovel,
       },
-      pontuacao: mvar.pontuacao,
-      classificacao: mvar.classificacao,
-      vetos: mvar.vetos,
-      dimensoes: mvar.dimensoes,
-      vtn: mvar.vtn,
-      resumo: mvar.resumo,
-      validacao,
-      status_final: statusFinal,
+      // Tokens consumidos
+      tokens: pm.tokens_consumidos,
     }
+
+    // 10. Gerar parecer PDF (por enquanto desabilitado — será adaptado ao pipeline)
+    let parecerPdfPath: string | null = null
+    // TODO: adaptar parecer-pdf.tsx para a nova estrutura do pipeline
 
     // 15. Atualizar consulta com resultado
     await admin.from("consultas").update({
       status: "concluida",
       parecer_json: parecer,
       parecer_pdf_path: parecerPdfPath,
-      area_hectares: resultadoMatricula.dados?.area_hectares,
+      area_hectares: areaPadronizada,
       updated_at: new Date().toISOString(),
     }).eq("id", consultaId)
 
