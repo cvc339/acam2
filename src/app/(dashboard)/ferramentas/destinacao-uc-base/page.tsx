@@ -43,6 +43,7 @@ interface Parecer {
     municipio: string
     estado: string
     area_hectares: number | null
+    area_fonte: string | null
     area_fontes: { kml: number | null; matricula: number | null; cnd: number | null } | null
     matricula: string | null
     cartorio: string | null
@@ -272,10 +273,8 @@ export default function DestinacaoUCBasePage() {
                 {p.imovel.matricula && <div><span className="text-muted-foreground">Matrícula:</span> <strong>{p.imovel.matricula}</strong></div>}
                 {p.imovel.cartorio && <div><span className="text-muted-foreground">Cartório:</span> <strong>{p.imovel.cartorio}</strong></div>}
                 {p.imovel.area_hectares != null && <div><span className="text-muted-foreground">Área:</span> <strong>{p.imovel.area_hectares.toFixed(2)} ha</strong>
-                  {p.imovel.area_fontes && (
-                    <span className="text-xs text-muted-foreground ml-2">
-                      (KML: {p.imovel.area_fontes.kml?.toFixed(2) || "—"} | Matrícula: {p.imovel.area_fontes.matricula?.toFixed(2) || "—"} | CND: {p.imovel.area_fontes.cnd?.toFixed(2) || "—"})
-                    </span>
+                  {p.imovel.area_fonte && (
+                    <span className="text-xs text-muted-foreground ml-2">(fonte: {p.imovel.area_fonte})</span>
                   )}
                 </div>}
                 {p.imovel.data_emissao && (

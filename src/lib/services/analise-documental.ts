@@ -362,9 +362,9 @@ ${JSON.stringify(dadosExtraidos, null, 2)}
 - Se não tiver certeza sobre algum campo, mantenha o valor original e adicione alerta.
 - RETORNE APENAS JSON VÁLIDO.`
 
-  // Pass 2 usa Sonnet (mais rápido, mais disponível, suficiente para verificação)
-  const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, promptVerificacao, 4096, "claude-sonnet-4-20250514")
-  console.log(`[TOKENS] Matrícula (verificação/Sonnet): ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
+  // Pass 2 usa mesmo modelo da pass 1 (Opus) para máxima qualidade
+  const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, promptVerificacao, 4096)
+  console.log(`[TOKENS] Matrícula (verificação): ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
 
   const dadosVerificados = json as unknown as DadosMatricula
 
@@ -376,10 +376,9 @@ ${JSON.stringify(dadosExtraidos, null, 2)}
     dadosVerificados.dias_desde_emissao = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   }
 
-  // Manter alertas de OCR da pass 1
-  const alertasOriginais = dadosExtraidos.alertas || []
-  const alertasVerificacao = dadosVerificados.alertas || []
-  dadosVerificados.alertas = [...alertasOriginais, ...alertasVerificacao]
+  // Deduplicar alertas (pass 2 já recebeu os da pass 1 no prompt, pode tê-los repetido)
+  const todosAlertas = dadosVerificados.alertas || []
+  dadosVerificados.alertas = [...new Set(todosAlertas)]
 
   return dadosVerificados
 }

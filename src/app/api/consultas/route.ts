@@ -169,13 +169,27 @@ export async function POST(request: Request) {
         .eq("tipo", "matricula")
     }
 
-    // Área do imóvel: priorizar KML (cálculo geométrico), depois CND, depois matrícula
-    // Usar != null em vez de || para não descartar valor 0
-    const areaKML = resultadoKML.sucesso && resultadoKML.areaHa != null ? resultadoKML.areaHa : null
+    // Área padronizada: Matrícula (oficial) → CND-ITR (público) → KML (cálculo geométrico)
+    const areaKML = resultadoKML.sucesso && resultadoKML.areaHa != null ? parseFloat(resultadoKML.areaHa.toFixed(2)) : null
     const areaMatricula = resultadoMatricula.dados?.area_hectares ?? null
     const areaCND = resultadoCND?.area_hectares ?? null
-    const areaMelhor = areaKML ?? areaCND ?? areaMatricula ?? 0
-    console.log(`[AREA] KML: ${areaKML}, CND: ${areaCND}, Matrícula: ${areaMatricula} → Melhor: ${areaMelhor}`)
+
+    let areaPadronizada: number
+    let areaFonte: string
+    if (areaMatricula != null && areaMatricula > 0) {
+      areaPadronizada = areaMatricula
+      areaFonte = "Matrícula"
+    } else if (areaCND != null && areaCND > 0) {
+      areaPadronizada = areaCND
+      areaFonte = "CND-ITR"
+    } else if (areaKML != null && areaKML > 0) {
+      areaPadronizada = areaKML
+      areaFonte = "KML (cálculo geométrico)"
+    } else {
+      areaPadronizada = 0
+      areaFonte = "Não disponível"
+    }
+    console.log(`[AREA] Matrícula: ${areaMatricula}, CND: ${areaCND}, KML: ${areaKML} → Padronizada: ${areaPadronizada} (${areaFonte})`)
 
     // 9. MVAR
     const mvar = await calcularMVAR(
@@ -213,7 +227,7 @@ export async function POST(request: Request) {
         nomeImovel: nomeImovel || resultadoMatricula.dados?.municipio || "Imóvel",
         municipio: municipio || resultadoMatricula.dados?.municipio || "",
         estado: resultadoMatricula.dados?.estado || "MG",
-        areaHa: areaMelhor,
+        areaHa: areaPadronizada,
         ferramenta: "Destinação em UC — Base",
         dadosMatricula: resultadoMatricula,
         mvar,
@@ -237,9 +251,10 @@ export async function POST(request: Request) {
         nome: nomeImovel,
         municipio: municipio || resultadoMatricula.dados?.municipio,
         estado: resultadoMatricula.dados?.estado || "MG",
-        area_hectares: areaMelhor,
+        area_hectares: areaPadronizada,
+        area_fonte: areaFonte,
         area_fontes: {
-          kml: areaKML ? parseFloat(areaKML.toFixed(2)) : null,
+          kml: areaKML,
           matricula: areaMatricula,
           cnd: areaCND,
         },
