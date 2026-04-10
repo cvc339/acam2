@@ -41,8 +41,14 @@ export interface DadosParecer {
 // COMPONENTES AUXILIARES
 // ============================================
 
+// React-PDF não aceita null/false como child
+// Wrap condicional: Se(condição, elemento) retorna element ou <View /> vazio
+function Se(cond: unknown, el: React.JSX.Element): React.JSX.Element {
+  return cond ? el : <View />
+}
+
 function Campo({ label, valor }: { label: string; valor: string }) {
-  if (!valor || valor === "—") return null
+  if (!valor || valor === "—") return <View />
   return (
     <View style={{ flexDirection: "row", marginBottom: 3 }}>
       <Text style={{ fontSize: 8, color: cores.neutral500, width: 100 }}>{label}:</Text>
@@ -110,13 +116,13 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
         </View>
 
         {/* Classificação */}
-        {mvar && (
+        {mvar ? (
           <CardDestaque
             label="Avaliação de Viabilidade"
             valor={mvar.classificacao.label}
             sublabel={mvar.classificacao.acao}
           />
-        )}
+        ) : <View />}
 
         {/* Dados do Imóvel */}
         <Secao titulo="1. Dados do Imóvel">
@@ -146,22 +152,22 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
                   </Text>
                 </View>
                 <Text style={{ fontSize: 8, color: cores.neutral500 }}>{uc.categoria}</Text>
-                {uc.percentual_sobreposicao != null && (
+                {uc.percentual_sobreposicao != null ? (
                   <Text style={{ fontSize: 8, marginTop: 2 }}>
                     Sobreposição: {uc.percentual_sobreposicao}% do imóvel no interior da UC
                     {uc.area_sobreposicao_ha != null ? ` (${uc.area_sobreposicao_ha} ha)` : ""}
                   </Text>
-                )}
+                ) : <View />}
               </View>
             ))
           ) : (
             <Alerta texto="Nenhuma Unidade de Conservação identificada na área do imóvel." cor="error" />
           )}
 
-          {geo?.bbox && geo?.centroide && (
+          {Se(geo?.bbox && geo?.centroide,
             <View style={{ marginTop: 6 }}>
-              <Campo label="Centróide" valor={`${geo.centroide.lat.toFixed(6)}, ${geo.centroide.lon.toFixed(6)}`} />
-              <Campo label="Bbox" valor={`${geo.bbox.minLat.toFixed(4)}, ${geo.bbox.minLon.toFixed(4)} → ${geo.bbox.maxLat.toFixed(4)}, ${geo.bbox.maxLon.toFixed(4)}`} />
+              <Campo label="Centróide" valor={geo?.centroide ? `${geo.centroide.lat.toFixed(6)}, ${geo.centroide.lon.toFixed(6)}` : "—"} />
+              <Campo label="Bbox" valor={geo?.bbox ? `${geo.bbox.minLat.toFixed(4)}, ${geo.bbox.minLon.toFixed(4)} → ${geo.bbox.maxLat.toFixed(4)}, ${geo.bbox.maxLon.toFixed(4)}` : "—"} />
               <Text style={[styles.textoMuted, { marginTop: 2 }]}>Para visualização do mapa interativo, acesse o resultado online no ACAM.</Text>
             </View>
           )}
@@ -186,9 +192,9 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
                   </Text>
                 </View>
               ))}
-              {mat.proprietarios.length > 2 && (
+              {mat.proprietarios.length > 2 ? (
                 <Alerta texto={`Condomínio com ${mat.proprietarios.length} proprietários — todos devem assinar a escritura de doação.`} cor="warning" />
-              )}
+              ) : <View />}
             </>
           ) : (
             <Alerta texto="Nenhum proprietário identificado na matrícula." cor="warning" />
@@ -205,16 +211,16 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
           )}
 
           {/* Alertas */}
-          {mat?.alertas && mat.alertas.length > 0 && (
-            <>
+          {mat?.alertas && mat.alertas.length > 0 ? (
+            <View>
               <Text style={[styles.secaoSubtitulo, { marginTop: 8, marginBottom: 4 }]}>Alertas</Text>
               {mat.alertas.map((alerta, i) => (
-                <Alerta key={i} texto={alerta} cor="warning" />
+                <Alerta key={i} texto={typeof alerta === "string" ? alerta : JSON.stringify(alerta)} cor="warning" />
               ))}
-            </>
-          )}
+            </View>
+          ) : <View />}
 
-          <Text style={[styles.textoMuted, { marginTop: 6, fontStyle: "italic" }]}>
+          <Text style={[styles.textoMuted, { marginTop: 6 }]}>
             A extração de dados da matrícula é feita por inteligência artificial. PDFs escaneados (imagem) podem ter precisão reduzida. Recomenda-se conferir os dados com o documento original.
           </Text>
         </Secao>
@@ -235,72 +241,65 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
 
       {/* ============ PÁGINA 3: MVAR + SÍNTESE + CONCLUSÃO ============ */}
       <Pagina ferramenta={dados.ferramenta}>
-        {/* Vetos */}
-        {mvar && mvar.vetos.length > 0 && (
+        {Se(mvar && mvar.vetos.length > 0,
           <Secao titulo="Impedimentos Identificados">
             <Text style={[styles.textoMuted, { marginBottom: 4 }]}>Situações que, se confirmadas, impedem a destinação do imóvel.</Text>
-            {mvar.vetos.map((v, i) => (
+            {(mvar?.vetos || []).map((v, i) => (
               <Alerta key={i} texto={`${v.origem}: ${v.motivo}`} cor="error" />
             ))}
           </Secao>
         )}
 
-        {/* Metodologia MVAR */}
-        {mvar && (
+        {Se(mvar,
           <Secao titulo="5. Avaliação de Viabilidade">
             <View style={{ padding: 8, backgroundColor: cores.neutral50, borderRadius: 4, marginBottom: 8 }}>
               <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.6 }}>
                 A avaliação utiliza metodologia própria (MVAR — Matriz de Viabilidade de Aquisição Rural) que analisa quatro dimensões do imóvel: situação registral (ônus e gravames), regularidade fiscal (CND-ITR), titularidade (tipo de proprietário e capacidade para transmissão) e situação técnica (georreferenciamento). Cada dimensão recebe pontuação proporcional ao seu peso na viabilidade da transferência. Situações impeditivas — como bloqueios judiciais, débitos fiscais exigíveis ou espólio não inventariado — resultam em veto automático, independente da pontuação obtida nas demais dimensões.
               </Text>
             </View>
-
-            <StatusDimensao nome="Situação Registral" pontos={mvar.dimensoes.juridica.pontos} peso={mvar.dimensoes.juridica.peso} percentual={mvar.dimensoes.juridica.percentual} />
-            <StatusDimensao nome="Regularidade Fiscal" pontos={mvar.dimensoes.fiscal.pontos} peso={mvar.dimensoes.fiscal.peso} percentual={mvar.dimensoes.fiscal.percentual} />
-            <StatusDimensao nome="Titularidade" pontos={mvar.dimensoes.titularidade.pontos} peso={mvar.dimensoes.titularidade.peso} percentual={mvar.dimensoes.titularidade.percentual} />
-            <StatusDimensao nome="Situação Técnica" pontos={mvar.dimensoes.tecnica.pontos} peso={mvar.dimensoes.tecnica.peso} percentual={mvar.dimensoes.tecnica.percentual} />
+            <StatusDimensao nome="Situação Registral" pontos={mvar?.dimensoes.juridica.pontos || 0} peso={mvar?.dimensoes.juridica.peso || 40} percentual={mvar?.dimensoes.juridica.percentual || 0} />
+            <StatusDimensao nome="Regularidade Fiscal" pontos={mvar?.dimensoes.fiscal.pontos || 0} peso={mvar?.dimensoes.fiscal.peso || 30} percentual={mvar?.dimensoes.fiscal.percentual || 0} />
+            <StatusDimensao nome="Titularidade" pontos={mvar?.dimensoes.titularidade.pontos || 0} peso={mvar?.dimensoes.titularidade.peso || 20} percentual={mvar?.dimensoes.titularidade.percentual || 0} />
+            <StatusDimensao nome="Situação Técnica" pontos={mvar?.dimensoes.tecnica.pontos || 0} peso={mvar?.dimensoes.tecnica.peso || 10} percentual={mvar?.dimensoes.tecnica.percentual || 0} />
           </Secao>
         )}
 
-        {/* Síntese */}
         <Secao titulo="6. Síntese">
-          {val && val.pontos_positivos.length > 0 && (
-            <>
+          {(val?.pontos_positivos || []).length > 0 ? (
+            <View>
               <Text style={[styles.secaoSubtitulo, { color: cores.success, marginBottom: 3 }]}>Pontos Favoráveis</Text>
-              {val.pontos_positivos.map((pp, i) => (
+              {(val?.pontos_positivos || []).map((pp, i) => (
                 <Text key={i} style={{ fontSize: 8, color: cores.success, marginBottom: 2 }}>✓ {pp}</Text>
               ))}
-            </>
-          )}
-          {val && val.pendencias.length > 0 && (
+            </View>
+          ) : <View />}
+          {(val?.pendencias || []).length > 0 ? (
             <View style={{ marginTop: 6 }}>
               <Text style={[styles.secaoSubtitulo, { color: cores.warning, marginBottom: 3 }]}>Pendências</Text>
-              {val.pendencias.map((p, i) => (
+              {(val?.pendencias || []).map((p, i) => (
                 <Text key={i} style={{ fontSize: 8, color: cores.warning, marginBottom: 2 }}>• {p}</Text>
               ))}
             </View>
-          )}
+          ) : <View />}
         </Secao>
 
-        {/* VTN */}
-        {mvar?.vtn?.encontrado && (
+        {Se(mvar?.vtn?.encontrado,
           <Secao titulo="7. Valor de Referência (VTN)">
-            <Campo label="Município" valor={mvar.vtn.municipio || "—"} />
-            <Campo label="R$/ha (preservação)" valor={mvar.vtn.valor_referencia ? `R$ ${mvar.vtn.valor_referencia.toLocaleString("pt-BR")}` : "—"} />
-            {mvar.vtn.valor_estimado && <Campo label="Valor estimado" valor={`R$ ${mvar.vtn.valor_estimado.toLocaleString("pt-BR")}`} />}
+            <Campo label="Município" valor={mvar?.vtn?.municipio || "—"} />
+            <Campo label="R$/ha (preservação)" valor={mvar?.vtn?.valor_referencia ? `R$ ${mvar.vtn.valor_referencia.toLocaleString("pt-BR")}` : "—"} />
+            <Campo label="Valor estimado" valor={mvar?.vtn?.valor_estimado ? `R$ ${mvar.vtn.valor_estimado.toLocaleString("pt-BR")}` : "—"} />
             <Text style={[styles.textoMuted, { marginTop: 3 }]}>
-              Fonte: SIPT/Receita Federal (exercício {mvar.vtn.exercicio}). Valor referencial, não substitui laudo de avaliação.
+              Fonte: SIPT/Receita Federal (exercício {mvar?.vtn?.exercicio || "N/I"}). Valor referencial, não substitui laudo de avaliação.
             </Text>
           </Secao>
         )}
 
-        {/* Conclusão */}
         <Secao titulo="Conclusão">
           <Text style={[styles.texto, { marginBottom: 4 }]}>
             {mvar?.resumo || "Análise concluída. Consulte os detalhes nas seções acima."}
           </Text>
         </Secao>
 
-        {/* Disclaimer final */}
         <View style={{ marginTop: 12, padding: 8, borderTopWidth: 0.5, borderTopColor: cores.neutral200 }}>
           <Text style={{ fontSize: 7, color: cores.neutral400, lineHeight: 1.5 }}>
             ACAM — Análise de Compensações Ambientais. Esta é uma análise preliminar automatizada. Não constitui parecer jurídico ou técnico e não gera responsabilidade profissional. Os dados extraídos por inteligência artificial devem ser conferidos com os documentos originais. A viabilidade definitiva da compensação depende de análise por profissional qualificado e aprovação do órgão gestor da Unidade de Conservação. Documento gerado em {dataFormatada}.

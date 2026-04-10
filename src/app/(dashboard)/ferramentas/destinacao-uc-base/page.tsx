@@ -321,7 +321,7 @@ export default function DestinacaoUCBasePage() {
                   <div key={i} style={{ padding: "0.75rem", background: "#fef2f2", borderRadius: "var(--radius-md)", marginBottom: "0.5rem" }}>
                     <strong className="text-sm">{onus.tipo}</strong>
                     {onus.numero_averbacao && <span className="text-xs text-muted-foreground"> ({onus.numero_averbacao})</span>}
-                    <div className="text-sm mt-1">{onus.impacto_compra_venda || onus.descricao}</div>
+                    <div className="text-sm mt-1">{typeof onus.impacto_compra_venda === "string" ? onus.impacto_compra_venda : typeof onus.descricao === "string" ? onus.descricao : ""}</div>
                   </div>
                 ))}
               </div>
@@ -332,7 +332,7 @@ export default function DestinacaoUCBasePage() {
               <div style={{ marginTop: "1rem" }}>
                 <h4 className="font-medium text-sm mb-2">Alertas</h4>
                 {p.alertas_matricula.map((alerta, i) => (
-                  <p key={i} className="text-sm" style={{ color: "var(--warning)" }}>• {alerta}</p>
+                  <p key={i} className="text-sm" style={{ color: "var(--warning)" }}>• {typeof alerta === "string" ? alerta : JSON.stringify(alerta)}</p>
                 ))}
               </div>
             )}
