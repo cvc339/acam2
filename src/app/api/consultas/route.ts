@@ -217,7 +217,7 @@ export async function POST(request: Request) {
       console.error("Erro ao gerar parecer PDF:", erroPdf)
     }
 
-    // 14. Montar parecer JSON
+    // 14. Montar parecer JSON (completo para exibição detalhada)
     const parecer = {
       imovel: {
         nome: nomeImovel,
@@ -226,28 +226,34 @@ export async function POST(request: Request) {
         area_hectares: resultadoMatricula.dados?.area_hectares,
         matricula: resultadoMatricula.dados?.matricula,
         cartorio: resultadoMatricula.dados?.cartorio,
+        data_emissao: resultadoMatricula.dados?.data_emissao,
+        dias_desde_emissao: resultadoMatricula.dados?.dias_desde_emissao,
+        ccir: resultadoMatricula.dados?.ccir,
+        nirf: resultadoMatricula.dados?.nirf,
       },
       proprietarios: resultadoMatricula.dados?.proprietarios || [],
-      documentacao: {
-        matricula: { sucesso: resultadoMatricula.sucesso },
-        ccir: { sucesso: !!resultadoCCIR },
-        itr: { sucesso: !!resultadoITR },
-        cnd: { sucesso: !!resultadoCND },
-      },
+      onus_gravames: resultadoMatricula.dados?.onus_gravames || [],
+      alertas_matricula: resultadoMatricula.dados?.alertas || [],
+      cnd: resultadoCND ? {
+        tipo: resultadoCND.tipo,
+        cib: resultadoCND.cib,
+        data_emissao: resultadoCND.data_emissao,
+        data_validade: resultadoCND.data_validade,
+        area_hectares: resultadoCND.area_hectares,
+        nome_contribuinte: resultadoCND.nome_contribuinte,
+      } : null,
       ide_sisema: {
         sucesso: resultadoGeo.sucesso,
         ucs: resultadoGeo.ucs_encontradas,
         bbox: resultadoGeo.bbox,
         centroide: resultadoGeo.centroide,
       },
-      mvar: {
-        pontuacao: mvar.pontuacao,
-        classificacao: mvar.classificacao,
-        vetos: mvar.vetos,
-        dimensoes: mvar.dimensoes,
-        vtn: mvar.vtn,
-        resumo: mvar.resumo,
-      },
+      pontuacao: mvar.pontuacao,
+      classificacao: mvar.classificacao,
+      vetos: mvar.vetos,
+      dimensoes: mvar.dimensoes,
+      vtn: mvar.vtn,
+      resumo: mvar.resumo,
       validacao,
       status_final: statusFinal,
     }
