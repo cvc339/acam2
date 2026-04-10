@@ -546,7 +546,10 @@ export default function DestinacaoUCBasePage() {
             <div className="acam-field">
               <label>Matrícula do Imóvel <span className="req">*</span></label>
               <input type="file" className="acam-form-input" accept=".pdf" onChange={(e) => setMatriculaFile(e.target.files?.[0] || null)} />
-              <span className="hint">PDF da matrícula atualizada (máx. 10MB). PDFs com texto selecionável produzem resultados mais precisos.</span>
+              <span className="hint">PDF da matrícula atualizada (máx. 10MB)</span>
+              <div className="acam-alert acam-alert-info" style={{ marginTop: "0.5rem", fontSize: "0.75rem", padding: "0.5rem 0.75rem" }}>
+                Para melhores resultados, utilize matrícula em PDF com <strong>texto selecionável</strong>. Matrículas escaneadas (imagem) são aceitas, mas a extração por OCR pode ter precisão reduzida em dados como área, códigos e nomes de proprietários.
+              </div>
             </div>
             <div className="acam-field">
               <label>Arquivo Geoespacial <span className="req">*</span></label>
