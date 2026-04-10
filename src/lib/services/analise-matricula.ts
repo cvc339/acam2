@@ -184,8 +184,17 @@ Para cada ato (R-1, R-2, AV-3, AV-4, R-5, etc.), extraia:
   * nome: MAIÚSCULAS
   * percentual: número (se "adquiri 80%" → 80; se "totalidade" → 100; se "partes iguais" entre N → 100/N)
   * cpf: se explícito no ato
+  🚨 ATENÇÃO MÁXIMA AOS PERCENTUAIS:
+  Procure expressões como "adquiri X%", "adquiriu X%", "X% deste imóvel", "X% do presente imóvel"
+  Cada adquirente pode ter um percentual DIFERENTE. Leia com cuidado.
+  NÃO assuma "partes iguais" se o documento especifica percentuais diferentes.
+  Se não conseguir ler o percentual com certeza, use null (não invente 50%).
+
   EXEMPLO: se o texto diz "MARIA adquiri 80%" e "JOÃO adquiri 20%":
   adquirentes: [{"nome": "MARIA", "percentual": 80, "cpf": null}, {"nome": "JOAO", "percentual": 20, "cpf": null}]
+
+  Se NÃO conseguir determinar o percentual: use null
+  adquirentes: [{"nome": "MARIA", "percentual": null, "cpf": null}]
 - valor: valor em reais (número) ou null
 - area_ha: área em hectares mencionada no ato (número) ou null
 - referencia_ato_anterior: se o ato CANCELA ou MODIFICA outro, informar qual (ex: "R-5")
@@ -477,6 +486,14 @@ function etapa5Relatorio(
   // Proprietários
   if (proprietarios.length > 3) {
     recomendacoes.push(`Condomínio com ${proprietarios.length} proprietários — todos devem assinar a escritura.`)
+  }
+
+  // Verificar percentuais — se todos iguais e >1 proprietário, pode ser falha de OCR
+  if (proprietarios.length > 1) {
+    const percentuais = proprietarios.map((p) => p.percentual).filter((p) => p != null) as number[]
+    if (percentuais.length > 0 && percentuais.every((p) => p === percentuais[0])) {
+      recomendacoes.push(`Percentuais de propriedade idênticos (${percentuais[0]}% cada) — verificar no documento original se os percentuais estão corretos, pois pode haver imprecisão na leitura automática.`)
+    }
   }
 
   if (documentos_faltantes.length > 0) {
