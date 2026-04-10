@@ -23,7 +23,7 @@ export interface AtoRegistral {
   descricao_resumida: string
   partes: {
     transmitentes: string[]
-    adquirentes: string[]
+    adquirentes: Array<{ nome: string; percentual: number | null; cpf: string | null }> | string[]
   }
   valor: number | null
   area_ha: number | null
@@ -180,7 +180,12 @@ Para cada ato (R-1, R-2, AV-3, AV-4, R-5, etc.), extraia:
   "inclusao_qualificacao", "reserva_legal", "servidao", "outro"
 - descricao_resumida: resumo em 1 frase
 - partes.transmitentes: nomes em MAIÚSCULAS de quem transmite/vende/doa
-- partes.adquirentes: nomes em MAIÚSCULAS de quem adquire/compra/recebe
+- partes.adquirentes: para cada adquirente, extraia um OBJETO com:
+  * nome: MAIÚSCULAS
+  * percentual: número (se "adquiri 80%" → 80; se "totalidade" → 100; se "partes iguais" entre N → 100/N)
+  * cpf: se explícito no ato
+  EXEMPLO: se o texto diz "MARIA adquiri 80%" e "JOÃO adquiri 20%":
+  adquirentes: [{"nome": "MARIA", "percentual": 80, "cpf": null}, {"nome": "JOAO", "percentual": 20, "cpf": null}]
 - valor: valor em reais (número) ou null
 - area_ha: área em hectares mencionada no ato (número) ou null
 - referencia_ato_anterior: se o ato CANCELA ou MODIFICA outro, informar qual (ex: "R-5")
@@ -351,31 +356,26 @@ async function etapa4Titularidade(pdfBuffer: Buffer, atos: AtoRegistral[]): Prom
 }> {
   const prompt = `Você é um especialista em registro de imóveis. Com base nos atos abaixo e relendo o documento original, identifique o(s) PROPRIETÁRIO(S) ATUAL(IS) do imóvel.
 
-## ATOS REGISTRADOS:
+## ATOS REGISTRADOS (com adquirentes e percentuais já extraídos):
 ${JSON.stringify(atos, null, 2)}
 
 ## TAREFA: IDENTIFICAR O PROPRIETÁRIO ATUAL
 
 A cadeia de titularidade se reconstrói assim:
-1. Identifique TODOS os registros de transmissão (compra e venda, doação, herança, formal de partilha, divisão amigável)
+1. Identifique TODOS os registros de transmissão (compra_e_venda, doacao, heranca_cessao, divisao_amigavel, formal_partilha)
 2. O ÚLTIMO registro de transmissão define o proprietário atual
-3. O ADQUIRENTE do último registro é o proprietário — NÃO o transmitente
-4. Se houve venda parcial (frações), podem existir múltiplos proprietários
+3. Os ADQUIRENTES do último registro são os proprietários — NÃO os transmitentes
+4. Os percentuais já foram extraídos nos atos acima — USE-OS. Não recalcule.
 
-Para CADA proprietário atual, extraia do DOCUMENTO ORIGINAL:
-- nome: EXATAMENTE como no documento, em MAIÚSCULAS
-- cpf: somente se explícito
-- estado_civil: somente se explícito (considerar averbações de casamento/divórcio posteriores)
-- conjuge: nome do cônjuge (considerar inclusões de cônjuge por averbação)
+Para CADA proprietário atual, extraia:
+- nome: EXATAMENTE como no ato de aquisição, em MAIÚSCULAS
+- cpf: do ato ou do documento original
+- estado_civil: considerar averbações de casamento/divórcio
+- conjuge: considerar inclusões de cônjuge por averbação
 - regime_bens: regime de bens do casamento
-- percentual: NÚMERO de % de propriedade. LEIA O DOCUMENTO COM ATENÇÃO:
-  * Se diz "adquiri 80% deste imóvel" → percentual: 80
-  * Se diz "adquiri 20% deste imóvel" → percentual: 20
-  * Se diz "partes iguais" entre 2 → percentual: 50 cada
-  * Se diz "totalidade" e é único → percentual: 100
-  * Os percentuais DEVEM SOMAR 100
-- fracao: fração de propriedade se informada (ex: "31,6730/45,2680")
-- ato_aquisitivo: número do registro em que adquiriu (ex: "R-14")
+- percentual: USE O PERCENTUAL JÁ EXTRAÍDO NO ATO. Se o ato diz percentual 80, use 80.
+- fracao: fração de propriedade se informada
+- ato_aquisitivo: número do registro em que adquiriu
 
 ## FORMATO:
 {
