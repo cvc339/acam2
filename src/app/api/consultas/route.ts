@@ -144,12 +144,22 @@ export async function POST(request: Request) {
     const itrBuffer = itrFile ? await uploadFile(itrFile, "itr") : null
     const cndBuffer = cndFile ? await uploadFile(cndFile, "cnd") : null
 
-    // 7. Análise documental (Claude API)
-    const resultadoMatricula = await analisarMatricula(matriculaBuffer)
+    // 7. Análise documental + geoespacial (em PARALELO para reduzir tempo)
+    const kmlContent = kmlBuffer.toString("utf-8")
+    const kmlNome = kmlFile.name.toLowerCase()
 
-    const resultadoCCIR = ccirBuffer ? await analisarCCIR(ccirBuffer) : null
-    const resultadoITR = itrBuffer ? await analisarITR(itrBuffer) : null
-    const resultadoCND = cndBuffer ? await analisarCND(cndBuffer) : null
+    const [resultadoMatricula, resultadoCND, resultadoKML, resultadoGeo] = await Promise.all([
+      analisarMatricula(matriculaBuffer),
+      cndBuffer ? analisarCND(cndBuffer) : Promise.resolve(null),
+      kmlNome.endsWith(".geojson") || kmlNome.endsWith(".json")
+        ? Promise.resolve(processarGeoJSON(kmlContent))
+        : processarKML(kmlContent),
+      analisarImovelIDESisema(kmlContent),
+    ])
+
+    const resultadoCCIR = null // Não usado no fluxo atual
+    const resultadoITR = null  // Não usado no fluxo atual
+    const geojsonImovel = resultadoKML.sucesso ? resultadoKML.geojson : null
 
     // Salvar dados extraídos nos documentos
     if (resultadoMatricula.sucesso && resultadoMatricula.dados) {
@@ -159,23 +169,13 @@ export async function POST(request: Request) {
         .eq("tipo", "matricula")
     }
 
-    // 8. Análise geoespacial (IDE-Sisema)
-    const kmlContent = kmlBuffer.toString("utf-8")
-
-    // Processar KML para obter GeoJSON do imóvel (para o mapa)
-    const kmlNome = kmlFile.name.toLowerCase()
-    const resultadoKML = kmlNome.endsWith(".geojson") || kmlNome.endsWith(".json")
-      ? processarGeoJSON(kmlContent)
-      : await processarKML(kmlContent)
-    const geojsonImovel = resultadoKML.sucesso ? resultadoKML.geojson : null
-
-    let resultadoGeo = await analisarImovelIDESisema(kmlContent)
-
     // Área do imóvel: priorizar KML (cálculo geométrico), depois CND, depois matrícula
-    const areaKML = resultadoKML.sucesso ? resultadoKML.areaHa : null
-    const areaMatricula = resultadoMatricula.dados?.area_hectares || null
-    const areaCND = resultadoCND?.area_hectares || null
-    const areaMelhor = areaKML || areaCND || areaMatricula || 0
+    // Usar != null em vez de || para não descartar valor 0
+    const areaKML = resultadoKML.sucesso && resultadoKML.areaHa != null ? resultadoKML.areaHa : null
+    const areaMatricula = resultadoMatricula.dados?.area_hectares ?? null
+    const areaCND = resultadoCND?.area_hectares ?? null
+    const areaMelhor = areaKML ?? areaCND ?? areaMatricula ?? 0
+    console.log(`[AREA] KML: ${areaKML}, CND: ${areaCND}, Matrícula: ${areaMatricula} → Melhor: ${areaMelhor}`)
 
     // 9. MVAR
     const mvar = await calcularMVAR(

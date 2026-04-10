@@ -101,8 +101,10 @@ async function chamarClaudeComPDF(
   pdfBuffer: Buffer,
   prompt: string,
   maxTokens = 4096,
+  modelOverride?: string,
 ): Promise<{ json: Record<string, unknown>; tokens: { input_tokens: number; output_tokens: number } }> {
-  const { apiKey, apiUrl, model } = getClaudeConfig()
+  const { apiKey, apiUrl, model: defaultModel } = getClaudeConfig()
+  const model = modelOverride || defaultModel
   const base64 = pdfBuffer.toString("base64")
 
   const response = await fetch(apiUrl, {
@@ -360,8 +362,9 @@ ${JSON.stringify(dadosExtraidos, null, 2)}
 - Se não tiver certeza sobre algum campo, mantenha o valor original e adicione alerta.
 - RETORNE APENAS JSON VÁLIDO.`
 
-  const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, promptVerificacao, 4096)
-  console.log(`[TOKENS] Matrícula (verificação): ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
+  // Pass 2 usa Sonnet (mais rápido, mais disponível, suficiente para verificação)
+  const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, promptVerificacao, 4096, "claude-sonnet-4-20250514")
+  console.log(`[TOKENS] Matrícula (verificação/Sonnet): ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
 
   const dadosVerificados = json as unknown as DadosMatricula
 
