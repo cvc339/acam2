@@ -14,18 +14,29 @@ const CUSTO_CREDITOS = 5
 
 interface Proprietario {
   nome: string
-  percentual: number
+  percentual: number | null
+  fracao: string | null
   cpf_cnpj: string | null
   estado_civil: string | null
   conjuge: string | null
   regime_bens: string | null
+  ato_aquisitivo: string | null
 }
 
 interface OnusGravame {
   tipo: string
+  nivel: number
+  nivel_descricao: string
   numero_averbacao: string
   descricao: string
   impacto_compra_venda: string
+}
+
+interface Cancelamento {
+  ato_criacao: string
+  ato_extincao: string
+  tipo_onus: string
+  motivo_extincao: string
 }
 
 interface UC {
@@ -54,7 +65,12 @@ interface Parecer {
   }
   proprietarios: Proprietario[]
   onus_gravames: OnusGravame[]
+  cancelamentos: Cancelamento[]
   alertas_matricula: string[]
+  semaforo: "verde" | "amarelo" | "vermelho"
+  semaforo_justificativa: string
+  recomendacoes: string[]
+  documentos_faltantes: string[]
   cnd: {
     tipo: string
     cib: string | null
@@ -69,20 +85,6 @@ interface Parecer {
     bbox: { minLon: number; maxLon: number; minLat: number; maxLat: number } | null
     centroide: { lon: number; lat: number } | null
     geojson_imovel: GeoJSON.FeatureCollection | null
-  }
-  pontuacao: { total: number; maximo: number }
-  classificacao: { faixa: string; label: string; acao: string; cor: string }
-  vetos: Array<{ origem: string; motivo: string }>
-  dimensoes: Record<string, { nome: string; pontos: number; peso: number; percentual: number; itens: Array<{ item: string; status: string; mensagem: string }> }>
-  vtn: { encontrado: boolean; valor_estimado?: number; valor_referencia?: number; municipio?: string } | null
-  resumo: string
-  validacao: { pendencias: string[]; pontos_positivos: string[] }
-  status_final: {
-    status: string
-    justificativa: string
-    impedimentos: string[]
-    pendencias: string[]
-    pontos_positivos: string[]
   }
 }
 
@@ -141,8 +143,8 @@ export default function DestinacaoUCBasePage() {
   if (resultado) {
     const { parecer, consultaId } = resultado
     const p = parecer
-    const temVeto = p.vetos.length > 0
-    const corFaixa = p.classificacao.cor
+    const temVeto = (p.onus_gravames || []).some((o: { nivel?: number }) => o.nivel === 1)
+    const corFaixa = p.semaforo === "verde" ? "#16a34a" : p.semaforo === "amarelo" ? "#d97706" : "#dc2626"
 
     // UC principal (maior sobreposição)
     const ucPrincipal = p.ide_sisema.ucs.length > 0
@@ -178,7 +180,7 @@ export default function DestinacaoUCBasePage() {
               {p.imovel.municipio}/{p.imovel.estado} — {p.imovel.area_hectares?.toFixed(2)} ha
             </p>
             <div style={{ marginTop: "1rem", padding: "0.75rem 1rem", background: "rgba(255,255,255,0.15)", borderRadius: "var(--radius-lg)" }}>
-              <strong>{temVeto ? "Impedimentos identificados" : p.classificacao.label}</strong> — {p.classificacao.acao}
+              <strong>{temVeto ? "Impedimentos identificados" : p.semaforo === "verde" ? "Risco Baixo" : p.semaforo === "amarelo" ? "Risco Médio" : "Risco Alto"}</strong> — {p.semaforo_justificativa}
             </div>
           </div>
 
@@ -192,9 +194,9 @@ export default function DestinacaoUCBasePage() {
             <div className="acam-card" style={{ padding: "var(--spacing-6)", borderLeft: "4px solid var(--error)" }}>
               <h3 className="font-semibold mb-3" style={{ color: "var(--error)" }}>Impedimentos Identificados</h3>
               <p className="text-sm text-muted-foreground mb-3">Situações que, se confirmadas, impedem a destinação do imóvel.</p>
-              {p.vetos.map((v, i) => (
+              {(p.onus_gravames || []).filter((o: { nivel?: number }) => o.nivel === 1).map((o: { tipo?: string; descricao?: string; impacto_compra_venda?: string }, i: number) => (
                 <div key={i} style={{ padding: "0.75rem", background: "var(--error-50, #fef2f2)", borderRadius: "var(--radius-md)", marginBottom: "0.5rem" }}>
-                  <strong className="text-sm">{v.origem}:</strong> <span className="text-sm">{v.motivo}</span>
+                  <strong className="text-sm">{o.tipo}:</strong> <span className="text-sm">{o.impacto_compra_venda || o.descricao}</span>
                 </div>
               ))}
             </div>
@@ -414,29 +416,29 @@ export default function DestinacaoUCBasePage() {
           <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
             <h3 className="font-semibold mb-4">Síntese da Análise</h3>
 
-            {p.validacao.pontos_positivos.length > 0 && (
+            {(p.recomendacoes || []).length > 0 && (
               <div style={{ marginBottom: "1rem" }}>
-                <h4 className="font-medium text-sm mb-2" style={{ color: "var(--success)" }}>Pontos Favoráveis</h4>
-                {p.validacao.pontos_positivos.map((pp, i) => (
-                  <p key={i} className="text-sm" style={{ color: "var(--success)" }}>✓ {pp}</p>
+                <h4 className="font-medium text-sm mb-2">Recomendações</h4>
+                {(p.recomendacoes as string[]).map((rec: string, i: number) => (
+                  <p key={i} className="text-sm" style={{ color: "var(--warning)" }}>• {rec}</p>
                 ))}
               </div>
             )}
 
-            {p.validacao.pendencias.length > 0 && (
+            {(p.documentos_faltantes || []).length > 0 && (
               <div style={{ marginBottom: "1rem" }}>
-                <h4 className="font-medium text-sm mb-2" style={{ color: "var(--warning)" }}>Pendências Identificadas</h4>
-                {p.validacao.pendencias.map((pend, i) => (
-                  <p key={i} className="text-sm" style={{ color: "var(--warning)" }}>• {pend}</p>
+                <h4 className="font-medium text-sm mb-2" style={{ color: "var(--warning)" }}>Documentos Faltantes</h4>
+                {(p.documentos_faltantes as string[]).map((doc: string, i: number) => (
+                  <p key={i} className="text-sm" style={{ color: "var(--warning)" }}>• {doc}</p>
                 ))}
               </div>
             )}
 
-            {p.status_final.impedimentos.length > 0 && (
+            {(p.cancelamentos || []).length > 0 && (
               <div>
-                <h4 className="font-medium text-sm mb-2" style={{ color: "var(--error)" }}>Impedimentos</h4>
-                {p.status_final.impedimentos.map((imp, i) => (
-                  <p key={i} className="text-sm" style={{ color: "var(--error)" }}>✗ {imp}</p>
+                <h4 className="font-medium text-sm mb-2" style={{ color: "var(--success)" }}>Ônus Cancelados/Extintos</h4>
+                {(p.cancelamentos as Array<{ tipo_onus?: string; motivo_extincao?: string }>).map((c, i: number) => (
+                  <p key={i} className="text-sm" style={{ color: "var(--success)" }}>✓ {c.tipo_onus} — {c.motivo_extincao}</p>
                 ))}
               </div>
             )}
@@ -447,29 +449,10 @@ export default function DestinacaoUCBasePage() {
           {/* ============================================ */}
           <div className="acam-card" style={{ padding: "var(--spacing-6)", borderLeft: `4px solid ${corFaixa}` }}>
             <h3 className="font-semibold mb-2">Conclusão</h3>
-            <p className="text-sm mb-3">{p.status_final.justificativa}</p>
-            <p className="text-sm text-muted-foreground">{p.resumo}</p>
+            <p className="text-sm mb-3">{p.semaforo_justificativa}</p>
           </div>
 
-          {/* VTN */}
-          {p.vtn?.encontrado && (
-            <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
-              <h3 className="font-semibold mb-2">Valor de Referência (VTN)</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Valor da Terra Nua por hectare, conforme Sistema de Preços de Terras (SIPT/Receita Federal). Referência para estimativa, não substitui laudo de avaliação.
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div><span className="text-muted-foreground">Município:</span> <strong>{p.vtn.municipio}</strong></div>
-                <div><span className="text-muted-foreground">R$/ha (preservação):</span> <strong>R$ {p.vtn.valor_referencia?.toLocaleString("pt-BR")}</strong></div>
-                {p.vtn.valor_estimado && (
-                  <div style={{ gridColumn: "1 / -1" }}>
-                    <span className="text-muted-foreground">Valor estimado total:</span>{" "}
-                    <strong style={{ fontSize: "1.1rem" }}>R$ {p.vtn.valor_estimado.toLocaleString("pt-BR")}</strong>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* VTN — TODO: reimplementar com pipeline */}
 
           {/* Disclaimer final */}
           <div className="acam-alert-result">
