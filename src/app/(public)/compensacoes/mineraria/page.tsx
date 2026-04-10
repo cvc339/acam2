@@ -17,7 +17,7 @@ export default function MinerariaPage() {
           <h1 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-2xl)", fontWeight: 600 }}>
             Compensação Minerária MG
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Lei Estadual 20.922/2013 · Art. 32</p>
+          <p className="text-sm text-muted-foreground mt-1">Lei Estadual 20.922/2013 · Decreto 47.749/2019</p>
         </div>
       </div>
 
