@@ -66,6 +66,7 @@ interface Parecer {
     ucs: UC[]
     bbox: { minLon: number; maxLon: number; minLat: number; maxLat: number } | null
     centroide: { lon: number; lat: number } | null
+    geojson_imovel: GeoJSON.FeatureCollection | null
   }
   pontuacao: { total: number; maximo: number }
   classificacao: { faixa: string; label: string; acao: string; cor: string }
@@ -203,7 +204,7 @@ export default function DestinacaoUCBasePage() {
           <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
             <h3 className="font-semibold mb-2">Localização em Unidade de Conservação</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Para compensação minerária, o imóvel deve estar inserido em UC de Proteção Integral pendente de regularização fundiária (Lei 20.922/2013, art. 39).
+              Para compensação minerária, o imóvel deve estar inserido em UC de Proteção Integral pendente de regularização fundiária (Lei Estadual 20.922/2013).
             </p>
 
             {p.ide_sisema.ucs.length === 0 ? (
@@ -246,8 +247,7 @@ export default function DestinacaoUCBasePage() {
                 <MapaImovel
                   bbox={p.ide_sisema.bbox}
                   centroide={p.ide_sisema.centroide}
-                  geojsonImovel={undefined}
-                  ucs={p.ide_sisema.ucs.map((uc) => ({ ...uc, geojson: undefined }))}
+                  geojsonImovel={p.ide_sisema.geojson_imovel || undefined}
                 />
                 <p className="text-xs text-muted-foreground mt-2">
                   O mapa mostra a localização aproximada baseada no arquivo geoespacial enviado. Para visualização precisa, utilize software GIS.

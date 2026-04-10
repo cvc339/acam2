@@ -275,6 +275,17 @@ RETORNE APENAS JSON VÁLIDO, SEM TEXTO ANTES OU DEPOIS.`
       dados.dias_desde_emissao = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     }
 
+    // Detectar PDF escaneado (heurística por tamanho)
+    const tamanhoPorPagina = pdfBuffer.length / 1024 // KB estimado por página
+    const pdfHeader = pdfBuffer.toString("utf8", 0, Math.min(pdfBuffer.length, 1000))
+    const temTextoEditavel = pdfHeader.includes("/Type/Font") || pdfHeader.includes("/Subtype/Type1")
+    const provavelmenteEscaneado = !temTextoEditavel || tamanhoPorPagina > 500
+
+    if (provavelmenteEscaneado) {
+      dados.alertas = dados.alertas || []
+      dados.alertas.unshift("Documento parece ser escaneado (imagem). A extração por OCR pode ter precisão reduzida. Recomenda-se conferir os dados com o documento original.")
+    }
+
     return { sucesso: true, dados, tokens }
   } catch (error) {
     console.error("Erro ao analisar matrícula:", error)

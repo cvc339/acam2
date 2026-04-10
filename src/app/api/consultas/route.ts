@@ -10,7 +10,7 @@ import {
   gerarStatusFinal,
   cruzarDados,
 } from "@/lib/services/analise-documental"
-import { analisarImovelIDESisema } from "@/lib/services/analise-geoespacial"
+import { analisarImovelIDESisema, processarKML, processarGeoJSON } from "@/lib/services/analise-geoespacial"
 import { calcularMVAR } from "@/lib/services/mvar"
 import { gerarParecerPDF } from "@/lib/services/parecer-pdf"
 
@@ -161,6 +161,14 @@ export async function POST(request: Request) {
 
     // 8. Análise geoespacial (IDE-Sisema)
     const kmlContent = kmlBuffer.toString("utf-8")
+
+    // Processar KML para obter GeoJSON do imóvel (para o mapa)
+    const kmlNome = kmlFile.name.toLowerCase()
+    const resultadoKML = kmlNome.endsWith(".geojson") || kmlNome.endsWith(".json")
+      ? processarGeoJSON(kmlContent)
+      : await processarKML(kmlContent)
+    const geojsonImovel = resultadoKML.sucesso ? resultadoKML.geojson : null
+
     let resultadoGeo = await analisarImovelIDESisema(kmlContent)
 
     // 9. MVAR
@@ -247,6 +255,7 @@ export async function POST(request: Request) {
         ucs: resultadoGeo.ucs_encontradas,
         bbox: resultadoGeo.bbox,
         centroide: resultadoGeo.centroide,
+        geojson_imovel: geojsonImovel,
       },
       pontuacao: mvar.pontuacao,
       classificacao: mvar.classificacao,
