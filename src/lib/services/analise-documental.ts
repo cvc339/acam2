@@ -327,40 +327,43 @@ async function verificarExtracaoMatricula(
   dadosExtraidos: DadosMatricula,
 ): Promise<DadosMatricula | null> {
   const promptVerificacao = `Você é um revisor especializado em matrículas de imóveis rurais.
-Recebi a seguinte extração automática desta matrícula. Sua tarefa é VERIFICAR se os dados estão corretos, relendo o documento original.
+Uma primeira leitura automática extraiu os dados abaixo. Sua tarefa é RELER O DOCUMENTO ORIGINAL e corrigir erros.
 
-## DADOS EXTRAÍDOS (a serem verificados):
+## DADOS DA PRIMEIRA LEITURA:
 ${JSON.stringify(dadosExtraidos, null, 2)}
 
-## VERIFICAÇÕES OBRIGATÓRIAS:
+## TAREFA PRINCIPAL: IDENTIFIQUE O ÚLTIMO ATO DE TRANSMISSÃO
 
-1. **PROPRIETÁRIO ATUAL** — O mais crítico!
-   - Em um registro de COMPRA E VENDA, o TRANSMITENTE/VENDEDOR NÃO é o proprietário.
-   - O ADQUIRENTE/COMPRADOR é o proprietário atual.
-   - Verifique se o(s) proprietário(s) listado(s) são realmente os ADQUIRENTES do último registro de transmissão.
-   - Se estiver errado, CORRIJA com os nomes dos adquirentes reais.
-   - Se houver mais de um adquirente, TODOS devem estar listados.
-   - Percentuais DEVEM somar 100%.
+Releia o documento e encontre o ÚLTIMO registro (R-1, R-2, R-3, etc.) que transfere a propriedade.
+Pode ser: COMPRA E VENDA, DOAÇÃO, FORMAL DE PARTILHA, ADJUDICAÇÃO, ARREMATAÇÃO, etc.
 
-2. **ÁREA** — Confira se a área em hectares está correta conforme documento.
+Nesse ato, identifique:
+- Quem TRANSMITIU (vendedor/doador/espólio) → NÃO é o proprietário atual
+- Quem ADQUIRIU (comprador/donatário/herdeiro) → ESTE é o proprietário atual
 
-3. **ÔNUS E GRAVAMES** — Verifique se os ônus listados realmente existem no documento.
-   - Ônus CANCELADOS não devem ser listados como ativos.
-   - Se nenhum ônus ativo foi encontrado, onus_gravames deve ser [].
+⚠️ Se a primeira leitura listou o TRANSMITENTE como proprietário, CORRIJA.
 
-4. **CÓDIGOS** — Verifique:
-   - CCIR: NÃO confundir com CNS (código do cartório)
-   - NIRF/CIB: formato X.XXX.XXX-X
-   - Código INCRA: formato XXX.XXX.XXX.XXX-X
+### Para CADA adquirente, extraia:
+- nome: EXATAMENTE como no documento, em MAIÚSCULAS
+- percentual: se "partes iguais" entre 2 = 50% cada. Percentuais DEVEM somar 100%.
+- cpf_cnpj, estado_civil, conjuge, regime_bens: somente se explícitos no documento
 
-5. **NÚMERO DA MATRÍCULA** — Confira se está completo.
+## OUTRAS VERIFICAÇÕES:
 
-## INSTRUÇÕES:
-- Se TODOS os dados estiverem corretos, retorne o JSON idêntico ao que recebeu.
-- Se encontrar ERROS, retorne o JSON CORRIGIDO.
-- Adicione ao array "alertas" qualquer correção que fizer, ex: "Verificação: proprietário corrigido de TRANSMITENTE para ADQUIRENTE"
-- Se não tiver certeza sobre algum campo, mantenha o valor original e adicione alerta.
-- RETORNE APENAS JSON VÁLIDO.`
+**ÁREA:** Procure o valor em hectares na descrição do imóvel. Se a primeira leitura diz ${dadosExtraidos.area_hectares} ha, confirme se esse número aparece no documento.
+
+**ÔNUS:** Ônus CANCELADOS (com palavras "cancelado", "baixado", "extinto", "quitado") NÃO devem constar. Se a matrícula está limpa, use [].
+
+**MATRÍCULA:** Confirme se o número está completo.
+
+**CÓDIGOS:** CCIR ≠ CNS (código do cartório). NIRF/CIB = X.XXX.XXX-X.
+
+## RESPOSTA:
+Retorne o JSON CORRIGIDO. No array "alertas", registre cada correção:
+- "Verificação: proprietário corrigido — [nome antigo] era transmitente, adquirente é [nome correto]"
+- "Verificação: área corrigida de X ha para Y ha conforme descrição do imóvel no documento"
+
+RETORNE APENAS JSON VÁLIDO.`
 
   // Pass 2 usa mesmo modelo da pass 1 (Opus) para máxima qualidade
   const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, promptVerificacao, 4096)

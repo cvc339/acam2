@@ -617,7 +617,7 @@ export async function calcularMVAR(
   dadosMatricula: ResultadoAnalise<DadosMatricula> | null,
   dadosCND: DadosCND | null,
   ideSisema: { sucesso: boolean; ucs_encontradas?: Array<{ nome?: string; unidade?: string; categoria?: string; protecao_integral?: boolean; percentual_sobreposicao?: number | null; area_sobreposicao_ha?: number | null }> } | null,
-  opcoes: { tipoOperacao?: string; municipio?: string } = {},
+  opcoes: { tipoOperacao?: string; municipio?: string; areaPadronizada?: number } = {},
 ): Promise<ResultadoMVAR> {
   const inicio = Date.now()
 
@@ -652,8 +652,9 @@ export async function calcularMVAR(
   const estado = dadosMatricula?.dados?.estado || "MG"
   if (municipio) {
     vtn = consultarVTN(municipio, estado)
-    if (vtn.encontrado && vtn.valor_referencia && dadosMatricula?.dados?.area_hectares) {
-      const areaHa = dadosMatricula.dados.area_hectares
+    const areaParaVTN = opcoes.areaPadronizada || dadosMatricula?.dados?.area_hectares
+    if (vtn.encontrado && vtn.valor_referencia && areaParaVTN) {
+      const areaHa = areaParaVTN
       vtn.valor_estimado = Math.round(vtn.valor_referencia * areaHa * 100) / 100
       vtn.area_hectares = areaHa
     }

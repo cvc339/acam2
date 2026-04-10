@@ -223,7 +223,7 @@ export async function POST(request: Request) {
       resultadoMatricula,
       resultadoCND,
       resultadoGeo,
-      { municipio: municipio || resultadoMatricula.dados?.municipio || undefined },
+      { municipio: municipio || resultadoMatricula.dados?.municipio || undefined, areaPadronizada },
     )
 
     // 10. Validação cruzada
