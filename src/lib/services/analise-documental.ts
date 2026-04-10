@@ -10,7 +10,7 @@ function getClaudeConfig() {
   return {
     apiKey: process.env.CLAUDE_API_KEY || "",
     apiUrl: process.env.CLAUDE_API_URL || "https://api.anthropic.com/v1/messages",
-    model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
+    model: process.env.CLAUDE_MODEL || "claude-opus-4-20250514",
   }
 }
 
@@ -200,12 +200,21 @@ export async function analisarMatricula(pdfBuffer: Buffer): Promise<ResultadoAna
 
 ### 2. PROPRIETÁRIO(S) ATUAIS - CRÍTICO!
 
-🚨 ATENÇÃO: MÚLTIPLOS PROPRIETÁRIOS!
+🚨🚨🚨 ATENÇÃO MÁXIMA — ERROS AQUI SÃO GRAVES 🚨🚨🚨
+
+**REGRA FUNDAMENTAL: TRANSMITENTE ≠ PROPRIETÁRIO!**
+Em um registro de COMPRA E VENDA:
+- TRANSMITENTE / VENDEDOR / OUTORGANTE = quem VENDEU (NÃO é o proprietário atual!)
+- ADQUIRENTE / COMPRADOR / OUTORGADO = quem COMPROU (ESTE é o proprietário atual!)
+
+O proprietário atual é sempre o ADQUIRENTE/COMPRADOR do ÚLTIMO registro de transmissão (R-1, R-2, R-3...).
+Se houver vários registros (R-1, R-2, R-3), o ÚLTIMO registro de compra e venda define quem é o dono ATUAL.
+
 IMPORTANTE: Leia TODOS os registros R-1, R-2, R-3, etc. O ÚLTIMO registro válido define o proprietário ATUAL.
-⚠️ SE HOUVER 2 OU MAIS PROPRIETÁRIOS, INCLUIR TODOS!
+⚠️ SE HOUVER 2 OU MAIS ADQUIRENTES, INCLUIR TODOS!
 ⚠️ Percentuais DEVEM somar 100%
 
-Para CADA proprietário atual, extrair EXATAMENTE como está escrito:
+Para CADA proprietário atual (ADQUIRENTE), extrair EXATAMENTE como está escrito:
 - nome: NOME COMPLETO EM MAIÚSCULAS (conforme documento)
 - percentual: % de propriedade (DEVE somar 100%)
 - cpf_cnpj: somente se EXPLICITAMENTE constar
@@ -265,6 +274,7 @@ Adicionar alerta SOMENTE se: matrícula >30 dias, ônus críticos encontrados, d
 RETORNE APENAS JSON VÁLIDO, SEM TEXTO ANTES OU DEPOIS.`
 
     const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, prompt, 4096)
+    console.log(`[TOKENS] Matrícula: ${tokens.input_tokens} input + ${tokens.output_tokens} output = ${tokens.input_tokens + tokens.output_tokens} total`)
     const dados = json as unknown as DadosMatricula
 
     // Recalcular dias_desde_emissao com precisão
@@ -331,7 +341,8 @@ C) NÚMERO DA MATRÍCULA → numero_matricula
 
 RETORNE APENAS JSON VÁLIDO.`
 
-    const { json } = await chamarClaudeComPDF(pdfBuffer, prompt, 2000)
+    const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, prompt, 2000)
+    console.log(`[TOKENS] CCIR: ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
     return json as unknown as DadosCCIR
   } catch (error) {
     console.error("Erro ao analisar CCIR:", error)
@@ -372,7 +383,8 @@ Formato: XXX.XXX.XXX.XXX-X → codigo_imovel_incra
 
 RETORNE APENAS JSON VÁLIDO.`
 
-    const { json } = await chamarClaudeComPDF(pdfBuffer, prompt, 2000)
+    const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, prompt, 2000)
+    console.log(`[TOKENS] ITR: ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
     return json as unknown as DadosITR
   } catch (error) {
     console.error("Erro ao analisar ITR:", error)
@@ -412,7 +424,8 @@ Leia o TÍTULO:
 
 RETORNE APENAS JSON VÁLIDO.`
 
-    const { json } = await chamarClaudeComPDF(pdfBuffer, prompt, 2000)
+    const { json, tokens } = await chamarClaudeComPDF(pdfBuffer, prompt, 2000)
+    console.log(`[TOKENS] CND: ${tokens.input_tokens} input + ${tokens.output_tokens} output`)
     return json as unknown as DadosCND
   } catch (error) {
     console.error("Erro ao analisar CND:", error)
