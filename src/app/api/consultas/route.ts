@@ -171,6 +171,12 @@ export async function POST(request: Request) {
 
     let resultadoGeo = await analisarImovelIDESisema(kmlContent)
 
+    // Área do imóvel: priorizar KML (cálculo geométrico), depois CND, depois matrícula
+    const areaKML = resultadoKML.sucesso ? resultadoKML.areaHa : null
+    const areaMatricula = resultadoMatricula.dados?.area_hectares || null
+    const areaCND = resultadoCND?.area_hectares || null
+    const areaMelhor = areaKML || areaCND || areaMatricula || 0
+
     // 9. MVAR
     const mvar = await calcularMVAR(
       resultadoMatricula,
@@ -207,7 +213,7 @@ export async function POST(request: Request) {
         nomeImovel: nomeImovel || resultadoMatricula.dados?.municipio || "Imóvel",
         municipio: municipio || resultadoMatricula.dados?.municipio || "",
         estado: resultadoMatricula.dados?.estado || "MG",
-        areaHa: resultadoMatricula.dados?.area_hectares || 0,
+        areaHa: areaMelhor,
         ferramenta: "Destinação em UC — Base",
         dadosMatricula: resultadoMatricula,
         mvar,
@@ -231,7 +237,12 @@ export async function POST(request: Request) {
         nome: nomeImovel,
         municipio: municipio || resultadoMatricula.dados?.municipio,
         estado: resultadoMatricula.dados?.estado || "MG",
-        area_hectares: resultadoMatricula.dados?.area_hectares,
+        area_hectares: areaMelhor,
+        area_fontes: {
+          kml: areaKML ? parseFloat(areaKML.toFixed(2)) : null,
+          matricula: areaMatricula,
+          cnd: areaCND,
+        },
         matricula: resultadoMatricula.dados?.matricula,
         cartorio: resultadoMatricula.dados?.cartorio,
         data_emissao: resultadoMatricula.dados?.data_emissao,

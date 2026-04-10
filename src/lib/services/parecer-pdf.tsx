@@ -164,13 +164,7 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
             <Alerta texto="Nenhuma Unidade de Conservação identificada na área do imóvel." cor="error" />
           )}
 
-          {Se(geo?.bbox && geo?.centroide,
-            <View style={{ marginTop: 6 }}>
-              <Campo label="Centróide" valor={geo?.centroide ? `${geo.centroide.lat.toFixed(6)}, ${geo.centroide.lon.toFixed(6)}` : "—"} />
-              <Campo label="Bbox" valor={geo?.bbox ? `${geo.bbox.minLat.toFixed(4)}, ${geo.bbox.minLon.toFixed(4)} → ${geo.bbox.maxLat.toFixed(4)}, ${geo.bbox.maxLon.toFixed(4)}` : "—"} />
-              <Text style={[styles.textoMuted, { marginTop: 2 }]}>Para visualização do mapa interativo, acesse o resultado online no ACAM.</Text>
-            </View>
-          )}
+          <Text style={[styles.textoMuted, { marginTop: 4 }]}>Para visualização do mapa interativo com o polígono do imóvel, acesse o resultado online no ACAM.</Text>
         </Secao>
       </Pagina>
 
