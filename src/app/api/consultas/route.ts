@@ -174,11 +174,38 @@ export async function POST(request: Request) {
     const areaMatricula = resultadoMatricula.dados?.area_hectares ?? null
     const areaCND = resultadoCND?.area_hectares ?? null
 
+    // Lógica de consenso: se duas fontes concordam e uma diverge, a divergente é erro
+    function diverge(a: number, b: number): boolean {
+      if (a === 0 || b === 0) return true
+      return Math.abs((a - b) / Math.max(a, b)) > 0.10 // >10% de diferença
+    }
+
     let areaPadronizada: number
     let areaFonte: string
+    const alertasArea: string[] = []
+
     if (areaMatricula != null && areaMatricula > 0) {
-      areaPadronizada = areaMatricula
-      areaFonte = "Matrícula"
+      // Matrícula existe — verificar se faz sentido cruzando com outras fontes
+      const cndConcorda = areaCND != null && areaCND > 0 && !diverge(areaMatricula, areaCND)
+      const kmlConcorda = areaKML != null && areaKML > 0 && !diverge(areaMatricula, areaKML)
+      const cndEKmlConcordam = areaCND != null && areaKML != null && areaCND > 0 && areaKML > 0 && !diverge(areaCND, areaKML)
+
+      if (cndConcorda || kmlConcorda || (areaCND == null && areaKML == null)) {
+        // Matrícula é consistente com pelo menos uma fonte, ou é a única
+        areaPadronizada = areaMatricula
+        areaFonte = "Matrícula"
+      } else if (cndEKmlConcordam) {
+        // CND e KML concordam entre si mas matrícula diverge → provável erro de OCR
+        areaPadronizada = areaCND!
+        areaFonte = "CND-ITR (matrícula com possível erro de leitura)"
+        alertasArea.push(`Área da matrícula (${areaMatricula} ha) diverge significativamente da CND (${areaCND} ha) e do KML (${areaKML} ha). Provável erro de OCR. Utilizando área da CND-ITR.`)
+      } else if (areaCND != null && areaCND > 0) {
+        areaPadronizada = areaCND
+        areaFonte = "CND-ITR"
+      } else {
+        areaPadronizada = areaMatricula
+        areaFonte = "Matrícula"
+      }
     } else if (areaCND != null && areaCND > 0) {
       areaPadronizada = areaCND
       areaFonte = "CND-ITR"
@@ -267,7 +294,7 @@ export async function POST(request: Request) {
       },
       proprietarios: resultadoMatricula.dados?.proprietarios || [],
       onus_gravames: resultadoMatricula.dados?.onus_gravames || [],
-      alertas_matricula: resultadoMatricula.dados?.alertas || [],
+      alertas_matricula: [...(resultadoMatricula.dados?.alertas || []), ...alertasArea],
       cnd: resultadoCND ? {
         tipo: resultadoCND.tipo,
         cib: resultadoCND.cib,
