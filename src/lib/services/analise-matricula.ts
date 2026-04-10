@@ -488,13 +488,6 @@ function etapa5Relatorio(
     recomendacoes.push(`Condomínio com ${proprietarios.length} proprietários — todos devem assinar a escritura.`)
   }
 
-  // Verificar percentuais — se todos iguais e >1 proprietário, pode ser falha de OCR
-  if (proprietarios.length > 1) {
-    const percentuais = proprietarios.map((p) => p.percentual).filter((p) => p != null) as number[]
-    if (percentuais.length > 0 && percentuais.every((p) => p === percentuais[0])) {
-      recomendacoes.push(`Percentuais de propriedade idênticos (${percentuais[0]}% cada) — verificar no documento original se os percentuais estão corretos, pois pode haver imprecisão na leitura automática.`)
-    }
-  }
 
   if (documentos_faltantes.length > 0) {
     if (semaforo === "verde") {
