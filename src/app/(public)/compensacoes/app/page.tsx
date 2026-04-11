@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { LegislacaoItem, CompensacaoIcon } from "@/components/acam"
 
 export const metadata: Metadata = { title: "Compensação de APP" }
@@ -42,12 +43,17 @@ export default function AppPage() {
           {[
             { titulo: "Recuperação de APP", sub: "Plantio na mesma sub-bacia hidrográfica" },
             { titulo: "Recuperação em UC", sub: "Área degradada em Unidade de Conservação" },
-            { titulo: "Doação para UC", sub: "Área na mesma bacia hidrográfica (Ferramenta: 6 créditos)" },
+            { titulo: "Doação para UC", sub: "Área na mesma bacia hidrográfica", href: "/ferramentas/destinacao-uc-app" },
             { titulo: "Área Verde Urbana", sub: "Implantação ou revitalização" },
           ].map((m) => (
             <div key={m.titulo} className="acam-card" style={{ padding: "var(--spacing-5)" }}>
               <h3 className="font-semibold text-sm">{m.titulo}</h3>
               <p className="text-xs text-muted-foreground mt-1">{m.sub}</p>
+              {m.href && (
+                <Link href={m.href} className="acam-btn acam-btn-primary acam-btn-sm" style={{ marginTop: "var(--spacing-3)" }}>
+                  Acessar ferramenta
+                </Link>
+              )}
             </div>
           ))}
         </div>

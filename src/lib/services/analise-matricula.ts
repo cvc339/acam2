@@ -445,6 +445,26 @@ REGRAS ESTRITAS:
   * NIRF (formato X.XXX.XXX-X)
 - Extraia também o(s) PROPRIETÁRIO(S) nomeado(s) na abertura da matrícula (antes dos atos).
 
+## GEORREFERENCIAMENTO (art. 9º, Decreto 4.449/2002)
+
+A matrícula tem georreferenciamento se contiver QUALQUER dos seguintes indicadores
+(podem estar no bloco de abertura, no perímetro, ou em qualquer ato/averbação):
+
+1. Memorial descritivo com coordenadas georreferenciadas ao Sistema Geodésico Brasileiro
+   (vértices com códigos como "FZS-P-T427", "VRT-001", coordenadas em graus/minutos/segundos)
+2. Código de certificação INCRA (hash alfanumérico, ex: "e2feea4c-dcc8-4a0a-a689-ff6fc3e5a672")
+3. Código de credenciamento do profissional junto ao INCRA (ex: "código do credenciamento FZS")
+4. Menção a "memorial descritivo e planta" elaborado por profissional com ART/CREA
+5. Referência explícita a "georreferenciamento", "georreferenciado" ou "certificado pelo INCRA"
+
+Se QUALQUER desses indicadores estiver presente em qualquer parte do documento:
+- georreferenciamento: true
+- georef_certificacao: o código hash de certificação (se presente)
+
+ATENÇÃO: leia o documento INTEIRO para verificar georreferenciamento, não apenas o bloco de abertura.
+Muitas matrículas contêm o memorial descritivo com coordenadas no próprio corpo do texto,
+antes dos atos, com dezenas de vértices e suas coordenadas geográficas.
+
 ## FORMATO DE RESPOSTA:
 
 {
@@ -1046,27 +1066,27 @@ function verificarOutorgaConjugal(proprietarios: ProprietarioAtual[]): OutorgaCo
 // --- 6. Georreferenciamento ---
 
 function verificarGeoreferenciamento(imovel: DadosImovel): GeorefStatus {
-  const area = imovel.area_ha ?? 0
   const temGeoref = imovel.georreferenciamento === true
 
-  // Decreto 4.449/2002 + Decreto 11.902/2024
-  // >= 25 ha: obrigatório desde 20/11/2023
-  // Qualquer tamanho: obrigatório a partir de 20/11/2025
-  let prazo: string
-  if (area >= 25) {
-    prazo = "20/11/2023 (Decreto 4.449/2002, art. 10, §4º)"
-  } else {
-    prazo = "20/11/2025 (Decreto 11.902/2024)"
-  }
+  // Decreto 4.449/2002, art. 10, com redação do Decreto 12.689/2025:
+  // Georreferenciamento exigível para transferência de imóvel rural a partir de 21/10/2029
+  const prazo = "21/10/2029 (Decreto 4.449/2002, art. 10, redação dada pelo Decreto 12.689/2025)"
+
+  // Antes de 21/10/2029, georref não é exigível para transferência
+  const hoje = new Date()
+  const dataExigibilidade = new Date("2029-10-21")
+  const exigivel = hoje >= dataExigibilidade
 
   return {
-    exigivel: true,
+    exigivel,
     prazo_legal: prazo,
     existente: temGeoref,
     certificacao: imovel.georef_certificacao,
     situacao: temGeoref ? "regular" : "pendente",
     impacto: !temGeoref
-      ? "Georreferenciamento ausente — bloqueará registro de qualquer transmissão. Necessário contratar profissional habilitado e obter certificação do INCRA."
+      ? exigivel
+        ? "Georreferenciamento ausente — necessário realizá-lo antes do registro da transmissão. Contratar profissional habilitado e obter certificação do INCRA."
+        : "Georreferenciamento ausente, mas ainda não exigível para transferência (prazo: 21/10/2029). Recomenda-se providenciar antecipadamente."
       : null,
   }
 }
@@ -1239,10 +1259,10 @@ function resolverSemaforo(
     }
   }
 
-  // VERMELHO: georef ausente em imóvel > 25 ha
-  if (!georef.existente && (imovel.area_ha ?? 0) >= 25) {
-    motivos_vermelho.push("Georreferenciamento ausente em imóvel acima de 25 ha — bloqueia registro")
-    recomendacoes.push(georef.impacto!)
+  // AMARELO: georef ausente e já exigível — dificulta mas não impede
+  if (!georef.existente && georef.exigivel) {
+    motivos_amarelo.push("Georreferenciamento ausente — necessário antes do registro da transmissão")
+    if (georef.impacto) recomendacoes.push(georef.impacto)
   }
 
   // AMARELO: copropriedade
@@ -1291,10 +1311,10 @@ function resolverSemaforo(
     motivos_amarelo.push("Restrições ambientais significativas registradas")
   }
 
-  // AMARELO: georef ausente em imóvel < 25 ha (pendente até 2025)
-  if (!georef.existente && (imovel.area_ha ?? 0) < 25) {
-    motivos_amarelo.push("Georreferenciamento ausente — obrigatório a partir de 20/11/2025")
-    recomendacoes.push("Verificar exigibilidade do georreferenciamento conforme Decreto 11.902/2024.")
+  // AMARELO: georef ausente mas ainda não exigível
+  if (!georef.existente && !georef.exigivel) {
+    motivos_amarelo.push("Georreferenciamento ausente — exigível a partir de 21/10/2029")
+    if (georef.impacto) recomendacoes.push(georef.impacto)
   }
 
   // Determinar semáforo

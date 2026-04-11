@@ -53,6 +53,12 @@ export interface DadosParecer {
     valor_estimado: number | null
     exercicio: number | string | null
   } | null
+  bacia?: {
+    sigla: string | null
+    nome: string | null
+    bacia_federal: string | null
+    comite: string | null
+  } | null
 }
 
 // ============================================
@@ -73,13 +79,27 @@ function Campo({ label, valor }: { label: string; valor: string }) {
   )
 }
 
-function Alerta({ texto, cor }: { texto: string; cor: "error" | "warning" | "success" | "info" }) {
-  const bgMap = { error: cores.errorBg, warning: cores.warningBg, success: cores.successBg, info: cores.infoBg }
-  const fgMap = { error: cores.error, warning: cores.warning, success: cores.success, info: cores.info }
+/** Fundo neutro + badge pequeno — espelha AlertResult do styleguide web */
+function AlertResultPDF({ label, cor, children }: { label: string; cor: string; children: React.ReactNode }) {
   return (
-    <View style={{ padding: 6, backgroundColor: bgMap[cor], borderRadius: 4, marginBottom: 4 }}>
-      <Text style={{ fontSize: 8, color: fgMap[cor], lineHeight: 1.5 }}>{texto}</Text>
+    <View style={{ padding: 10, backgroundColor: cores.neutral50, borderRadius: 6, marginBottom: 6, borderWidth: 0.5, borderColor: cores.neutral200 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+        <View style={{ paddingHorizontal: 6, paddingVertical: 2, backgroundColor: cor, borderRadius: 4 }}>
+          <Text style={{ fontSize: 7, fontFamily: "Source Sans 3", fontWeight: 700, color: "#fff" }}>{label}</Text>
+        </View>
+      </View>
+      <View>{children}</View>
     </View>
+  )
+}
+
+function Alerta({ texto, cor }: { texto: string; cor: "error" | "warning" | "success" | "info" }) {
+  const corMap = { error: cores.error, warning: cores.warning, success: cores.success, info: cores.info }
+  const labelMap = { error: "Atenção", warning: "Pendência", success: "Adequado", info: "Informação" }
+  return (
+    <AlertResultPDF label={labelMap[cor]} cor={corMap[cor]}>
+      <Text style={{ fontSize: 8, color: cores.neutral700, lineHeight: 1.5 }}>{texto}</Text>
+    </AlertResultPDF>
   )
 }
 
@@ -103,17 +123,13 @@ function StatusDimensao({ nome, pontos, peso, percentual }: { nome: string; pont
 }
 
 function SemaforoBadge({ semaforo, justificativa }: { semaforo: string; justificativa: string }) {
-  const bgMap: Record<string, string> = { verde: cores.successBg, amarelo: cores.warningBg, vermelho: cores.errorBg }
-  const fgMap: Record<string, string> = { verde: cores.success, amarelo: cores.warning, vermelho: cores.error }
-  const borderMap: Record<string, string> = { verde: cores.successBorder, amarelo: cores.warningBorder, vermelho: cores.errorBorder }
+  const corMap: Record<string, string> = { verde: cores.success, amarelo: cores.warning, vermelho: cores.error }
+  const labelMap: Record<string, string> = { verde: "Risco Baixo", amarelo: "Risco Médio", vermelho: "Risco Alto" }
 
   return (
-    <View style={{ padding: 12, backgroundColor: bgMap[semaforo] || cores.neutral50, borderRadius: 8, marginBottom: 16, borderWidth: 1, borderColor: borderMap[semaforo] || cores.neutral200 }}>
-      <Text style={{ fontSize: 14, fontFamily: "Source Sans 3", fontWeight: 700, color: fgMap[semaforo] || cores.neutral700, textAlign: "center", marginBottom: 4 }}>
-        {semaforo.toUpperCase()}
-      </Text>
-      <Text style={{ fontSize: 8, color: cores.neutral700, textAlign: "center", lineHeight: 1.5 }}>{justificativa}</Text>
-    </View>
+    <AlertResultPDF label={labelMap[semaforo] || semaforo} cor={corMap[semaforo] || cores.neutral500}>
+      <Text style={{ fontSize: 8, color: cores.neutral700, lineHeight: 1.5 }}>{justificativa}</Text>
+    </AlertResultPDF>
   )
 }
 
@@ -140,12 +156,11 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
       {/* ============ PÁGINA 1: SEMÁFORO + IMÓVEL + UC ============ */}
       <Pagina ferramenta={dados.ferramenta}>
         {/* Disclaimer */}
-        <View style={{ padding: 10, backgroundColor: cores.warningBg, borderRadius: 6, marginBottom: 12, borderWidth: 0.5, borderColor: cores.warning }}>
-          <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.warning, marginBottom: 3 }}>ANÁLISE PRELIMINAR</Text>
+        <AlertResultPDF label="Preliminar" cor={cores.warning}>
           <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>
             Este relatório é uma pré-avaliação automatizada e não constitui parecer jurídico ou técnico. Os dados extraídos por inteligência artificial devem ser conferidos com os documentos originais.{pm.imovel.confianca_ocr === "baixa" ? " ATENÇÃO: documento com baixa legibilidade — conferir todos os dados numéricos." : ""}
           </Text>
-        </View>
+        </AlertResultPDF>
 
         {/* Semáforo */}
         <SemaforoBadge semaforo={pm.semaforo} justificativa={pm.semaforo_justificativa} />
@@ -201,10 +216,12 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
 
           {/* Regime UC */}
           {pm.regime_uc ? (
-            <View style={{ marginTop: 8, padding: 8, backgroundColor: cores.infoBg, borderRadius: 4, borderWidth: 0.5, borderColor: cores.infoBorder }}>
-              <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.info, marginBottom: 4 }}>Regime de UC de Proteção Integral</Text>
-              <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>{pm.regime_uc.impacto_transmissao}</Text>
-              <Text style={{ fontSize: 7, color: cores.neutral500, marginTop: 4, lineHeight: 1.5 }}>{pm.regime_uc.fundamentacao}</Text>
+            <View style={{ marginTop: 8 }}>
+              <AlertResultPDF label="Informação" cor={cores.info}>
+                <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.neutral800, marginBottom: 3 }}>Regime de UC de Proteção Integral</Text>
+                <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>{pm.regime_uc.impacto_transmissao}</Text>
+                <Text style={{ fontSize: 7, color: cores.neutral500, marginTop: 4, lineHeight: 1.5 }}>{pm.regime_uc.fundamentacao}</Text>
+              </AlertResultPDF>
             </View>
           ) : <View />}
         </Secao>
@@ -258,18 +275,17 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
         <Secao titulo="5. Ônus e Gravames">
           {pm.onus_ativos.length > 0 ? (
             pm.onus_ativos.map((o, i) => (
-              <View key={i} style={{ padding: 6, backgroundColor: o.nivel === 1 ? cores.errorBg : cores.warningBg, borderRadius: 4, marginBottom: 4 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 2 }}>
-                  <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: o.nivel === 1 ? cores.error : cores.warning }}>
-                    {o.tipo.toUpperCase()} — Nível {o.nivel}
-                  </Text>
-                  <Text style={{ fontSize: 7, color: cores.neutral500 }}>{o.ato}</Text>
-                </View>
+              <AlertResultPDF key={i} label={o.nivel === 1 ? "VETO" : "Pendências"} cor={o.nivel === 1 ? cores.error : cores.warning}>
+                <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.neutral800 }}>
+                  {o.tipo} ({o.ato})
+                </Text>
                 <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>{o.impacto_transmissao}</Text>
-              </View>
+              </AlertResultPDF>
             ))
           ) : (
-            <Alerta texto="Nenhum ônus ou gravame ativo — situação registral favorável." cor="success" />
+            <AlertResultPDF label="Adequado" cor={cores.success}>
+              <Text style={{ fontSize: 8, color: cores.neutral700 }}>Nenhum ônus ou gravame ativo — situação registral favorável.</Text>
+            </AlertResultPDF>
           )}
 
           {pm.onus_extintos.length > 0 ? (
@@ -286,19 +302,18 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
 
         {/* Georreferenciamento */}
         <Secao titulo="6. Georreferenciamento">
-          <View style={{ padding: 8, backgroundColor: pm.georeferenciamento.situacao === "regular" ? cores.successBg : cores.errorBg, borderRadius: 4 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
-              <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, color: pm.georeferenciamento.situacao === "regular" ? cores.success : cores.error }}>
-                {pm.georeferenciamento.situacao === "regular" ? "Regular" : "Pendente"}
-              </Text>
-              <Text style={{ fontSize: 7, color: cores.neutral500 }}>Prazo: {pm.georeferenciamento.prazo_legal}</Text>
-            </View>
-            {pm.georeferenciamento.impacto ? (
-              <Text style={{ fontSize: 7, color: cores.error, lineHeight: 1.5 }}>{pm.georeferenciamento.impacto}</Text>
-            ) : (
-              <Text style={{ fontSize: 7, color: cores.success }}>Georreferenciamento existente e em conformidade.</Text>
-            )}
-          </View>
+          <AlertResultPDF
+            label={pm.georeferenciamento.situacao === "regular" ? "Adequado" : "Pendências"}
+            cor={pm.georeferenciamento.situacao === "regular" ? cores.success : cores.warning}
+          >
+            <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.neutral800 }}>
+              {pm.georeferenciamento.situacao === "regular" ? "Regular" : "Pendente"}
+            </Text>
+            <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>
+              {pm.georeferenciamento.impacto || "Georreferenciamento existente e em conformidade."}
+            </Text>
+            <Text style={{ fontSize: 7, color: cores.neutral500, marginTop: 2 }}>Prazo: {pm.georeferenciamento.prazo_legal}</Text>
+          </AlertResultPDF>
         </Secao>
       </Pagina>
 
@@ -309,11 +324,11 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
           <Secao titulo="7. Restrições Ambientais">
             {pm.restricoes_ambientais.length > 0 ? (
               pm.restricoes_ambientais.map((r, i) => (
-                <View key={i} style={{ padding: 6, backgroundColor: cores.warningBg, borderRadius: 4, marginBottom: 4 }}>
-                  <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.warning }}>{r.tipo}</Text>
+                <AlertResultPDF key={i} label="Pendências" cor={cores.warning}>
+                  <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.neutral800 }}>{r.tipo}</Text>
                   <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>{r.descricao}</Text>
                   {r.area_ha ? <Text style={{ fontSize: 7, color: cores.neutral500 }}>Área: {r.area_ha} ha</Text> : <View />}
-                </View>
+                </AlertResultPDF>
               ))
             ) : (
               <Text style={styles.textoMuted}>Nenhuma restrição ambiental vigente identificada.</Text>
@@ -419,6 +434,18 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
             <Campo label="Valor estimado" valor={dados.vtn?.valor_estimado ? `R$ ${dados.vtn.valor_estimado.toLocaleString("pt-BR")}` : "—"} />
             <Text style={[styles.textoMuted, { marginTop: 3 }]}>
               Fonte: SIPT/Receita Federal (exercício {dados.vtn?.exercicio || "N/I"}). Valor referencial, não substitui laudo de avaliação.
+            </Text>
+          </Secao>
+        )}
+
+        {Se(dados.bacia,
+          <Secao titulo="12. Bacia Hidrográfica">
+            <Campo label="Bacia" valor={dados.bacia?.nome || "—"} />
+            <Campo label="Sigla" valor={dados.bacia?.sigla || "—"} />
+            <Campo label="Bacia Federal" valor={dados.bacia?.bacia_federal || "—"} />
+            <Campo label="Comitê" valor={dados.bacia?.comite || "—"} />
+            <Text style={[styles.textoMuted, { marginTop: 3 }]}>
+              Para compensação APP (modalidade 4.4), a área proposta deve estar na mesma bacia hidrográfica da intervenção (Decreto 47.749/2019).
             </Text>
           </Secao>
         )}

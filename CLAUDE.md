@@ -66,6 +66,8 @@ Documentacao completa em `docs/claude-context/`.
 8. **Ferramenta paga = debito obrigatorio** — toda ferramenta paga deve: (a) usar `debitarCreditos()` de `@/lib/creditos/client` (client-side) ou `creditos.debitar()` de `@/lib/creditos` (server-side) ANTES de entregar resultado, (b) router.refresh() apos debito para atualizar saldo no header, (c) botao "Baixar Novamente" nao debita de novo
 9. **PDFs oficiais vs relatorios internos** — requerimentos e formularios oficiais do Estado usam jsPDF com layout posicional exato (modelo ACAM1). Relatorios internos do ACAM (calculadora, parecer) usam React-PDF com template ACAM2 (Capa, Pagina, Secao)
 10. **Layout publico auth-aware** — rotas (public) verificam sessao: logado mostra header com creditos, deslogado mostra Entrar/Criar conta
+11. **Resultados de analise = AlertResult** — todo resultado de analise (viabilidade, onus, criterios, impedimentos) usa `AlertResult` com `status` + `statusLabel` (fundo neutro, badge comunica). Proibido: cards coloridos (`acam-semaforo-*`), `acam-alert-success/error` como resultado, fundos coloridos. `acam-alert` so para erros de sistema (formulario, conexao). Mesma regra no PDF com `AlertResultPDF`.
+12. **Checklist pre/pos UI** — antes de criar pagina: `grep "^\.acam-" globals.css` + `ls src/components/acam/`. Depois: `grep "style={{" pagina.tsx` — cada inline precisa de justificativa (valor dinamico ou layout fixo). Se nao for dinamico, criar classe CSS.
 
 ## Modulos centralizados — NAO DUPLICAR
 

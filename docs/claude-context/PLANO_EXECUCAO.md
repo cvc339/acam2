@@ -72,10 +72,10 @@ os 3 requerimentos, e as ferramentas gratuitas. Isso permite uso real imediato.
 - [x] Accordion nas orientacoes DAE
 **Status: BLOCO 1B CONCLUIDO — 2026-04-07**
 
-**Pendencias para proxima sessao:**
-- Enriquecer PDF de reposicao florestal com conteudo normativo (1 pagina max)
-- Fontes Source Serif/Sans no PDF (URLs a corrigir)
-- Responsividade mobile (ajuste fino da landing page)
+**Pendencias resolvidas:**
+- [x] Enriquecer PDF de reposicao florestal com conteudo normativo (1 pagina max)
+- [x] Fontes Source Serif/Sans no PDF (URLs a corrigir)
+- [x] Responsividade mobile (ajuste fino da landing page)
 
 ### Bloco 1C — Engine de analise (servicos internos)
 - [x] Analise Documental (Claude API): matricula 20+ campos, CCIR, ITR, CAR, CND
@@ -128,8 +128,9 @@ admin, email e analytics.
 **Entregas:**
 
 ### Bloco 2A — Destinacao em UC — APP (6cr) [modalidade 4.4]
-- [ ] Engine base + validacao de bacia e sub-bacia
-- [ ] Aparece em: Comp. APP (4.4)
+- [x] Engine base + validacao de bacia e sub-bacia
+- [x] Aparece em: Comp. APP (4.4)
+**Status: BLOCO 2A CONCLUIDO — 2026-04-11**
 
 ### Bloco 2B — Destinacao em UC — Mata Atlantica (7cr) [modalidade 1.2]
 - [ ] Engine base + bacia + sub-bacia + bioma MA

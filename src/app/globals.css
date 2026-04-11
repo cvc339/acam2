@@ -1694,6 +1694,23 @@ body.page-public {
 .acam-text-muted { color: var(--neutral-500); }
 .acam-text-light { color: var(--neutral-400); }
 .acam-text-body { color: var(--neutral-600); }
+.acam-text-error { color: var(--error); }
+.acam-text-warning { color: var(--warning); }
+.acam-text-success { color: var(--success); }
+
+/* --- Subtítulos de seção (dentro de cards) --- */
+.acam-subsection-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--font-family-heading);
+    color: var(--neutral-800);
+    margin-top: var(--spacing-4);
+}
+
+/* --- Bordas laterais coloridas em cards --- */
+.acam-card-border-error { border-left: 4px solid var(--error); }
+.acam-card-border-warning { border-left: 4px solid var(--warning); }
+.acam-card-border-success { border-left: 4px solid var(--success); }
 
 /* Botão de opção do wizard — movido para inline no componente (Tailwind v4 purga classes custom) */
 

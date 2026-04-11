@@ -22,7 +22,7 @@ const ferramentas = [
   { nome: "Análise de Servidão/RPPN", descricao: "Análise para servidão ou RPPN", compensacao: "Mata Atlântica", creditos: "7", ativo: true },
   { nome: "Requerimento Mata Atlântica", descricao: "Preenchimento assistido + PDF", compensacao: "Mata Atlântica", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mata-atlantica" },
   // APP
-  { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: true },
+  { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: true, href: "/ferramentas/destinacao-uc-app" },
   // SNUC
   { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: true },
   { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-snuc" },

@@ -6,10 +6,16 @@ import {
   analisarCND,
 } from "@/lib/services/analise-documental"
 import { analisarMatriculaPipeline } from "@/lib/services/analise-matricula"
-import { analisarImovelIDESisema, processarKML, processarGeoJSON } from "@/lib/services/analise-geoespacial"
+import { analisarImovelIDESisema, processarKML, processarGeoJSON, consultarBaciaHidrografica } from "@/lib/services/analise-geoespacial"
 import { consultarVTN } from "@/lib/services/mvar"
 
-const CUSTO_CREDITOS = 5
+const CUSTO_POR_FERRAMENTA: Record<string, number> = {
+  "dest-uc-base": 5,
+  "dest-uc-app": 6,
+  "dest-uc-ma": 7,
+}
+
+const FERRAMENTAS_COM_BACIA = ["dest-uc-app", "dest-uc-ma"]
 
 /**
  * POST /api/consultas
@@ -36,6 +42,7 @@ export async function POST(request: Request) {
   }
 
   let consultaId: string | null = null
+  let custoCreditos = 5
 
   try {
     const formData = await request.formData()
@@ -51,6 +58,9 @@ export async function POST(request: Request) {
     const cndFile = formData.get("cnd") as File | null
 
     // 2. Validação
+    custoCreditos = CUSTO_POR_FERRAMENTA[ferramentaId] ?? 5
+    const precisaBacia = FERRAMENTAS_COM_BACIA.includes(ferramentaId)
+
     if (!matriculaFile) {
       return NextResponse.json({ erro: "Matrícula (PDF) é obrigatória." }, { status: 400 })
     }
@@ -59,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     // 3+4. Debitar créditos ANTES do processamento (atômico: verifica saldo + debita)
-    const resultadoDebito = await creditos.debitar(user.id, CUSTO_CREDITOS, {
+    const resultadoDebito = await creditos.debitar(user.id, custoCreditos, {
       descricao: `Análise ${ferramentaId} — ${nomeImovel || "Sem nome"}`,
       ferramenta_id: ferramentaId,
     })
@@ -72,7 +82,7 @@ export async function POST(request: Request) {
       }, { status })
     }
 
-    const saldoAtual = resultadoDebito.saldo_restante + CUSTO_CREDITOS // saldo antes do débito
+    const saldoAtual = resultadoDebito.saldo_restante + custoCreditos // saldo antes do débito
 
     // 5. Criar registro da consulta
     const { data: consulta, error: erroConsulta } = await admin.from("consultas").insert({
@@ -81,11 +91,11 @@ export async function POST(request: Request) {
       nome_imovel: nomeImovel,
       municipio,
       status: "processando",
-      creditos_usados: CUSTO_CREDITOS,
+      creditos_usados: custoCreditos,
     }).select("id").single()
 
     if (erroConsulta || !consulta) {
-      await creditos.reembolsar(user.id, CUSTO_CREDITOS, {
+      await creditos.reembolsar(user.id, custoCreditos, {
         descricao: "Reembolso — erro ao criar consulta",
       })
       return NextResponse.json({ erro: "Erro ao criar consulta" }, { status: 500 })
@@ -137,6 +147,11 @@ export async function POST(request: Request) {
         : processarKML(kmlContent),
       analisarImovelIDESisema(kmlContent),
     ])
+
+    // 7a-bis. Consultar bacia hidrográfica (se ferramenta exige)
+    const resultadoBacia = precisaBacia && resultadoKML.sucesso && resultadoKML.bbox && resultadoKML.centroide
+      ? await consultarBaciaHidrografica(resultadoKML.bbox, resultadoKML.centroide)
+      : null
 
     // 7b. Detectar UC de proteção integral do IDE-Sisema
     const ucProtecaoIntegral = resultadoGeo.ucs_encontradas.find(
@@ -294,6 +309,14 @@ export async function POST(request: Request) {
         centroide: resultadoGeo.centroide,
         geojson_imovel: geojsonImovel,
       },
+      // Bacia hidrográfica (dest-uc-app, dest-uc-ma)
+      bacia: resultadoBacia?.sucesso && resultadoBacia.bacia ? {
+        sigla: resultadoBacia.bacia.sigla,
+        nome: resultadoBacia.bacia.nome,
+        bacia_federal: resultadoBacia.bacia.bacia_federal,
+        comite: resultadoBacia.bacia.comite,
+        sede_comite: resultadoBacia.bacia.sede_comite,
+      } : null,
       // VTN
       vtn: vtn.encontrado ? {
         encontrado: true,
@@ -318,8 +341,14 @@ export async function POST(request: Request) {
         areaFonte,
         ferramenta: ferramentaId,
         pipeline: pm,
-        mvar: null, // MVAR será integrado quando disponível
+        mvar: null,
         ideSisema: resultadoGeo,
+        bacia: resultadoBacia?.sucesso && resultadoBacia.bacia ? {
+          sigla: resultadoBacia.bacia.sigla,
+          nome: resultadoBacia.bacia.nome,
+          bacia_federal: resultadoBacia.bacia.bacia_federal,
+          comite: resultadoBacia.bacia.comite,
+        } : null,
         cnd: resultadoCND ? {
           tipo: resultadoCND.tipo,
           cib: resultadoCND.cib,
@@ -361,7 +390,7 @@ export async function POST(request: Request) {
       consulta_id: consultaId,
       status: "concluida",
       parecer,
-      creditos_restantes: saldoAtual - CUSTO_CREDITOS,
+      creditos_restantes: saldoAtual - custoCreditos,
     })
 
   } catch (error) {
@@ -369,7 +398,7 @@ export async function POST(request: Request) {
 
     // Reembolsar créditos em caso de erro
     if (consultaId) {
-      await creditos.reembolsar(user.id, CUSTO_CREDITOS, {
+      await creditos.reembolsar(user.id, custoCreditos, {
         descricao: `Reembolso — erro no processamento da consulta ${consultaId}`,
         consulta_id: consultaId,
       })
