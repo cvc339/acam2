@@ -149,7 +149,7 @@ export default function CalculoModalidade2Page() {
       {!resultado ? (
         <>
           {/* Formulário */}
-          <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+          <div className="acam-card">
             <div className="acam-section-title">Dados da intervenção</div>
             <div className="acam-section-desc">Informe a área e o tipo de vegetação para calcular o valor da compensação.</div>
 
@@ -223,7 +223,7 @@ export default function CalculoModalidade2Page() {
           </div>
 
           {/* Fluxo administrativo */}
-          <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+          <div className="acam-card">
             <h3 className="font-semibold mb-4">Fluxo Administrativo Estimado</h3>
             <p className="text-sm text-muted-foreground mb-6">Etapas típicas para cumprimento da compensação na modalidade 2. Prazo total estimado: 18-60 meses.</p>
             {FLUXO_ADMINISTRATIVO.map((etapa, i) => (
@@ -246,7 +246,7 @@ export default function CalculoModalidade2Page() {
           </div>
 
           {/* Legislação */}
-          <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+          <div className="acam-card">
             <h3 className="font-semibold mb-4">Legislação de Referência</h3>
             <div className="acam-legislacao-item acam-legislacao-item-clickable">
               <a href="https://www.almg.gov.br/legislacao-mineira/texto/LEI/20922/2013/?cons=1" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>

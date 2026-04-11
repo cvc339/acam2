@@ -46,7 +46,7 @@ export default async function ExtratoPage() {
       </div>
 
       {transacoes && transacoes.length > 0 ? (
-        <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+        <div className="acam-card">
           <div style={{ overflowX: "auto" }}>
             <table className="acam-services-table">
               <thead>

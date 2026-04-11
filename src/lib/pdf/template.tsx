@@ -32,8 +32,17 @@ const cores = {
   neutral800: "#262626",
   neutral900: "#171717",
   success: "#16a34a",
+  successBg: "#f0fdf4",
+  successBorder: "#bbf7d0",
   error: "#dc2626",
+  errorBg: "#fef2f2",
+  errorBorder: "#fecaca",
   warning: "#f59e0b",
+  warningBg: "#fffbeb",
+  warningBorder: "#fde68a",
+  info: "#2563eb",
+  infoBg: "#eff6ff",
+  infoBorder: "#bfdbfe",
 }
 
 const styles = StyleSheet.create({

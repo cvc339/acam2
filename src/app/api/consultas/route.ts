@@ -138,19 +138,32 @@ export async function POST(request: Request) {
     const itrBuffer = itrFile ? await uploadFile(itrFile, "itr") : null
     const cndBuffer = cndFile ? await uploadFile(cndFile, "cnd") : null
 
-    // 7. Análise documental + geoespacial (em PARALELO para reduzir tempo)
+    // 7. Análise geoespacial + documental
     const kmlContent = kmlBuffer.toString("utf-8")
     const kmlNome = kmlFile.name.toLowerCase()
 
-    // 7. Análise em PARALELO: Pipeline Matrícula + CND + KML + IDE-Sisema
-    const [pipelineMatricula, resultadoCND, resultadoKML, resultadoGeo] = await Promise.all([
-      analisarMatriculaPipeline(matriculaBuffer),
+    // 7a. Primeiro: geo + CND + KML em paralelo (para obter dados de UC)
+    const [resultadoCND, resultadoKML, resultadoGeo] = await Promise.all([
       cndBuffer ? analisarCND(cndBuffer) : Promise.resolve(null),
       kmlNome.endsWith(".geojson") || kmlNome.endsWith(".json")
         ? Promise.resolve(processarGeoJSON(kmlContent))
         : processarKML(kmlContent),
       analisarImovelIDESisema(kmlContent),
     ])
+
+    // 7b. Detectar UC de proteção integral do IDE-Sisema
+    const ucProtecaoIntegral = resultadoGeo.ucs_encontradas.find(
+      (uc) => uc.protecao_integral === true,
+    )
+    const opcoesUC = {
+      imovelEmUC: !!ucProtecaoIntegral,
+      nomeUC: ucProtecaoIntegral?.nome ?? null,
+      categoriaUC: ucProtecaoIntegral?.categoria ?? null,
+      percentualSobreposicao: ucProtecaoIntegral?.percentual_sobreposicao ?? null,
+    }
+
+    // 7c. Pipeline de matrícula com contexto UC
+    const pipelineMatricula = await analisarMatriculaPipeline(matriculaBuffer, opcoesUC)
 
     const geojsonImovel = resultadoKML.sucesso ? resultadoKML.geojson : null
 
@@ -239,11 +252,17 @@ export async function POST(request: Request) {
         percentual: p.percentual || null,
         fracao: p.fracao || null,
         cpf_cnpj: p.cpf || null,
+        qualificacao: p.qualificacao || null,
         estado_civil: p.estado_civil || null,
         conjuge: p.conjuge || null,
         regime_bens: p.regime_bens || null,
         ato_aquisitivo: p.ato_aquisitivo,
+        data_aquisicao: p.data_aquisicao || null,
       })),
+      // Outorga conjugal
+      outorga_conjugal: pm.outorga_conjugal,
+      // Georreferenciamento
+      georeferenciamento: pm.georeferenciamento,
       // Pipeline: ônus ativos com classificação por nível
       onus_gravames: pm.onus_ativos.map((o) => ({
         tipo: o.tipo,
@@ -253,15 +272,24 @@ export async function POST(request: Request) {
         descricao: o.descricao,
         impacto_compra_venda: o.impacto_transmissao,
       })),
+      onus_extintos: pm.onus_extintos,
+      // Restrições ambientais da matrícula
+      restricoes_ambientais: pm.restricoes_ambientais,
+      contexto_historico_ambiental: pm.contexto_historico_ambiental,
+      regime_uc: pm.regime_uc,
       // Pipeline: todos os atos para transparência
       atos_registrais: pm.atos,
       cancelamentos: pm.cancelamentos,
-      // Semáforo do pipeline
+      // Análise de transmissibilidade (Prompt C)
+      analise_transmissibilidade: pm.analise_transmissibilidade,
+      // Semáforo do pipeline (determinístico)
       semaforo: pm.semaforo,
       semaforo_justificativa: pm.semaforo_justificativa,
       recomendacoes: pm.recomendacoes,
       documentos_faltantes: pm.documentos_faltantes,
       alertas_matricula: [...pm.alertas, ...alertasArea],
+      // Confiança OCR
+      confianca_ocr: pm.imovel.confianca_ocr,
       // CND
       cnd: resultadoCND ? {
         tipo: resultadoCND.tipo,
@@ -291,93 +319,39 @@ export async function POST(request: Request) {
       tokens: pm.tokens_consumidos,
     }
 
-    // 10. Gerar parecer PDF (jsPDF simplificado)
+    // 10. Gerar parecer PDF (React-PDF com template ACAM2)
     let parecerPdfPath: string | null = null
     try {
-      const { jsPDF } = await import("jspdf")
-      const doc = new jsPDF()
-      const pw = doc.internal.pageSize.getWidth()
-      const m = 15
-      const cw = pw - 2 * m
-      let y = 20
+      const { gerarParecerPDF } = await import("@/lib/services/parecer-pdf")
+      const pdfBuffer = await gerarParecerPDF({
+        nomeImovel: nomeImovel || pm.imovel.denominacao || "",
+        municipio: municipio || pm.imovel.municipio || "",
+        estado: "MG",
+        areaHa: areaPadronizada,
+        areaFonte,
+        ferramenta: ferramentaId,
+        pipeline: pm,
+        mvar: null, // MVAR será integrado quando disponível
+        ideSisema: resultadoGeo,
+        cnd: resultadoCND ? {
+          tipo: resultadoCND.tipo,
+          cib: resultadoCND.cib,
+          data_emissao: resultadoCND.data_emissao,
+          data_validade: resultadoCND.data_validade,
+          area_hectares: resultadoCND.area_hectares,
+          nome_contribuinte: resultadoCND.nome_contribuinte,
+        } : null,
+        vtn: vtn.encontrado ? {
+          encontrado: true,
+          municipio: vtn.municipio ?? null,
+          valor_referencia: vtn.valor_referencia ?? null,
+          valor_estimado: vtn.valor_estimado ?? null,
+          exercicio: vtn.exercicio ?? null,
+        } : null,
+      })
 
-      const title = (t: string) => { doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.text(t, m, y); y += 8 }
-      const text = (t: string) => { doc.setFontSize(9); doc.setFont("helvetica", "normal"); const l = doc.splitTextToSize(t, cw); doc.text(l, m, y); y += l.length * 4 + 2 }
-      const field = (l: string, v: string) => { doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.text(l + ": ", m, y); const lw = doc.getTextWidth(l + ": "); doc.setFont("helvetica", "normal"); doc.text(v || "—", m + lw, y); y += 5 }
-      const check = () => { if (y > 270) { doc.addPage(); y = 20 } }
-
-      // Header
-      doc.setFontSize(16); doc.setFont("helvetica", "bold")
-      doc.text("Análise Preliminar de Viabilidade", m, y); y += 10
-      doc.setFontSize(10); doc.setFont("helvetica", "normal")
-      doc.text(`Imóvel: ${parecer.imovel.nome || "N/I"} — ${parecer.imovel.municipio || "N/I"}/${parecer.imovel.estado}`, m, y); y += 6
-      doc.text(`Área: ${areaPadronizada.toFixed(2)} ha (fonte: ${areaFonte})`, m, y); y += 6
-      doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, m, y); y += 10
-
-      // Disclaimer
-      doc.setFontSize(8); doc.setFont("helvetica", "italic")
-      const disclaimer = "ANÁLISE PRELIMINAR — Este relatório é uma pré-avaliação automatizada e não constitui parecer jurídico ou técnico. Os dados extraídos por IA devem ser conferidos com os documentos originais."
-      const dl = doc.splitTextToSize(disclaimer, cw)
-      doc.text(dl, m, y); y += dl.length * 3.5 + 4
-      doc.setFont("helvetica", "normal")
-
-      // Semáforo
-      check(); title("Avaliação")
-      field("Semáforo", parecer.semaforo.toUpperCase())
-      text(parecer.semaforo_justificativa)
-
-      // Proprietários
-      check(); title("Proprietários Atuais")
-      for (const prop of parecer.proprietarios) {
-        field(prop.nome, `${prop.percentual || "?"}% — ${prop.estado_civil || ""} ${prop.conjuge ? "(cônjuge: " + prop.conjuge + ")" : ""}`)
-        check()
-      }
-
-      // Ônus
-      check(); title("Ônus e Gravames")
-      if (parecer.onus_gravames.length === 0) {
-        text("Nenhum ônus ou gravame ativo identificado.")
-      } else {
-        for (const o of parecer.onus_gravames) {
-          field(`${o.tipo} (Nível ${o.nivel})`, o.descricao)
-          check()
-        }
-      }
-
-      // UCs
-      check(); title("Unidades de Conservação")
-      if (parecer.ide_sisema.ucs.length === 0) {
-        text("Nenhuma UC identificada na área do imóvel.")
-      } else {
-        for (const uc of parecer.ide_sisema.ucs) {
-          field(uc.nome, `${uc.categoria} — ${uc.protecao_integral ? "Proteção Integral" : "Uso Sustentável"} — ${uc.percentual_sobreposicao ?? "?"}%`)
-          check()
-        }
-      }
-
-      // Recomendações
-      if (parecer.recomendacoes.length > 0) {
-        check(); title("Recomendações")
-        for (const r of parecer.recomendacoes) { text("• " + r); check() }
-      }
-
-      // VTN
-      if (parecer.vtn?.encontrado) {
-        check(); title("Valor de Referência (VTN)")
-        field("Município", parecer.vtn.municipio || "—")
-        field("R$/ha", `R$ ${parecer.vtn.valor_referencia?.toLocaleString("pt-BR") || "—"}`)
-        if (parecer.vtn.valor_estimado) field("Valor estimado", `R$ ${parecer.vtn.valor_estimado.toLocaleString("pt-BR")}`)
-      }
-
-      // Disclaimer final
-      check()
-      doc.setFontSize(7); doc.setFont("helvetica", "normal")
-      const df = "ACAM — Análise de Compensações Ambientais. Análise preliminar automatizada. Não constitui parecer jurídico ou técnico."
-      doc.text(doc.splitTextToSize(df, cw), m, y)
-
-      const pdfArrayBuffer = doc.output("arraybuffer")
       const pdfPath = `${user.id}/${consultaId}/parecer.pdf`
-      await admin.storage.from("documentos").upload(pdfPath, Buffer.from(pdfArrayBuffer), {
+      await admin.storage.from("documentos").upload(pdfPath, pdfBuffer, {
         contentType: "application/pdf",
         upsert: true,
       })

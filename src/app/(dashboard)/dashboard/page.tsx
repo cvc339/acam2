@@ -10,17 +10,22 @@ export const metadata: Metadata = {
 
 
 const ferramentas = [
+  // Gratuitas
   { nome: "Calculadora de Intervenção Ambiental", descricao: "Taxa de expediente, taxa florestal e reposição florestal", compensacao: "Todas", creditos: "Gratuita", ativo: true, href: "/calculadora" },
   { nome: "Cálculo de Reposição Florestal", descricao: "Cálculo com base nos quantitativos de nativa", compensacao: "Reposição Florestal", creditos: "Gratuita", ativo: true, href: "/reposicao-florestal" },
+  // Minerária
   { nome: "Destinação em UC — Base", descricao: "Análise completa de viabilidade", compensacao: "Minerária / Reserva Legal", creditos: "5", ativo: true, href: "/ferramentas/destinacao-uc-base" },
   { nome: "Cálculo Implantação/Manutenção UC", descricao: "Cálculo com UFEMG vigente", compensacao: "Minerária", creditos: "2", ativo: true, href: "/ferramentas/calculo-modalidade2" },
   { nome: "Requerimento Minerária", descricao: "Preenchimento assistido + PDF", compensacao: "Minerária", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mineraria" },
-  { nome: "Requerimento Mata Atlântica", descricao: "Preenchimento assistido + PDF", compensacao: "Mata Atlântica", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mata-atlantica" },
-  { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-snuc" },
-  { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: true },
+  // Mata Atlântica
   { nome: "Destinação em UC — Mata Atlântica", descricao: "Análise com bacia, sub-bacia e bioma", compensacao: "Mata Atlântica", creditos: "7", ativo: true },
   { nome: "Análise de Servidão/RPPN", descricao: "Análise para servidão ou RPPN", compensacao: "Mata Atlântica", creditos: "7", ativo: true },
+  { nome: "Requerimento Mata Atlântica", descricao: "Preenchimento assistido + PDF", compensacao: "Mata Atlântica", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mata-atlantica" },
+  // APP
+  { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: true },
+  // SNUC
   { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: true },
+  { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-snuc" },
 ]
 
 export default async function DashboardPage() {
@@ -47,7 +52,7 @@ export default async function DashboardPage() {
       <ChecklistResultado />
 
       {/* Ferramentas */}
-      <section className="acam-card" style={{ padding: "var(--spacing-6)" }}>
+      <section className="acam-card">
         <h3 className="mb-2">Ferramentas Profissionais</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Ferramentas especializadas em análise de compensações ambientais.

@@ -95,7 +95,7 @@ export default function CreditosPage() {
         <div className={`acam-alert ${
           statusParam === "sucesso" ? "acam-alert-success" :
           statusParam === "erro" ? "acam-alert-error" :
-          "acam-alert-info"
+          "acam-alert-result"
         }`}>
           {mensagem}
         </div>

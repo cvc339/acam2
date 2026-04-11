@@ -128,7 +128,7 @@ export default function RequerimentoMinerariaPage() {
   if (concluido) {
     return (
       <div style={{ maxWidth: "48rem", margin: "0 auto", padding: "var(--spacing-8) var(--spacing-6)", textAlign: "center" }}>
-        <div className="acam-card" style={{ padding: "var(--spacing-8)" }}>
+        <div className="acam-card">
           <div style={{ fontSize: "3rem", marginBottom: "var(--spacing-4)" }}>✓</div>
           <h2 style={{ color: "var(--primary-600)", marginBottom: "var(--spacing-2)" }}>PDF Gerado!</h2>
           <p className="text-sm text-muted-foreground mb-6">O requerimento foi baixado com sucesso. Lembre-se de anexar os documentos necessários.</p>
@@ -317,7 +317,7 @@ function StepRevisaoMineraria({ form }: { form: FormMineraria }) {
         <SummaryItem label="DNPM" valor={p.dnpm} />
       </SummaryCard>
 
-      <div className="acam-alert acam-alert-info" style={{ marginTop: "1rem" }}>
+      <div className="acam-alert acam-alert-result" style={{ marginTop: "1rem" }}>
         Este serviço consome <strong>{CUSTO_REQUERIMENTO} crédito</strong>
       </div>
     </>

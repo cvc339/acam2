@@ -1,8 +1,11 @@
 /**
  * Geração de Parecer PDF — React-PDF (template ACAM2)
  *
- * Relatório técnico interno do ACAM, não é formulário oficial do Estado.
+ * Relatório técnico interno do ACAM usando dados do pipeline v3.
  * Usa o template React-PDF (Capa, Pagina, Secao) conforme regra 9 do CLAUDE.md.
+ *
+ * DESIGN: todas as cores e estilos vêm do template.tsx (design system ACAM2).
+ * Nenhuma cor hardcoded — tudo via `cores` e `styles`.
  */
 
 import { renderToBuffer } from "@react-pdf/renderer"
@@ -17,8 +20,8 @@ import {
   cores,
 } from "@/lib/pdf/template"
 import { Text, View } from "@react-pdf/renderer"
+import type { ResultadoPipeline } from "./analise-matricula"
 import type { ResultadoMVAR } from "./mvar"
-import type { DadosMatricula, ResultadoAnalise, ResultadoValidacao } from "./analise-documental"
 import type { ResultadoIDESisema } from "./analise-geoespacial"
 
 // ============================================
@@ -30,19 +33,32 @@ export interface DadosParecer {
   municipio: string
   estado: string
   areaHa: number
+  areaFonte: string
   ferramenta: string
-  dadosMatricula: ResultadoAnalise<DadosMatricula> | null
+  pipeline: ResultadoPipeline
   mvar: ResultadoMVAR | null
   ideSisema: ResultadoIDESisema | null
-  validacao: ResultadoValidacao | null
+  cnd: {
+    tipo: string | null
+    cib: string | null
+    data_emissao: string | null
+    data_validade: string | null
+    area_hectares: number | null
+    nome_contribuinte: string | null
+  } | null
+  vtn: {
+    encontrado: boolean
+    municipio: string | null
+    valor_referencia: number | null
+    valor_estimado: number | null
+    exercicio: number | string | null
+  } | null
 }
 
 // ============================================
-// COMPONENTES AUXILIARES
+// COMPONENTES AUXILIARES (design system ACAM2)
 // ============================================
 
-// React-PDF não aceita null/false como child
-// Wrap condicional: Se(condição, elemento) retorna element ou <View /> vazio
 function Se(cond: unknown, el: React.JSX.Element): React.JSX.Element {
   return cond ? el : <View />
 }
@@ -51,8 +67,18 @@ function Campo({ label, valor }: { label: string; valor: string }) {
   if (!valor || valor === "—") return <View />
   return (
     <View style={{ flexDirection: "row", marginBottom: 3 }}>
-      <Text style={{ fontSize: 8, color: cores.neutral500, width: 100 }}>{label}:</Text>
+      <Text style={{ fontSize: 8, color: cores.neutral500, width: 110 }}>{label}:</Text>
       <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 600, color: cores.neutral800, flex: 1 }}>{valor}</Text>
+    </View>
+  )
+}
+
+function Alerta({ texto, cor }: { texto: string; cor: "error" | "warning" | "success" | "info" }) {
+  const bgMap = { error: cores.errorBg, warning: cores.warningBg, success: cores.successBg, info: cores.infoBg }
+  const fgMap = { error: cores.error, warning: cores.warning, success: cores.success, info: cores.info }
+  return (
+    <View style={{ padding: 6, backgroundColor: bgMap[cor], borderRadius: 4, marginBottom: 4 }}>
+      <Text style={{ fontSize: 8, color: fgMap[cor], lineHeight: 1.5 }}>{texto}</Text>
     </View>
   )
 }
@@ -76,10 +102,17 @@ function StatusDimensao({ nome, pontos, peso, percentual }: { nome: string; pont
   )
 }
 
-function Alerta({ texto, cor }: { texto: string; cor: string }) {
+function SemaforoBadge({ semaforo, justificativa }: { semaforo: string; justificativa: string }) {
+  const bgMap: Record<string, string> = { verde: cores.successBg, amarelo: cores.warningBg, vermelho: cores.errorBg }
+  const fgMap: Record<string, string> = { verde: cores.success, amarelo: cores.warning, vermelho: cores.error }
+  const borderMap: Record<string, string> = { verde: cores.successBorder, amarelo: cores.warningBorder, vermelho: cores.errorBorder }
+
   return (
-    <View style={{ padding: 6, backgroundColor: cor === "error" ? "#fef2f2" : cor === "warning" ? "#fffbeb" : "#f0fdf4", borderRadius: 4, marginBottom: 4 }}>
-      <Text style={{ fontSize: 8, color: cor === "error" ? cores.error : cor === "warning" ? cores.warning : cores.success }}>{texto}</Text>
+    <View style={{ padding: 12, backgroundColor: bgMap[semaforo] || cores.neutral50, borderRadius: 8, marginBottom: 16, borderWidth: 1, borderColor: borderMap[semaforo] || cores.neutral200 }}>
+      <Text style={{ fontSize: 14, fontFamily: "Source Sans 3", fontWeight: 700, color: fgMap[semaforo] || cores.neutral700, textAlign: "center", marginBottom: 4 }}>
+        {semaforo.toUpperCase()}
+      </Text>
+      <Text style={{ fontSize: 8, color: cores.neutral700, textAlign: "center", lineHeight: 1.5 }}>{justificativa}</Text>
     </View>
   )
 }
@@ -91,34 +124,36 @@ function Alerta({ texto, cor }: { texto: string; cor: string }) {
 export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
   const dataFormatada = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
 
-  const mat = dados.dadosMatricula?.dados
+  const pm = dados.pipeline
   const mvar = dados.mvar
   const geo = dados.ideSisema
-  const val = dados.validacao
 
   const pdf = (
     <Document>
       {/* ============ CAPA ============ */}
       <Capa
         ferramenta="Análise Preliminar de Viabilidade"
-        descricao={`Destinação em UC — Imóvel: ${dados.nomeImovel || "N/I"}, ${dados.municipio || "N/I"}/${dados.estado || "MG"}. Área: ${dados.areaHa ? dados.areaHa.toFixed(2) + " ha" : "N/I"}.`}
+        descricao={`Destinação em UC — Imóvel: ${dados.nomeImovel || "N/I"}, ${dados.municipio || "N/I"}/${dados.estado || "MG"}. Área: ${dados.areaHa ? dados.areaHa.toFixed(2) + " ha" : "N/I"} (${dados.areaFonte}).`}
         data={dataFormatada}
       />
 
-      {/* ============ PÁGINA 1: DISCLAIMER + IMÓVEL + UC ============ */}
+      {/* ============ PÁGINA 1: SEMÁFORO + IMÓVEL + UC ============ */}
       <Pagina ferramenta={dados.ferramenta}>
         {/* Disclaimer */}
-        <View style={{ padding: 10, backgroundColor: "#fffbeb", borderRadius: 6, marginBottom: 12, borderWidth: 0.5, borderColor: cores.warning }}>
+        <View style={{ padding: 10, backgroundColor: cores.warningBg, borderRadius: 6, marginBottom: 12, borderWidth: 0.5, borderColor: cores.warning }}>
           <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.warning, marginBottom: 3 }}>ANÁLISE PRELIMINAR</Text>
           <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>
-            Este relatório é uma pré-avaliação automatizada e não constitui parecer jurídico ou técnico com responsabilidade profissional. O objetivo é antecipar possíveis problemas antes de investir esforço em negociações. Os dados extraídos por inteligência artificial devem ser conferidos com os documentos originais. PDFs escaneados (imagem) podem ter precisão reduzida. Para análise aprofundada, consulte um profissional qualificado.
+            Este relatório é uma pré-avaliação automatizada e não constitui parecer jurídico ou técnico. Os dados extraídos por inteligência artificial devem ser conferidos com os documentos originais.{pm.imovel.confianca_ocr === "baixa" ? " ATENÇÃO: documento com baixa legibilidade — conferir todos os dados numéricos." : ""}
           </Text>
         </View>
 
-        {/* Classificação */}
+        {/* Semáforo */}
+        <SemaforoBadge semaforo={pm.semaforo} justificativa={pm.semaforo_justificativa} />
+
+        {/* MVAR se disponível */}
         {mvar ? (
           <CardDestaque
-            label="Avaliação de Viabilidade"
+            label="Avaliação de Viabilidade (MVAR)"
             valor={mvar.classificacao.label}
             sublabel={mvar.classificacao.acao}
           />
@@ -127,21 +162,21 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
         {/* Dados do Imóvel */}
         <Secao titulo="1. Dados do Imóvel">
           <Campo label="Nome" valor={dados.nomeImovel || "—"} />
-          <Campo label="Município/UF" valor={`${dados.municipio || "—"}/${dados.estado || "MG"}`} />
-          <Campo label="Área" valor={dados.areaHa ? `${dados.areaHa.toFixed(2)} ha` : "—"} />
-          {mat?.matricula && <Campo label="Matrícula" valor={mat.matricula} />}
-          {mat?.cartorio && <Campo label="Cartório" valor={mat.cartorio} />}
-          {mat?.data_emissao && <Campo label="Data emissão" valor={new Date(mat.data_emissao).toLocaleDateString("pt-BR")} />}
-          {mat?.ccir && <Campo label="CCIR" valor={mat.ccir} />}
-          {mat?.nirf && <Campo label="NIRF/CIB" valor={mat.nirf} />}
+          <Campo label="Município/UF" valor={`${dados.municipio || pm.imovel.municipio || "—"}/${dados.estado || pm.imovel.uf || "MG"}`} />
+          <Campo label="Área" valor={`${dados.areaHa.toFixed(2)} ha (${dados.areaFonte})`} />
+          <Campo label="Matrícula" valor={pm.imovel.matricula || "—"} />
+          <Campo label="Cartório" valor={pm.imovel.cartorio || "—"} />
+          <Campo label="Comarca" valor={pm.imovel.comarca || "—"} />
+          <Campo label="CCIR" valor={pm.imovel.ccir || "—"} />
+          <Campo label="NIRF" valor={pm.imovel.nirf || "—"} />
+          <Campo label="CAR" valor={pm.imovel.car || "—"} />
+          <Campo label="INCRA" valor={pm.imovel.codigo_incra || "—"} />
+          <Campo label="Georreferenciamento" valor={pm.imovel.georreferenciamento ? "Sim" : "Não"} />
+          {pm.imovel.georef_certificacao ? <Campo label="Certificação" valor={pm.imovel.georef_certificacao} /> : <View />}
         </Secao>
 
         {/* Localização em UC */}
         <Secao titulo="2. Localização em Unidade de Conservação">
-          <Text style={[styles.textoMuted, { marginBottom: 6 }]}>
-            Para compensação minerária, o imóvel deve estar inserido em UC de Proteção Integral pendente de regularização fundiária (Lei Estadual 20.922/2013).
-          </Text>
-
           {geo && geo.ucs_encontradas.length > 0 ? (
             geo.ucs_encontradas.map((uc, i) => (
               <View key={i} style={{ padding: 8, backgroundColor: cores.neutral50, borderRadius: 4, marginBottom: 4 }}>
@@ -154,7 +189,7 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
                 <Text style={{ fontSize: 8, color: cores.neutral500 }}>{uc.categoria}</Text>
                 {uc.percentual_sobreposicao != null ? (
                   <Text style={{ fontSize: 8, marginTop: 2 }}>
-                    Sobreposição: {uc.percentual_sobreposicao}% do imóvel no interior da UC
+                    Sobreposição: {uc.percentual_sobreposicao}% do imóvel
                     {uc.area_sobreposicao_ha != null ? ` (${uc.area_sobreposicao_ha} ha)` : ""}
                   </Text>
                 ) : <View />}
@@ -164,80 +199,199 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
             <Alerta texto="Nenhuma Unidade de Conservação identificada na área do imóvel." cor="error" />
           )}
 
-          <Text style={[styles.textoMuted, { marginTop: 4 }]}>Para visualização do mapa interativo com o polígono do imóvel, acesse o resultado online no ACAM.</Text>
+          {/* Regime UC */}
+          {pm.regime_uc ? (
+            <View style={{ marginTop: 8, padding: 8, backgroundColor: cores.infoBg, borderRadius: 4, borderWidth: 0.5, borderColor: cores.infoBorder }}>
+              <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.info, marginBottom: 4 }}>Regime de UC de Proteção Integral</Text>
+              <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>{pm.regime_uc.impacto_transmissao}</Text>
+              <Text style={{ fontSize: 7, color: cores.neutral500, marginTop: 4, lineHeight: 1.5 }}>{pm.regime_uc.fundamentacao}</Text>
+            </View>
+          ) : <View />}
         </Secao>
       </Pagina>
 
-      {/* ============ PÁGINA 2: MATRÍCULA + CND ============ */}
+      {/* ============ PÁGINA 2: PROPRIETÁRIOS + OUTORGA + ÔNUS + GEOREF ============ */}
       <Pagina ferramenta={dados.ferramenta}>
-        {/* Proprietários */}
-        <Secao titulo="3. Análise da Matrícula">
-          {mat?.proprietarios && mat.proprietarios.length > 0 ? (
-            <>
-              <Text style={[styles.secaoSubtitulo, { marginBottom: 4 }]}>Proprietários identificados</Text>
-              {mat.proprietarios.map((p, i) => (
-                <View key={i} style={{ flexDirection: "row", marginBottom: 3, paddingBottom: 3, borderBottomWidth: 0.5, borderBottomColor: cores.neutral200 }}>
-                  <Text style={{ fontSize: 8, flex: 2 }}>{p.nome}</Text>
-                  <Text style={{ fontSize: 8, flex: 1, textAlign: "center", color: cores.neutral500 }}>
-                    {p.estado_civil || "—"}{p.conjuge ? ` (cônjuge: ${p.conjuge})` : ""}
-                  </Text>
-                  <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, width: 40, textAlign: "right" }}>
-                    {p.percentual}%
+        <Secao titulo="3. Proprietários Atuais">
+          {pm.proprietarios_atuais.length > 0 ? (
+            pm.proprietarios_atuais.map((p, i) => (
+              <View key={i} style={{ padding: 8, backgroundColor: cores.neutral50, borderRadius: 4, marginBottom: 4 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 2 }}>
+                  <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, flex: 1 }}>{p.nome}</Text>
+                  <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.accent }}>
+                    {p.percentual != null ? `${p.percentual}%` : "?%"}
                   </Text>
                 </View>
-              ))}
-              {mat.proprietarios.length > 2 ? (
-                <Alerta texto={`Condomínio com ${mat.proprietarios.length} proprietários — todos devem assinar a escritura de doação.`} cor="warning" />
-              ) : <View />}
-            </>
+                {p.cpf ? <Text style={{ fontSize: 7, color: cores.neutral500 }}>CPF: {p.cpf}</Text> : <View />}
+                {p.estado_civil ? (
+                  <Text style={{ fontSize: 7, color: cores.neutral500 }}>
+                    {p.estado_civil}{p.conjuge ? ` — cônjuge: ${p.conjuge}` : ""}{p.regime_bens ? ` (${p.regime_bens})` : ""}
+                  </Text>
+                ) : <View />}
+                <Text style={{ fontSize: 7, color: cores.neutral400 }}>Ato: {p.ato_aquisitivo}{p.data_aquisicao ? ` (${new Date(p.data_aquisicao).toLocaleDateString("pt-BR")})` : ""}</Text>
+              </View>
+            ))
           ) : (
             <Alerta texto="Nenhum proprietário identificado na matrícula." cor="warning" />
           )}
+        </Secao>
 
-          {/* Ônus e Gravames */}
-          <Text style={[styles.secaoSubtitulo, { marginTop: 8, marginBottom: 4 }]}>Ônus e Gravames</Text>
-          {mat?.onus_gravames && mat.onus_gravames.length > 0 ? (
-            mat.onus_gravames.map((onus, i) => (
-              <Alerta key={i} texto={`${onus.tipo}${onus.numero_averbacao ? ` (${onus.numero_averbacao})` : ""}: ${onus.impacto_compra_venda || onus.descricao}`} cor="error" />
+        {/* Outorga Conjugal */}
+        {pm.outorga_conjugal.some((o) => o.exige_outorga || o.observacao) ? (
+          <Secao titulo="4. Outorga Conjugal">
+            <Text style={[styles.textoMuted, { marginBottom: 6 }]}>
+              Art. 1.647, I do Código Civil — nenhum cônjuge pode alienar imóvel sem autorização do outro.
+            </Text>
+            {pm.outorga_conjugal.map((o, i) => (
+              <View key={i} style={{ marginBottom: 4 }}>
+                {o.exige_outorga ? (
+                  <Alerta texto={`${o.nome}: exige outorga do cônjuge ${o.conjuge || "(nome não identificado)"}. ${o.observacao || ""}`} cor="warning" />
+                ) : o.observacao ? (
+                  <Alerta texto={`${o.nome}: ${o.observacao}`} cor="info" />
+                ) : <View />}
+              </View>
+            ))}
+          </Secao>
+        ) : <View />}
+
+        {/* Ônus e Gravames */}
+        <Secao titulo="5. Ônus e Gravames">
+          {pm.onus_ativos.length > 0 ? (
+            pm.onus_ativos.map((o, i) => (
+              <View key={i} style={{ padding: 6, backgroundColor: o.nivel === 1 ? cores.errorBg : cores.warningBg, borderRadius: 4, marginBottom: 4 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 2 }}>
+                  <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: o.nivel === 1 ? cores.error : cores.warning }}>
+                    {o.tipo.toUpperCase()} — Nível {o.nivel}
+                  </Text>
+                  <Text style={{ fontSize: 7, color: cores.neutral500 }}>{o.ato}</Text>
+                </View>
+                <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>{o.impacto_transmissao}</Text>
+              </View>
             ))
           ) : (
-            <Alerta texto="Nenhum ônus ou gravame identificado na matrícula — situação favorável." cor="success" />
+            <Alerta texto="Nenhum ônus ou gravame ativo — situação registral favorável." cor="success" />
           )}
 
-          {/* Alertas */}
-          {mat?.alertas && mat.alertas.length > 0 ? (
-            <View>
-              <Text style={[styles.secaoSubtitulo, { marginTop: 8, marginBottom: 4 }]}>Alertas</Text>
-              {mat.alertas.map((alerta, i) => (
-                <Alerta key={i} texto={typeof alerta === "string" ? alerta : JSON.stringify(alerta)} cor="warning" />
+          {pm.onus_extintos.length > 0 ? (
+            <View style={{ marginTop: 6 }}>
+              <Text style={[styles.secaoSubtitulo, { color: cores.neutral500, marginBottom: 3 }]}>Ônus Extintos</Text>
+              {pm.onus_extintos.map((o, i) => (
+                <Text key={i} style={{ fontSize: 7, color: cores.neutral500, marginBottom: 2 }}>
+                  ✓ {o.tipo} ({o.ato}) — cancelado por {o.cancelado_por}
+                </Text>
               ))}
             </View>
           ) : <View />}
-
-          <Text style={[styles.textoMuted, { marginTop: 6 }]}>
-            A extração de dados da matrícula é feita por inteligência artificial. PDFs escaneados (imagem) podem ter precisão reduzida. Recomenda-se conferir os dados com o documento original.
-          </Text>
         </Secao>
 
-        {/* Análise Fiscal */}
-        <Secao titulo="4. Análise Fiscal — CND-ITR">
-          <Text style={[styles.textoMuted, { marginBottom: 6 }]}>
-            A CND-ITR comprova a regularidade fiscal do imóvel perante a Receita Federal, requisito para a transferência.
-          </Text>
-
-          {!dados.dadosMatricula ? (
-            <Alerta texto="CND-ITR não apresentada. Análise fiscal não realizada." cor="warning" />
-          ) : (
-            <Text style={styles.texto}>Dados fiscais foram cruzados com os dados da matrícula. Consulte a seção de síntese para divergências identificadas.</Text>
-          )}
+        {/* Georreferenciamento */}
+        <Secao titulo="6. Georreferenciamento">
+          <View style={{ padding: 8, backgroundColor: pm.georeferenciamento.situacao === "regular" ? cores.successBg : cores.errorBg, borderRadius: 4 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 4 }}>
+              <Text style={{ fontSize: 9, fontFamily: "Source Sans 3", fontWeight: 700, color: pm.georeferenciamento.situacao === "regular" ? cores.success : cores.error }}>
+                {pm.georeferenciamento.situacao === "regular" ? "Regular" : "Pendente"}
+              </Text>
+              <Text style={{ fontSize: 7, color: cores.neutral500 }}>Prazo: {pm.georeferenciamento.prazo_legal}</Text>
+            </View>
+            {pm.georeferenciamento.impacto ? (
+              <Text style={{ fontSize: 7, color: cores.error, lineHeight: 1.5 }}>{pm.georeferenciamento.impacto}</Text>
+            ) : (
+              <Text style={{ fontSize: 7, color: cores.success }}>Georreferenciamento existente e em conformidade.</Text>
+            )}
+          </View>
         </Secao>
       </Pagina>
 
-      {/* ============ PÁGINA 3: MVAR + SÍNTESE + CONCLUSÃO ============ */}
+      {/* ============ PÁGINA 3: RESTRIÇÕES + CND + ANÁLISE ============ */}
+      <Pagina ferramenta={dados.ferramenta}>
+        {/* Restrições Ambientais */}
+        {(pm.restricoes_ambientais.length > 0 || pm.contexto_historico_ambiental.length > 0) ? (
+          <Secao titulo="7. Restrições Ambientais">
+            {pm.restricoes_ambientais.length > 0 ? (
+              pm.restricoes_ambientais.map((r, i) => (
+                <View key={i} style={{ padding: 6, backgroundColor: cores.warningBg, borderRadius: 4, marginBottom: 4 }}>
+                  <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.warning }}>{r.tipo}</Text>
+                  <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>{r.descricao}</Text>
+                  {r.area_ha ? <Text style={{ fontSize: 7, color: cores.neutral500 }}>Área: {r.area_ha} ha</Text> : <View />}
+                </View>
+              ))
+            ) : (
+              <Text style={styles.textoMuted}>Nenhuma restrição ambiental vigente identificada.</Text>
+            )}
+
+            {pm.contexto_historico_ambiental.length > 0 ? (
+              <View style={{ marginTop: 8 }}>
+                <Text style={[styles.secaoSubtitulo, { color: cores.neutral500, marginBottom: 4 }]}>Contexto Histórico (absorvido pela UC)</Text>
+                {pm.contexto_historico_ambiental.map((r, i) => (
+                  <View key={i} style={{ padding: 6, backgroundColor: cores.neutral50, borderRadius: 4, marginBottom: 4 }}>
+                    <Text style={{ fontSize: 7, color: cores.neutral500 }}>{r.tipo} ({r.ato_origem})</Text>
+                    <Text style={{ fontSize: 7, color: cores.neutral500, fontStyle: "italic", lineHeight: 1.5 }}>{r.motivo_reclassificacao}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : <View />}
+          </Secao>
+        ) : <View />}
+
+        {/* CND */}
+        <Secao titulo={`8. Análise Fiscal — CND-ITR`}>
+          {dados.cnd ? (
+            <>
+              <Campo label="Tipo" valor={dados.cnd.tipo || "—"} />
+              <Campo label="CIB" valor={dados.cnd.cib || "—"} />
+              <Campo label="Contribuinte" valor={dados.cnd.nome_contribuinte || "—"} />
+              <Campo label="Área" valor={dados.cnd.area_hectares ? `${dados.cnd.area_hectares} ha` : "—"} />
+              <Campo label="Emissão" valor={dados.cnd.data_emissao ? new Date(dados.cnd.data_emissao).toLocaleDateString("pt-BR") : "—"} />
+              <Campo label="Validade" valor={dados.cnd.data_validade ? new Date(dados.cnd.data_validade).toLocaleDateString("pt-BR") : "—"} />
+            </>
+          ) : (
+            <Alerta texto="CND-ITR não apresentada. Análise fiscal não realizada." cor="warning" />
+          )}
+        </Secao>
+
+        {/* Análise de Transmissibilidade */}
+        {pm.analise_transmissibilidade ? (
+          <Secao titulo="9. Análise de Transmissibilidade">
+            <Text style={[styles.texto, { marginBottom: 8 }]}>{pm.analise_transmissibilidade.resumo}</Text>
+
+            {pm.analise_transmissibilidade.impedimentos.length > 0 ? (
+              <View style={{ marginBottom: 8 }}>
+                <Text style={[styles.secaoSubtitulo, { color: cores.error, marginBottom: 4 }]}>Impedimentos</Text>
+                {pm.analise_transmissibilidade.impedimentos.map((imp, i) => (
+                  <View key={i} style={{ padding: 6, backgroundColor: cores.errorBg, borderRadius: 4, marginBottom: 4 }}>
+                    <Text style={{ fontSize: 8, fontFamily: "Source Sans 3", fontWeight: 700, color: cores.error }}>{imp.descricao}</Text>
+                    <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>Fundamentação: {imp.fundamentacao}</Text>
+                    <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.5 }}>Recomendação: {imp.recomendacao}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : <View />}
+
+            {pm.analise_transmissibilidade.diligencias_recomendadas.length > 0 ? (
+              <View style={{ marginBottom: 8 }}>
+                <Text style={[styles.secaoSubtitulo, { marginBottom: 4 }]}>Diligências Recomendadas</Text>
+                {pm.analise_transmissibilidade.diligencias_recomendadas.map((d, i) => (
+                  <Text key={i} style={{ fontSize: 8, color: cores.neutral700, marginBottom: 3, lineHeight: 1.5 }}>• {d}</Text>
+                ))}
+              </View>
+            ) : <View />}
+
+            {pm.analise_transmissibilidade.ressalvas.length > 0 ? (
+              <View>
+                <Text style={[styles.secaoSubtitulo, { color: cores.neutral500, marginBottom: 4 }]}>Ressalvas</Text>
+                {pm.analise_transmissibilidade.ressalvas.map((r, i) => (
+                  <Text key={i} style={{ fontSize: 7, color: cores.neutral500, marginBottom: 2, lineHeight: 1.5 }}>{r}</Text>
+                ))}
+              </View>
+            ) : <View />}
+          </Secao>
+        ) : <View />}
+      </Pagina>
+
+      {/* ============ PÁGINA 4: MVAR + VTN + RECOMENDAÇÕES + CONCLUSÃO ============ */}
       <Pagina ferramenta={dados.ferramenta}>
         {Se(mvar && mvar.vetos.length > 0,
-          <Secao titulo="Impedimentos Identificados">
-            <Text style={[styles.textoMuted, { marginBottom: 4 }]}>Situações que, se confirmadas, impedem a destinação do imóvel.</Text>
+          <Secao titulo="Impedimentos (MVAR)">
             {(mvar?.vetos || []).map((v, i) => (
               <Alerta key={i} texto={`${v.origem}: ${v.motivo}`} cor="error" />
             ))}
@@ -245,10 +399,10 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
         )}
 
         {Se(mvar,
-          <Secao titulo="5. Avaliação de Viabilidade">
+          <Secao titulo="10. Avaliação de Viabilidade (MVAR)">
             <View style={{ padding: 8, backgroundColor: cores.neutral50, borderRadius: 4, marginBottom: 8 }}>
               <Text style={{ fontSize: 7, color: cores.neutral700, lineHeight: 1.6 }}>
-                A avaliação utiliza metodologia própria (MVAR — Matriz de Viabilidade de Aquisição Rural) que analisa quatro dimensões do imóvel: situação registral (ônus e gravames), regularidade fiscal (CND-ITR), titularidade (tipo de proprietário e capacidade para transmissão) e situação técnica (georreferenciamento). Cada dimensão recebe pontuação proporcional ao seu peso na viabilidade da transferência. Situações impeditivas — como bloqueios judiciais, débitos fiscais exigíveis ou espólio não inventariado — resultam em veto automático, independente da pontuação obtida nas demais dimensões.
+                A avaliação utiliza a MVAR (Matriz de Viabilidade de Aquisição Rural), que analisa quatro dimensões: situação registral, regularidade fiscal, titularidade e situação técnica. Situações impeditivas resultam em veto automático.
               </Text>
             </View>
             <StatusDimensao nome="Situação Registral" pontos={mvar?.dimensoes.juridica.pontos || 0} peso={mvar?.dimensoes.juridica.peso || 40} percentual={mvar?.dimensoes.juridica.percentual || 0} />
@@ -258,39 +412,36 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
           </Secao>
         )}
 
-        <Secao titulo="6. Síntese">
-          {(val?.pontos_positivos || []).length > 0 ? (
-            <View>
-              <Text style={[styles.secaoSubtitulo, { color: cores.success, marginBottom: 3 }]}>Pontos Favoráveis</Text>
-              {(val?.pontos_positivos || []).map((pp, i) => (
-                <Text key={i} style={{ fontSize: 8, color: cores.success, marginBottom: 2 }}>✓ {pp}</Text>
-              ))}
-            </View>
-          ) : <View />}
-          {(val?.pendencias || []).length > 0 ? (
-            <View style={{ marginTop: 6 }}>
-              <Text style={[styles.secaoSubtitulo, { color: cores.warning, marginBottom: 3 }]}>Pendências</Text>
-              {(val?.pendencias || []).map((p, i) => (
-                <Text key={i} style={{ fontSize: 8, color: cores.warning, marginBottom: 2 }}>• {p}</Text>
-              ))}
-            </View>
-          ) : <View />}
-        </Secao>
-
-        {Se(mvar?.vtn?.encontrado,
-          <Secao titulo="7. Valor de Referência (VTN)">
-            <Campo label="Município" valor={mvar?.vtn?.municipio || "—"} />
-            <Campo label="R$/ha (preservação)" valor={mvar?.vtn?.valor_referencia ? `R$ ${mvar.vtn.valor_referencia.toLocaleString("pt-BR")}` : "—"} />
-            <Campo label="Valor estimado" valor={mvar?.vtn?.valor_estimado ? `R$ ${mvar.vtn.valor_estimado.toLocaleString("pt-BR")}` : "—"} />
+        {Se(dados.vtn?.encontrado,
+          <Secao titulo="11. Valor de Referência (VTN)">
+            <Campo label="Município" valor={dados.vtn?.municipio || "—"} />
+            <Campo label="R$/ha (preservação)" valor={dados.vtn?.valor_referencia ? `R$ ${dados.vtn.valor_referencia.toLocaleString("pt-BR")}` : "—"} />
+            <Campo label="Valor estimado" valor={dados.vtn?.valor_estimado ? `R$ ${dados.vtn.valor_estimado.toLocaleString("pt-BR")}` : "—"} />
             <Text style={[styles.textoMuted, { marginTop: 3 }]}>
-              Fonte: SIPT/Receita Federal (exercício {mvar?.vtn?.exercicio || "N/I"}). Valor referencial, não substitui laudo de avaliação.
+              Fonte: SIPT/Receita Federal (exercício {dados.vtn?.exercicio || "N/I"}). Valor referencial, não substitui laudo de avaliação.
             </Text>
           </Secao>
         )}
 
+        {pm.recomendacoes.length > 0 ? (
+          <Secao titulo="Recomendações">
+            {pm.recomendacoes.map((r, i) => (
+              <Text key={i} style={{ fontSize: 8, color: cores.neutral700, marginBottom: 3, lineHeight: 1.5 }}>• {r}</Text>
+            ))}
+          </Secao>
+        ) : <View />}
+
+        {pm.documentos_faltantes.length > 0 ? (
+          <Secao titulo="Documentos Faltantes">
+            {pm.documentos_faltantes.map((d, i) => (
+              <Alerta key={i} texto={d} cor="warning" />
+            ))}
+          </Secao>
+        ) : <View />}
+
         <Secao titulo="Conclusão">
           <Text style={[styles.texto, { marginBottom: 4 }]}>
-            {mvar?.resumo || "Análise concluída. Consulte os detalhes nas seções acima."}
+            {mvar?.resumo || pm.analise_transmissibilidade?.resumo || "Análise concluída. Consulte os detalhes nas seções acima."}
           </Text>
         </Secao>
 
