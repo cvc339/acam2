@@ -153,13 +153,17 @@ admin, email e analytics.
 - [ ] Analytics: uso por ferramenta
 
 ### Pipeline de Analise de Matricula (reescrita completa — prioridade maxima)
-- [x] Nivel 1: Multi-pass basico (substituido pelo pipeline abaixo)
-- [ ] Pipeline completo em 5 etapas:
-  - [ ] Etapa 1: Parsing — extrair lista ordenada de atos (R-1, AV-2, etc.) com campos estruturados
-  - [ ] Etapa 2: Pareamento — cruzar cancelamentos com atos originarios (criacao <-> extincao)
-  - [ ] Etapa 3: Classificacao — 4 niveis de impacto (impedimento absoluto / onus real / irregularidade / alerta)
-  - [ ] Etapa 4: Titularidade — reconstituir cadeia de transmissoes, identificar proprietario atual
-  - [ ] Etapa 5: Relatorio — semaforo geral, onus ativos, recomendacoes, documentos faltantes
+- [x] Nivel 1: Multi-pass basico (substituido pelo pipeline v3)
+- [x] Pipeline v3 (3 LLM + codigo deterministico):
+  - [x] Prompt A: dados do imovel (abertura da matricula)
+  - [x] Prompt B: atos com partes e percentuais (A+B em paralelo)
+  - [x] Codigo deterministico: pareamento, onus, titularidade (parcial), area vigente
+  - [x] Outorga conjugal (art. 1.647 CC), georef (Decreto 4.449/2002)
+  - [x] Restricoes ambientais + regra de UC de protecao integral
+  - [x] Prompt C: analise de transmissibilidade (sem PDF, so JSON)
+  - [x] Semaforo deterministico (regras binarias, override sobre LLM)
+  - [x] Testado com Opus: 7/7 na matricula 12669 (80/20 correto)
+- [x] Parecer PDF migrado para React-PDF com template ACAM2
 - [ ] Nivel 2: Few-shot examples no prompt (exemplos reais anonimizados)
 - [ ] Nivel 3: Validacao de schema com Zod (rejeitar extracoes impossiveis, re-extrair)
 
