@@ -24,6 +24,7 @@ import {
   CUSTO_REQUERIMENTO,
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
+import { DatePicker } from "@/components/acam/date-picker"
 
 const ETAPAS = ["Responsável", "Empreendedor", "Empreendimento", "Correspondência", "Licenciamento", "UCs", "Gerar"]
 
@@ -267,7 +268,7 @@ function StepProcessoSNUC({ dados, onChange }: { dados: ProcessoSNUC; onChange: 
         </div>
         <div className="acam-field">
           <label>5.4 - Data da Aprovação da Licença <span className="req">*</span></label>
-          <input className="acam-form-input" placeholder="DD/MM/AAAA" value={dados.dataAprovacao} onChange={(e) => set("dataAprovacao", e.target.value)} />
+          <DatePicker value={dados.dataAprovacao} onChange={(v) => set("dataAprovacao", v)} />
         </div>
       </div>
 
@@ -292,7 +293,7 @@ function StepProcessoSNUC({ dados, onChange }: { dados: ProcessoSNUC; onChange: 
 
       <div className="acam-field">
         <label>5.7 - Data de implantação do empreendimento (se LI, LP+LI, LIC, LO ou RevLO):</label>
-        <input className="acam-form-input" placeholder="DD/MM/AAAA" style={{ maxWidth: "180px" }} value={dados.dataImplantacao} onChange={(e) => set("dataImplantacao", e.target.value)} />
+        <DatePicker value={dados.dataImplantacao} onChange={(v) => set("dataImplantacao", v)} />
       </div>
 
       <div className="acam-field">

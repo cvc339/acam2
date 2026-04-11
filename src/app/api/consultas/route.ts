@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { creditos } from "@/lib/creditos"
 import {
   analisarCND,
 } from "@/lib/services/analise-documental"
@@ -57,33 +58,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ erro: "Arquivo geoespacial (KML/GeoJSON) é obrigatório." }, { status: 400 })
     }
 
-    // 3. Verificar saldo
-    const { data: saldo } = await admin
-      .from("saldo_creditos")
-      .select("saldo")
-      .eq("usuario_id", user.id)
-      .single()
-
-    const saldoAtual = saldo?.saldo ?? 0
-    if (saldoAtual < CUSTO_CREDITOS) {
-      return NextResponse.json({
-        erro: `Saldo insuficiente. Você tem ${saldoAtual} créditos, mas precisa de ${CUSTO_CREDITOS}.`,
-        saldo: saldoAtual,
-      }, { status: 400 })
-    }
-
-    // 4. Debitar créditos ANTES do processamento
-    const { error: erroDebito } = await admin.from("transacoes_creditos").insert({
-      usuario_id: user.id,
-      tipo: "uso",
-      quantidade: CUSTO_CREDITOS,
+    // 3+4. Debitar créditos ANTES do processamento (atômico: verifica saldo + debita)
+    const resultadoDebito = await creditos.debitar(user.id, CUSTO_CREDITOS, {
       descricao: `Análise ${ferramentaId} — ${nomeImovel || "Sem nome"}`,
+      ferramenta_id: ferramentaId,
     })
 
-    if (erroDebito) {
-      console.error("Erro ao debitar créditos:", erroDebito)
-      return NextResponse.json({ erro: "Erro ao debitar créditos" }, { status: 500 })
+    if (!resultadoDebito.sucesso) {
+      const status = resultadoDebito.erro?.includes("Saldo insuficiente") ? 400 : 500
+      return NextResponse.json({
+        erro: resultadoDebito.erro || "Erro ao debitar créditos",
+        saldo: resultadoDebito.saldo_restante,
+      }, { status })
     }
+
+    const saldoAtual = resultadoDebito.saldo_restante + CUSTO_CREDITOS // saldo antes do débito
 
     // 5. Criar registro da consulta
     const { data: consulta, error: erroConsulta } = await admin.from("consultas").insert({
@@ -96,10 +85,8 @@ export async function POST(request: Request) {
     }).select("id").single()
 
     if (erroConsulta || !consulta) {
-      // Reembolsar
-      await admin.from("transacoes_creditos").insert({
-        usuario_id: user.id, tipo: "reembolso", quantidade: CUSTO_CREDITOS,
-        descricao: `Reembolso — erro ao criar consulta`,
+      await creditos.reembolsar(user.id, CUSTO_CREDITOS, {
+        descricao: "Reembolso — erro ao criar consulta",
       })
       return NextResponse.json({ erro: "Erro ao criar consulta" }, { status: 500 })
     }
@@ -382,14 +369,10 @@ export async function POST(request: Request) {
 
     // Reembolsar créditos em caso de erro
     if (consultaId) {
-      await admin.from("transacoes_creditos").insert({
-        usuario_id: user.id, tipo: "reembolso", quantidade: CUSTO_CREDITOS,
+      await creditos.reembolsar(user.id, CUSTO_CREDITOS, {
         descricao: `Reembolso — erro no processamento da consulta ${consultaId}`,
+        consulta_id: consultaId,
       })
-      await admin.from("consultas").update({
-        status: "reembolsada",
-        updated_at: new Date().toISOString(),
-      }).eq("id", consultaId)
     }
 
     return NextResponse.json({

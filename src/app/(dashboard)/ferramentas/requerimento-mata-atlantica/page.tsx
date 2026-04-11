@@ -22,6 +22,7 @@ import {
   CUSTO_REQUERIMENTO,
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
+import { DatePicker } from "@/components/acam/date-picker"
 
 const ETAPAS = ["Responsável", "Empreendedor", "Correspondência", "Processo", "Gerar"]
 
@@ -237,7 +238,7 @@ function StepProcessoMA({ dados, onChange }: { dados: ProcessoMataAtlantica; onC
         </div>
         <div className="acam-field">
           <label>4.4 - Data Aprovação junto à URC/COPAM</label>
-          <input className="acam-form-input" placeholder="DD/MM/AAAA" value={dados.dataAprovacao} onChange={(e) => set("dataAprovacao", e.target.value)} />
+          <DatePicker value={dados.dataAprovacao} onChange={(v) => set("dataAprovacao", v)} />
         </div>
       </div>
 
@@ -272,7 +273,7 @@ function StepProcessoMA({ dados, onChange }: { dados: ProcessoMataAtlantica; onC
         </div>
         <div className="acam-field">
           <label>Válida até</label>
-          <input className="acam-form-input" placeholder="DD/MM/AAAA" value={dados.apefValidade} onChange={(e) => set("apefValidade", e.target.value)} />
+          <DatePicker value={dados.apefValidade} onChange={(v) => set("apefValidade", v)} />
         </div>
       </div>
 
@@ -283,7 +284,7 @@ function StepProcessoMA({ dados, onChange }: { dados: ProcessoMataAtlantica; onC
         </div>
         <div className="acam-field">
           <label>Válido até</label>
-          <input className="acam-form-input" placeholder="DD/MM/AAAA" value={dados.daiaValidade} onChange={(e) => set("daiaValidade", e.target.value)} />
+          <DatePicker value={dados.daiaValidade} onChange={(v) => set("daiaValidade", v)} />
         </div>
       </div>
     </>

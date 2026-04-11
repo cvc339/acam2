@@ -22,6 +22,7 @@ import {
   CUSTO_REQUERIMENTO,
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
+import { DatePicker } from "@/components/acam/date-picker"
 
 const ETAPAS = ["Responsável", "Empreendedor", "Correspondência", "Processo", "Gerar"]
 
@@ -238,7 +239,7 @@ function StepProcessoMineraria({ dados, onChange }: { dados: ProcessoMineraria; 
         </div>
         <div className="acam-field">
           <label>4.5 - Data da Aprovação <span className="req">*</span></label>
-          <input className="acam-form-input" placeholder="DD/MM/AAAA" value={dados.dataAprovacao} onChange={(e) => set("dataAprovacao", e.target.value)} />
+          <DatePicker value={dados.dataAprovacao} onChange={(v) => set("dataAprovacao", v)} />
         </div>
       </div>
 

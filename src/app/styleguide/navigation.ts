@@ -21,6 +21,7 @@ export const styleguideNav: NavSection[] = [
       { title: "Botões", href: "/styleguide/components/button" },
       { title: "Cards", href: "/styleguide/components/card" },
       { title: "Formulários", href: "/styleguide/components/input" },
+      { title: "Date Picker", href: "/styleguide/components/date-picker" },
       { title: "Alertas", href: "/styleguide/components/alert" },
       { title: "Badges", href: "/styleguide/components/badge" },
       { title: "Tabela de Serviços", href: "/styleguide/components/table" },

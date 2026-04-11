@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { createAdminClient } from "@/lib/supabase/admin"
+import { creditos } from "@/lib/creditos"
 
 /**
  * POST /api/creditos/debitar
- * Debita créditos do usuário autenticado via função atômica do Postgres.
- * Regra: debitar antes, reembolsar se falhar.
+ * Debita créditos do usuário autenticado.
+ * Delega para o módulo centralizado de créditos.
  */
 export async function POST(request: Request) {
   try {
@@ -22,29 +22,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ erro: "Quantidade inválida" }, { status: 400 })
     }
 
-    const admin = createAdminClient()
-
-    // Débito atômico via função Postgres (resolve race condition)
-    const { data, error } = await admin.rpc("debitar_creditos", {
-      p_usuario_id: user.id,
-      p_quantidade: quantidade,
-      p_descricao: descricao || `Uso de ferramenta: ${ferramenta_id || "não especificada"}`,
-      p_ferramenta_id: ferramenta_id || null,
-      p_consulta_id: consulta_id || null,
+    const resultado = await creditos.debitar(user.id, quantidade, {
+      descricao,
+      ferramenta_id,
+      consulta_id,
     })
 
-    if (error) {
-      console.error("Erro ao debitar créditos:", error)
-      return NextResponse.json({ erro: "Erro ao debitar créditos" }, { status: 500 })
-    }
-
-    const resultado = Array.isArray(data) ? data[0] : data
-
-    if (!resultado?.sucesso) {
+    if (!resultado.sucesso) {
+      const status = resultado.erro?.includes("Saldo insuficiente") ? 400 : 500
       return NextResponse.json({
-        erro: resultado?.erro || "Saldo insuficiente.",
-        saldo: resultado?.saldo_restante ?? 0,
-      }, { status: 400 })
+        erro: resultado.erro || "Erro ao debitar créditos",
+        saldo: resultado.saldo_restante,
+      }, { status })
     }
 
     return NextResponse.json({
@@ -53,7 +42,7 @@ export async function POST(request: Request) {
       saldo_restante: resultado.saldo_restante,
     })
   } catch (error) {
-    console.error("Erro na API de débito:", error)
+    console.error("[API /creditos/debitar] Erro:", error)
     return NextResponse.json({ erro: "Erro interno" }, { status: 500 })
   }
 }

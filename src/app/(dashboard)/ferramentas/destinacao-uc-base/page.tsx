@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { StatusBadge, AlertResult, DocumentoItem } from "@/components/acam"
 import { MapaImovel } from "@/components/acam/mapa-imovel"
+import { ComboboxMunicipio } from "@/components/acam/combobox-municipio"
 
 const CUSTO_CREDITOS = 5
 
@@ -169,6 +170,7 @@ const ETAPAS_ANALISE = [
 
 function EtapasProgresso() {
   const [etapaAtual, setEtapaAtual] = useState(0)
+  const [fadeIn, setFadeIn] = useState(true)
 
   useEffect(() => {
     let tempoAcumulado = 0
@@ -176,41 +178,70 @@ function EtapasProgresso() {
 
     for (let i = 1; i < ETAPAS_ANALISE.length; i++) {
       tempoAcumulado += ETAPAS_ANALISE[i - 1].duracao * 1000
-      timers.push(setTimeout(() => setEtapaAtual(i), tempoAcumulado))
+      // Fade-out 300ms antes da troca
+      timers.push(setTimeout(() => setFadeIn(false), tempoAcumulado - 300))
+      // Troca de etapa + fade-in
+      timers.push(setTimeout(() => {
+        setEtapaAtual(i)
+        setFadeIn(true)
+      }, tempoAcumulado))
     }
 
     return () => timers.forEach(clearTimeout)
   }, [])
 
+  const etapa = ETAPAS_ANALISE[etapaAtual]
+  const progresso = ((etapaAtual + 1) / ETAPAS_ANALISE.length) * 100
+
   return (
-    <div className="acam-card" style={{ textAlign: "center" }}>
+    <div className="acam-card" style={{ textAlign: "center", padding: "var(--spacing-8) var(--spacing-6)" }}>
       {/* Spinner */}
-      <div className="acam-spinner" style={{ margin: "0 auto var(--spacing-4)" }} />
+      <div className="acam-spinner-lg" style={{ margin: "0 auto var(--spacing-6)" }} />
 
-      <div className="acam-section-title" style={{ textAlign: "center", borderBottom: "none" }}>
-        {ETAPAS_ANALISE[etapaAtual].label}
-      </div>
-      <p className="text-sm text-muted-foreground mb-6">
-        {ETAPAS_ANALISE[etapaAtual].descricao}
-      </p>
-
-      {/* Lista de etapas */}
-      <div style={{ textAlign: "left", maxWidth: "24rem", margin: "0 auto" }}>
-        {ETAPAS_ANALISE.map((etapa, i) => (
-          <div key={i} className="flex items-center gap-3 py-2 text-sm" style={{ opacity: i <= etapaAtual ? 1 : 0.4 }}>
-            <span style={{ color: i < etapaAtual ? "var(--success)" : i === etapaAtual ? "var(--primary-600)" : "var(--neutral-400)", fontWeight: i === etapaAtual ? 600 : 400 }}>
-              {i < etapaAtual ? "✓" : i === etapaAtual ? "●" : "○"}
-            </span>
-            <span style={{ color: i === etapaAtual ? "var(--primary-600)" : undefined, fontWeight: i === etapaAtual ? 600 : 400 }}>
-              {etapa.label}
-            </span>
-          </div>
-        ))}
+      {/* Frase da etapa com fade */}
+      <div style={{
+        transition: "opacity 0.3s ease",
+        opacity: fadeIn ? 1 : 0,
+        minHeight: "3.5rem",
+      }}>
+        <div style={{
+          fontSize: "var(--font-size-base)",
+          fontWeight: 600,
+          color: "var(--primary-600)",
+          marginBottom: "var(--spacing-2)",
+        }}>
+          {etapa.label}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {etapa.descricao}
+        </p>
       </div>
 
-      <p className="text-xs text-muted-foreground mt-4">
-        A análise completa leva aproximadamente 45 segundos.
-      </p>
+      {/* Barra de progresso */}
+      <div style={{
+        marginTop: "var(--spacing-6)",
+        maxWidth: "16rem",
+        marginLeft: "auto",
+        marginRight: "auto",
+      }}>
+        <div style={{
+          height: "3px",
+          borderRadius: "2px",
+          background: "var(--neutral-200)",
+          overflow: "hidden",
+        }}>
+          <div style={{
+            height: "100%",
+            width: `${progresso}%`,
+            background: "var(--primary-500)",
+            borderRadius: "2px",
+            transition: "width 0.5s ease",
+          }} />
+        </div>
+        <p className="text-xs text-muted-foreground" style={{ marginTop: "var(--spacing-2)" }}>
+          Etapa {etapaAtual + 1} de {ETAPAS_ANALISE.length}
+        </p>
+      </div>
     </div>
   )
 }
@@ -713,7 +744,7 @@ export default function DestinacaoUCBasePage() {
             </div>
             <div className="acam-field">
               <label>Município</label>
-              <input className="acam-form-input" placeholder="Ex: Três Marias" value={municipio} onChange={(e) => setMunicipio(e.target.value)} />
+              <ComboboxMunicipio value={municipio} onChange={setMunicipio} placeholder="Ex: Três Marias" />
             </div>
           </div>
         </div>
