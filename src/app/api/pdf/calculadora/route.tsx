@@ -11,10 +11,7 @@ import {
   styles,
 } from "@/lib/pdf/template"
 import { Text, View } from "@react-pdf/renderer"
-
-function fmt(v: number): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
-}
+import { formatBRL as fmt } from "@/lib/format"
 
 function un(unidade: string, qtd: number): string {
   if (unidade === "hectare" && qtd > 1) return "hectares"

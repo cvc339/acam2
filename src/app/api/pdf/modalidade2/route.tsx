@@ -11,14 +11,7 @@ import {
   styles,
 } from "@/lib/pdf/template"
 import { Text, View } from "@react-pdf/renderer"
-
-function fmt(v: number): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
-}
-
-function fmtNum(v: number): string {
-  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
+import { formatBRL as fmt, formatNum as fmtNum } from "@/lib/format"
 
 export async function POST(request: Request) {
   try {

@@ -49,9 +49,8 @@ function OpcaoBtn({ selected, onClick, children }: { selected: boolean; onClick:
   )
 }
 
-function fmt(v: number): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
-}
+import { formatBRL as fmt } from "@/lib/format"
+import { downloadPDF } from "@/lib/pdf/download"
 
 function un(unidade: string, qtd: number): string {
   if (unidade === "hectare" && qtd > 1) return "hectares"
@@ -710,13 +709,7 @@ export default function CalculadoraPage() {
                         }),
                       })
                       if (res.ok) {
-                        const blob = await res.blob()
-                        const url = URL.createObjectURL(blob)
-                        const a = document.createElement("a")
-                        a.href = url
-                        a.download = "ACAM-Calculadora-Intervencao-" + new Date().toISOString().slice(0, 10) + ".pdf"
-                        a.click()
-                        URL.revokeObjectURL(url)
+                        await downloadPDF(res, "ACAM-Calculadora-Intervencao-" + new Date().toISOString().slice(0, 10) + ".pdf")
                       }
                     } catch (err) {
                       console.error("Erro ao gerar PDF:", err)

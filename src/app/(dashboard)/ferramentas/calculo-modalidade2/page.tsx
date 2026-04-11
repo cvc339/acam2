@@ -11,14 +11,9 @@ import {
   type TipoVegetacao,
   type ResultadoModalidade2,
 } from "@/lib/calculo/modalidade2"
-
-function fmt(v: number): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
-}
-
-function fmtNum(v: number): string {
-  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
+import { formatBRL as fmt, formatNum as fmtNum } from "@/lib/format"
+import { downloadPDF } from "@/lib/pdf/download"
+import { debitarCreditos } from "@/lib/creditos/client"
 
 const CUSTO_CREDITOS = 2
 
@@ -87,23 +82,9 @@ export default function CalculoModalidade2Page() {
         return
       }
 
-      // Registrar uso de créditos via fetch (service_role no backend)
-      const res = await fetch("/api/creditos/debitar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          quantidade: CUSTO_CREDITOS,
-          descricao: `Cálculo Modalidade 2 — ${fmtNum(areaNum)} ha de ${NOMES_VEGETACAO[tipoVegetacao]}`,
-          ferramenta_id: "calc-impl-uc",
-        }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setErro(data.erro || "Erro ao debitar créditos.")
-        setLoading(false)
-        return
-      }
+      // Debitar créditos
+      const debito = await debitarCreditos(CUSTO_CREDITOS, "calc-impl-uc", `Cálculo Modalidade 2 — ${fmtNum(areaNum)} ha de ${NOMES_VEGETACAO[tipoVegetacao]}`)
+      if (!debito.ok) { setErro(debito.erro); setLoading(false); return }
 
       // Calcular
       const calc = calcularModalidade2(areaNum, tipoVegetacao, ufemg.valor, ufemg.ano)
@@ -272,13 +253,7 @@ export default function CalculoModalidade2Page() {
                   body: JSON.stringify(resultado),
                 })
                 if (res.ok) {
-                  const blob = await res.blob()
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement("a")
-                  a.href = url
-                  a.download = "ACAM-Calculo-Modalidade2-" + new Date().toISOString().slice(0, 10) + ".pdf"
-                  a.click()
-                  URL.revokeObjectURL(url)
+                  await downloadPDF(res, "ACAM-Calculo-Modalidade2-" + new Date().toISOString().slice(0, 10) + ".pdf")
                 }
               } catch (err) {
                 console.error("Erro ao gerar PDF:", err)

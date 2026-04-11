@@ -25,6 +25,8 @@ import {
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
 import { DatePicker } from "@/components/acam/date-picker"
+import { downloadPDF } from "@/lib/pdf/download"
+import { debitarCreditos } from "@/lib/creditos/client"
 
 const ETAPAS = ["Responsável", "Empreendedor", "Empreendimento", "Correspondência", "Licenciamento", "UCs", "Gerar"]
 
@@ -91,21 +93,8 @@ export default function RequerimentoSNUCPage() {
     setErro("")
     try {
       // Debitar créditos antes de gerar
-      const debitRes = await fetch("/api/creditos/debitar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          quantidade: CUSTO_REQUERIMENTO,
-          descricao: `Requerimento SNUC — ${form.empreendimento.razaoSocial || "N/A"}`,
-          ferramenta_id: "req-snuc",
-        }),
-      })
-      if (!debitRes.ok) {
-        const data = await debitRes.json()
-        setErro(data.erro || "Erro ao debitar créditos.")
-        setLoading(false)
-        return
-      }
+      const debito = await debitarCreditos(CUSTO_REQUERIMENTO, "req-snuc", `Requerimento SNUC — ${form.empreendimento.razaoSocial || "N/A"}`)
+      if (!debito.ok) { setErro(debito.erro); setLoading(false); return }
 
       // Gerar PDF
       const res = await fetch("/api/pdf/requerimento", {
@@ -119,13 +108,7 @@ export default function RequerimentoSNUCPage() {
         setLoading(false)
         return
       }
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "Requerimento_SNUC.pdf"
-      a.click()
-      URL.revokeObjectURL(url)
+      await downloadPDF(res, "Requerimento_SNUC.pdf")
       setConcluido(true)
       router.refresh()
     } catch {
@@ -144,7 +127,7 @@ export default function RequerimentoSNUCPage() {
           <div style={{ display: "flex", gap: "var(--spacing-3)", justifyContent: "center", flexWrap: "wrap" }}>
             <button className="acam-btn acam-btn-secondary" onClick={async () => {
               const res = await fetch("/api/pdf/requerimento", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tipo: "snuc", form }) })
-              if (res.ok) { const blob = await res.blob(); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "Requerimento_SNUC.pdf"; a.click(); URL.revokeObjectURL(url) }
+              if (res.ok) { await downloadPDF(res, "Requerimento_SNUC.pdf") }
             }}>Baixar Novamente</button>
             <button className="acam-btn acam-btn-primary" onClick={() => { setConcluido(false); setEtapa(0); setForm({ responsavel: responsavelInicial, empreendedor: empreendedorInicial, empreendimento: { ...empreendedorInicial }, correspondencia: correspondenciaInicial, processo: processoSNUCInicial, ucs: ucsInicial }) }}>
               Novo Requerimento

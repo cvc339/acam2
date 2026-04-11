@@ -23,6 +23,8 @@ import {
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
 import { DatePicker } from "@/components/acam/date-picker"
+import { downloadPDF } from "@/lib/pdf/download"
+import { debitarCreditos } from "@/lib/creditos/client"
 
 const ETAPAS = ["Responsável", "Empreendedor", "Correspondência", "Processo", "Gerar"]
 
@@ -83,21 +85,8 @@ export default function RequerimentoMinerariaPage() {
     setErro("")
     try {
       // Debitar créditos antes de gerar
-      const debitRes = await fetch("/api/creditos/debitar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          quantidade: CUSTO_REQUERIMENTO,
-          descricao: `Requerimento Minerária — ${form.empreendedor.razaoSocial || "N/A"}`,
-          ferramenta_id: "req-mineraria",
-        }),
-      })
-      if (!debitRes.ok) {
-        const data = await debitRes.json()
-        setErro(data.erro || "Erro ao debitar créditos.")
-        setLoading(false)
-        return
-      }
+      const debito = await debitarCreditos(CUSTO_REQUERIMENTO, "req-mineraria", `Requerimento Minerária — ${form.empreendedor.razaoSocial || "N/A"}`)
+      if (!debito.ok) { setErro(debito.erro); setLoading(false); return }
 
       // Gerar PDF
       const res = await fetch("/api/pdf/requerimento", {
@@ -111,13 +100,7 @@ export default function RequerimentoMinerariaPage() {
         setLoading(false)
         return
       }
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "Requerimento_Compensacao_Mineraria.pdf"
-      a.click()
-      URL.revokeObjectURL(url)
+      await downloadPDF(res, "Requerimento_Compensacao_Mineraria.pdf")
       setConcluido(true)
       router.refresh() // atualiza saldo no header
     } catch {
@@ -136,7 +119,7 @@ export default function RequerimentoMinerariaPage() {
           <div style={{ display: "flex", gap: "var(--spacing-3)", justifyContent: "center", flexWrap: "wrap" }}>
             <button className="acam-btn acam-btn-secondary" onClick={async () => {
               const res = await fetch("/api/pdf/requerimento", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tipo: "mineraria", form }) })
-              if (res.ok) { const blob = await res.blob(); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "Requerimento_Compensacao_Mineraria.pdf"; a.click(); URL.revokeObjectURL(url) }
+              if (res.ok) { await downloadPDF(res, "Requerimento_Compensacao_Mineraria.pdf") }
             }}>Baixar Novamente</button>
             <button className="acam-btn acam-btn-primary" onClick={() => { setConcluido(false); setEtapa(0); setForm({ responsavel: responsavelInicial, empreendedor: empreendedorInicial, correspondencia: correspondenciaInicial, processo: processoMinerariaInicial }) }}>
               Novo Requerimento

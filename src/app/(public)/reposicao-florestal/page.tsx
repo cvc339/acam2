@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { HeaderLogo } from "@/components/acam"
+import { downloadPDF } from "@/lib/pdf/download"
 import { PRODUTOS, calcularReposicaoItem } from "@/lib/calculo/intervencao"
 
 function formatarMoeda(valor: number): string {
@@ -148,13 +149,7 @@ export default function ReposicaoFlorestalPage() {
                   }),
                 })
                 if (res.ok) {
-                  const blob = await res.blob()
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement("a")
-                  a.href = url
-                  a.download = "ACAM-Reposicao-Florestal-" + new Date().toISOString().slice(0, 10) + ".pdf"
-                  a.click()
-                  URL.revokeObjectURL(url)
+                  await downloadPDF(res, "ACAM-Reposicao-Florestal-" + new Date().toISOString().slice(0, 10) + ".pdf")
                 }
               } catch (err) {
                 console.error("Erro ao gerar PDF:", err)
