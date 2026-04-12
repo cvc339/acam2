@@ -188,11 +188,14 @@ export async function POST(request: Request) {
     // PDF
     let parecerPdfPath: string | null = null
     try {
-      const { gerarParecerPDF } = await import("@/lib/services/parecer-pdf")
-      const pdfBuffer = await gerarParecerPDF({
-        nomeImovel: nomeImovel || pm.imovel.denominacao || "", municipio: municipio || pm.imovel.municipio || "",
-        estado: "MG", areaHa: pm.imovel.area_ha || 0, areaFonte: "Matrícula",
-        ferramenta: FERRAMENTA_ID, pipeline: pm, mvar: mvarResult, ideSisema: resultadoGeo,
+      const { gerarParecerMatriculaPDF } = await import("@/lib/services/parecer-matricula-pdf")
+      const pdfBuffer = await gerarParecerMatriculaPDF({
+        nomeImovel: nomeImovel || pm.imovel.denominacao || "",
+        municipio: municipio || pm.imovel.municipio || "",
+        estado: "MG",
+        pipeline: pm,
+        mvar: mvarResult,
+        ideSisema: resultadoGeo,
         cnd: resultadoCND ? { tipo: resultadoCND.tipo, cib: resultadoCND.cib, data_emissao: resultadoCND.data_emissao, data_validade: resultadoCND.data_validade, area_hectares: resultadoCND.area_hectares, nome_contribuinte: resultadoCND.nome_contribuinte } : null,
         vtn: vtn.encontrado ? { encontrado: true, municipio: vtn.municipio ?? null, valor_referencia: vtn.valor_referencia ?? null, valor_estimado: vtn.valor_estimado ?? null, exercicio: vtn.exercicio ?? null } : null,
       })
