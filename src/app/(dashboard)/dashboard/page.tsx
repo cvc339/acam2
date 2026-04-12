@@ -26,6 +26,8 @@ const ferramentas = [
   // SNUC
   { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: true },
   { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-snuc" },
+  // Análise documental
+  { nome: "Análise de Matrícula", descricao: "Viabilidade registral, MVAR, transmissibilidade", compensacao: "Todas", creditos: "5", ativo: true, href: "/ferramentas/analise-matricula" },
 ]
 
 export default async function DashboardPage() {

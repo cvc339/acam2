@@ -2,10 +2,6 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { creditos } from "@/lib/creditos"
-import { analisarCND } from "@/lib/services/analise-documental"
-import type { ResultadoAnalise, DadosMatricula } from "@/lib/services/analise-documental"
-import { analisarMatriculaPipeline } from "@/lib/services/analise-matricula"
-import type { ResultadoPipeline } from "@/lib/services/analise-matricula"
 import {
   processarKML,
   processarGeoJSON,
@@ -20,45 +16,18 @@ import {
   consultarPrioridadeBiodiversidade,
 } from "@/lib/services/analise-geoespacial"
 import type { BBox, Centroide } from "@/lib/services/analise-geoespacial"
-import { calcularMVAR, consultarVTN } from "@/lib/services/mvar"
 import { avaliarCriteriosServidao } from "@/lib/services/criterios-servidao"
 import { analiseSentinel2 } from "@/lib/services/sentinel-ndvi"
 
-const CUSTO_CREDITOS = 7
+const CUSTO_CREDITOS = 6
 const FERRAMENTA_ID = "dest-servidao"
-
-/** Converte ResultadoPipeline (v3) para formato MVAR */
-function pipelineParaMVAR(pm: ResultadoPipeline): ResultadoAnalise<DadosMatricula> {
-  return {
-    sucesso: true,
-    dados: {
-      matricula: pm.imovel.matricula,
-      cartorio: pm.imovel.cartorio,
-      data_emissao: pm.imovel.data_abertura,
-      dias_desde_emissao: null,
-      proprietarios: pm.proprietarios_atuais.map((p) => ({
-        nome: p.nome, percentual: p.percentual ?? 0, cpf_cnpj: p.cpf,
-        estado_civil: p.estado_civil, conjuge: p.conjuge, regime_bens: p.regime_bens,
-      })),
-      onus_gravames: pm.onus_ativos.map((o) => ({
-        tipo: o.tipo, numero_averbacao: o.ato, descricao: o.descricao,
-        valor: o.valor ? String(o.valor) : null, credor: o.credor, data: o.data,
-        impacto_compra_venda: o.impacto_transmissao,
-      })),
-      area_hectares: pm.imovel.area_ha,
-      ccir: pm.imovel.ccir, codigo_imovel_incra: pm.imovel.codigo_incra,
-      nirf: pm.imovel.nirf, municipio: pm.imovel.municipio, estado: pm.imovel.uf,
-      alertas: pm.alertas,
-    },
-  }
-}
 
 /**
  * POST /api/consultas/dest-servidao
  *
  * Compensação MA — Servidão Ambiental ou RPPN (Art. 50, Decreto 47.749/2019)
- * Dois KMLs: área de supressão + área proposta para servidão/RPPN
- * Critérios Art. 50 + ganho ambiental §1º
+ * Análise GEOESPACIAL PURA — sem matrícula, sem CND, sem MVAR.
+ * Foco: similaridade ecológica + ganho ambiental (§1º)
  */
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -74,12 +43,9 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const nomeImovel = formData.get("nome_imovel") as string || ""
     const municipio = formData.get("municipio") as string || ""
-    const matriculaFile = formData.get("matricula") as File | null
-    const cndFile = formData.get("cnd") as File | null
     const kmlSupressaoFile = formData.get("kml_supressao") as File | null
     const kmlPropostaFile = formData.get("kml_proposta") as File | null
 
-    if (!matriculaFile) return NextResponse.json({ erro: "Matrícula (PDF) é obrigatória." }, { status: 400 })
     if (!kmlSupressaoFile) return NextResponse.json({ erro: "Arquivo geoespacial da área de supressão é obrigatório." }, { status: 400 })
     if (!kmlPropostaFile) return NextResponse.json({ erro: "Arquivo geoespacial da área proposta é obrigatório." }, { status: 400 })
 
@@ -106,16 +72,13 @@ export async function POST(request: Request) {
     consultaId = consulta.id
 
     // Upload
-    async function uploadFile(file: File, tipo: string): Promise<Buffer> {
+    async function uploadFile(file: File, tipo: string): Promise<void> {
       const buffer = Buffer.from(await file.arrayBuffer())
       const path = `${user!.id}/${consultaId}/${tipo}_${file.name}`
       await admin.storage.from("documentos").upload(path, buffer, { contentType: file.type, upsert: true })
       await admin.from("documentos").insert({ consulta_id: consultaId, usuario_id: user!.id, tipo, arquivo_nome: file.name, arquivo_path: path, arquivo_tamanho: buffer.length })
-      return buffer
     }
 
-    const matriculaBuffer = await uploadFile(matriculaFile, "matricula")
-    const cndBuffer = cndFile ? await uploadFile(cndFile, "cnd") : null
     await uploadFile(kmlSupressaoFile, "kml_supressao")
     await uploadFile(kmlPropostaFile, "kml_proposta")
 
@@ -148,7 +111,7 @@ export async function POST(request: Request) {
       coberturaSupressao, coberturaProposta,
       fitofisionomiaSuprimida, fitofisionomaProposta,
       areaPrioritaria, corredor, biodiversidade,
-      resultadoUC, resultadoCND,
+      resultadoUC,
     ] = await Promise.all([
       verificarMataAtlantica(bboxSup, centSup),
       verificarMataAtlantica(bboxProp, centProp),
@@ -162,7 +125,6 @@ export async function POST(request: Request) {
       consultarCorredorEcologico(bboxProp, centProp),
       consultarPrioridadeBiodiversidade(bboxProp, centProp),
       analisarImovelIDESisema(kmlPropContent),
-      cndBuffer ? analisarCND(cndBuffer) : Promise.resolve(null),
     ])
 
     const temUCProxima = resultadoUC.ucs_encontradas.length > 0
@@ -178,25 +140,10 @@ export async function POST(request: Request) {
       ),
     ])
 
-    // ETAPA 4: MATRÍCULA + MVAR
-    const pipelineMatricula = await analisarMatriculaPipeline(matriculaBuffer, {})
-    await admin.from("documentos").update({ dados_extraidos: pipelineMatricula }).eq("consulta_id", consultaId).eq("tipo", "matricula")
-
-    const dadosMVAR = pipelineParaMVAR(pipelineMatricula)
-    const mvarResult = await calcularMVAR(dadosMVAR, resultadoCND, resultadoUC, {
-      tipoOperacao: "servidao_rppn", municipio: municipio || pipelineMatricula.imovel.municipio || "",
-      areaPadronizada: resultadoProp.areaHa,
-    })
-
-    const municipioVTN = municipio || pipelineMatricula.imovel.municipio || ""
-    const vtn = consultarVTN(municipioVTN, "MG")
-    const areaPropostaHa = resultadoProp.areaHa ? parseFloat(resultadoProp.areaHa.toFixed(2)) : 0
-    if (vtn.encontrado && vtn.valor_referencia && areaPropostaHa > 0) {
-      vtn.valor_estimado = Math.round(vtn.valor_referencia * areaPropostaHa * 100) / 100
-    }
-
-    // ETAPA 5: AVALIAR CRITÉRIOS
+    // ETAPA 4: AVALIAR CRITÉRIOS
     const areaSupHa = resultadoSup.areaHa ? parseFloat(resultadoSup.areaHa.toFixed(2)) : 0
+    const areaPropostaHa = resultadoProp.areaHa ? parseFloat(resultadoProp.areaHa.toFixed(2)) : 0
+
     const resultadoCriterios = avaliarCriteriosServidao({
       areaSuprimidaHa: areaSupHa, areaPropostaHa,
       maSuprimida: maSupressao.estaNaMataAtlantica,
@@ -204,12 +151,11 @@ export async function POST(request: Request) {
       baciaSuprimida: baciaSupressao?.bacia || null,
       baciaProposta: baciaProposta?.bacia || null,
       coberturaSuprimida: coberturaSupressao, coberturaProposta,
-      fitofisionomiaSuprimida: fitofisionomiaSuprimida,
-      fitofisionomaProposta: fitofisionomaProposta,
+      fitofisionomiaSuprimida, fitofisionomaProposta: fitofisionomaProposta,
       areaPrioritaria, corredor, biodiversidade, temUCProxima,
     })
 
-    // ETAPA 6: MONTAR RESPOSTA
+    // ETAPA 5: MONTAR RESPOSTA
     const parecer = {
       tipo: "Mata Atlântica — Servidão Ambiental / RPPN",
       base_legal: "Art. 50, Decreto Estadual nº 47.749/2019",
@@ -241,40 +187,16 @@ export async function POST(request: Request) {
 
       dinamica_vegetal: dinamicaVegetal.sucesso ? dinamicaVegetal : null,
       sentinel2,
-      mvar: mvarResult,
 
-      imovel: {
-        nome: nomeImovel || pipelineMatricula.imovel.denominacao,
-        municipio: municipio || pipelineMatricula.imovel.municipio, estado: "MG",
-        matricula: pipelineMatricula.imovel.matricula, cartorio: pipelineMatricula.imovel.cartorio,
-        ccir: pipelineMatricula.imovel.ccir, nirf: pipelineMatricula.imovel.nirf,
-        car: pipelineMatricula.imovel.car, georreferenciamento: pipelineMatricula.imovel.georreferenciamento,
-      },
-      proprietarios: pipelineMatricula.proprietarios_atuais.map((p) => ({
-        nome: p.nome, percentual: p.percentual || null,
-        estado_civil: p.estado_civil || null, conjuge: p.conjuge || null,
-      })),
-      onus_gravames: pipelineMatricula.onus_ativos.map((o) => ({
-        tipo: o.tipo, nivel: o.nivel, nivel_descricao: o.nivel_descricao,
-        numero_averbacao: o.ato, descricao: o.descricao, impacto_compra_venda: o.impacto_transmissao,
-      })),
-      semaforo: pipelineMatricula.semaforo,
-      confianca_ocr: pipelineMatricula.imovel.confianca_ocr,
-
-      cnd: resultadoCND ? { tipo: resultadoCND.tipo, cib: resultadoCND.cib, data_validade: resultadoCND.data_validade, area_hectares: resultadoCND.area_hectares } : null,
-      vtn: vtn.encontrado ? { encontrado: true, municipio: vtn.municipio, valor_referencia: vtn.valor_referencia, valor_estimado: vtn.valor_estimado, exercicio: vtn.exercicio } : null,
-      tokens: pipelineMatricula.tokens_consumidos,
+      imovel: { nome: nomeImovel, municipio, estado: "MG" },
     }
 
-    // ETAPA 7: PDF
+    // ETAPA 6: PDF
     let parecerPdfPath: string | null = null
-    console.log("[ROUTE-SERVIDAO] Iniciando geração do PDF...")
     try {
       const { gerarParecerServidaoPDF } = await import("@/lib/services/parecer-servidao-pdf")
       const pdfBuffer = await gerarParecerServidaoPDF({
-        nomeImovel: nomeImovel || pipelineMatricula.imovel.denominacao || "",
-        municipio: municipio || pipelineMatricula.imovel.municipio || "",
-        estado: "MG",
+        nomeImovel, municipio, estado: "MG",
         viabilidade: resultadoCriterios.viabilidade,
         recomendacao: resultadoCriterios.recomendacao,
         baseLegal: "Art. 50, Decreto Estadual nº 47.749/2019",
@@ -289,9 +211,7 @@ export async function POST(request: Request) {
         },
         areaPrioritaria, corredor, biodiversidade,
         dinamicaVegetal: dinamicaVegetal.sucesso ? dinamicaVegetal : null,
-        sentinel2, mvar: mvarResult, pipeline: pipelineMatricula,
-        cnd: resultadoCND ? { tipo: resultadoCND.tipo, cib: resultadoCND.cib, data_validade: resultadoCND.data_validade, area_hectares: resultadoCND.area_hectares } : null,
-        vtn: vtn.encontrado ? { encontrado: true, municipio: vtn.municipio ?? null, valor_referencia: vtn.valor_referencia ?? null, valor_estimado: vtn.valor_estimado ?? null, exercicio: vtn.exercicio ?? null } : null,
+        sentinel2,
       })
 
       const pdfPath = `${user.id}/${consultaId}/parecer.pdf`
@@ -299,7 +219,6 @@ export async function POST(request: Request) {
       parecerPdfPath = pdfPath
     } catch (erroPdf) {
       console.error("Erro ao gerar parecer PDF Servidão:", erroPdf)
-      console.error("Stack:", (erroPdf as Error).stack)
     }
 
     // Atualizar consulta
