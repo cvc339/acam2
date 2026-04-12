@@ -5,6 +5,9 @@
  */
 import { Font } from "@react-pdf/renderer"
 
+// Desabilitar hifenização automática (causa quebras erradas em português)
+Font.registerHyphenationCallback((word) => [word])
+
 Font.register({
   family: "Source Sans 3",
   fonts: [
