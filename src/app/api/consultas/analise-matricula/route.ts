@@ -98,6 +98,7 @@ export async function POST(request: Request) {
 
     // Análise geoespacial (opcional — se KML enviado)
     let resultadoGeo: ResultadoIDESisema | null = null
+    let geojsonImovel: GeoJSON.FeatureCollection | null = null
     if (kmlFile) {
       const kmlContent = Buffer.from(await kmlFile.arrayBuffer()).toString("utf-8")
       const kmlNome = kmlFile.name.toLowerCase()
@@ -106,6 +107,7 @@ export async function POST(request: Request) {
         : await processarKML(kmlContent)
 
       if (resultadoKML.sucesso) {
+        geojsonImovel = resultadoKML.geojson || null
         resultadoGeo = await analisarImovelIDESisema(kmlContent)
       }
     }
@@ -178,6 +180,7 @@ export async function POST(request: Request) {
         total_ucs: resultadoGeo.total_ucs,
         bbox: resultadoGeo.bbox,
         centroide: resultadoGeo.centroide,
+        geojson_imovel: geojsonImovel,
       } : null,
       tokens: pm.tokens_consumidos,
     }

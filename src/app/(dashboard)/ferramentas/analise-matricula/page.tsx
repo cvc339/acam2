@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertResult, DocumentoItem } from "@/components/acam"
+import { AlertResult, DocumentoItem, StatusBadge } from "@/components/acam"
+import { MapaImovel } from "@/components/acam/mapa-imovel"
 import { ComboboxMunicipio } from "@/components/acam/combobox-municipio"
 import { ProgressBar } from "@/components/acam/progress-bar"
 import { formatBRL, formatNum } from "@/lib/format"
@@ -38,6 +39,7 @@ interface Parecer {
   cnd: { tipo: string; cib: string | null; data_emissao: string | null; data_validade: string | null; area_hectares: number | null; nome_contribuinte: string | null } | null
   mvar: { pontuacao?: { total: number; maximo: number }; classificacao?: { label: string; acao: string }; resumo?: string; dimensoes?: Record<string, DimensaoMVAR>; vetos?: Array<{ origem: string; motivo: string }> } | null
   vtn: { encontrado: boolean; municipio?: string; valor_referencia?: number; valor_estimado?: number } | null
+  ide_sisema: { sucesso: boolean; ucs: Array<{ nome: string; categoria: string; protecao_integral: boolean; percentual_sobreposicao: number | null; area_sobreposicao_ha?: number }>; bbox?: { minLon: number; maxLon: number; minLat: number; maxLat: number }; centroide?: { lon: number; lat: number }; geojson_imovel?: GeoJSON.FeatureCollection | null } | null
 }
 
 // Etapas
@@ -246,6 +248,53 @@ export default function AnaliseMatriculaPage() {
 
           <p className="text-xs text-muted-foreground mt-4 italic">Dados extraídos por IA. Conferir com o documento original.</p>
         </div>
+
+        {/* LOCALIZAÇÃO EM UC */}
+        {p.ide_sisema && p.ide_sisema.ucs.length > 0 && (
+          <div className="acam-card">
+            <div className="acam-section-title">Localização em Unidade de Conservação</div>
+            <div className="acam-section-desc">
+              O imóvel apresenta sobreposição com Unidades de Conservação. Esta informação é relevante para avaliação de restrições de uso e potencial de desapropriação.
+            </div>
+            {p.ide_sisema.ucs.map((uc, i) => (
+              <AlertResult
+                key={i}
+                status={uc.protecao_integral ? "warning" : "success"}
+                statusLabel={uc.protecao_integral ? "Proteção Integral" : "Uso Sustentável"}
+              >
+                <strong>{uc.nome}</strong>
+                <div className="text-sm mt-1">{uc.categoria}</div>
+                {uc.percentual_sobreposicao != null && (
+                  <div className="text-sm mt-1">
+                    <strong>{uc.percentual_sobreposicao}%</strong> do imóvel está no interior da UC
+                    {uc.area_sobreposicao_ha != null && <> ({formatNum(uc.area_sobreposicao_ha)} ha)</>}
+                  </div>
+                )}
+                {uc.protecao_integral && (
+                  <div className="text-xs text-muted-foreground mt-2">
+                    UCs de Proteção Integral impõem restrições severas de uso. Verificar situação fundiária junto ao órgão gestor.
+                  </div>
+                )}
+              </AlertResult>
+            ))}
+
+            {p.ide_sisema.bbox && p.ide_sisema.centroide && (
+              <div className="mt-4">
+                <MapaImovel bbox={p.ide_sisema.bbox} centroide={p.ide_sisema.centroide} geojsonImovel={p.ide_sisema.geojson_imovel || undefined} />
+                <p className="text-xs text-muted-foreground mt-2">Localização aproximada baseada no arquivo geoespacial enviado.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {p.ide_sisema && p.ide_sisema.ucs.length === 0 && (
+          <div className="acam-card">
+            <div className="acam-section-title">Localização em Unidade de Conservação</div>
+            <AlertResult status="success" statusLabel="Adequado">
+              Nenhuma Unidade de Conservação identificada na área do imóvel.
+            </AlertResult>
+          </div>
+        )}
 
         {/* CND */}
         <div className="acam-card">
