@@ -213,7 +213,7 @@ export async function gerarParecerAppPDF(dados: DadosParecerApp): Promise<Buffer
 
         {/* Comparação de áreas */}
         <Secao titulo="2. Comparação de Áreas">
-          <View style={{ flexDirection: "row", gap: 8 }}>
+          <View style={{ flexDirection: "row" }}>
             <AreaCard
               titulo="Área de Intervenção"
               label="Intervenção"
@@ -317,5 +317,6 @@ export async function gerarParecerAppPDF(dados: DadosParecerApp): Promise<Buffer
     </Document>
   )
 
-  return renderToBuffer(pdf)
+  const buffer = await renderToBuffer(pdf)
+  return Buffer.from(buffer)
 }

@@ -18,7 +18,7 @@ const ferramentas = [
   { nome: "Cálculo Implantação/Manutenção UC", descricao: "Cálculo com UFEMG vigente", compensacao: "Minerária", creditos: "2", ativo: true, href: "/ferramentas/calculo-modalidade2" },
   { nome: "Requerimento Minerária", descricao: "Preenchimento assistido + PDF", compensacao: "Minerária", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mineraria" },
   // Mata Atlântica
-  { nome: "Destinação em UC — Mata Atlântica", descricao: "Análise com bacia, sub-bacia e bioma", compensacao: "Mata Atlântica", creditos: "7", ativo: true },
+  { nome: "Destinação em UC — Mata Atlântica", descricao: "Análise com bacia, sub-bacia e bioma", compensacao: "Mata Atlântica", creditos: "7", ativo: true, href: "/ferramentas/destinacao-uc-ma" },
   { nome: "Análise de Servidão/RPPN", descricao: "Análise para servidão ou RPPN", compensacao: "Mata Atlântica", creditos: "7", ativo: true },
   { nome: "Requerimento Mata Atlântica", descricao: "Preenchimento assistido + PDF", compensacao: "Mata Atlântica", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mata-atlantica" },
   // APP

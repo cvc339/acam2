@@ -133,8 +133,14 @@ admin, email e analytics.
 **Status: BLOCO 2A CONCLUIDO — 2026-04-11**
 
 ### Bloco 2B — Destinacao em UC — Mata Atlantica (7cr) [modalidade 1.2]
-- [ ] Engine base + bacia + sub-bacia + bioma MA
-- [ ] Aparece em: Comp. Mata Atlantica (1.2)
+- [x] Engine base + bacia + sub-bacia + bioma MA
+- [x] Cobertura vegetal detalhada (grade MapBiomas 8x8)
+- [x] Dinamica vegetal temporal (comparacao 2018-2023)
+- [x] Sentinel-2 NDVI (Copernicus Data Space)
+- [x] Criterios Art. 49, II (6 criterios + calculo 2:1)
+- [x] MVAR completo (4 dimensoes)
+- [x] Aparece em: Comp. Mata Atlantica (1.2)
+**Status: BLOCO 2B CONCLUIDO — 2026-04-12**
 
 ### Bloco 2C — Analise de Servidao/RPPN (7cr) [modalidade 1.1]
 - [ ] Analise geoespacial para servidao ambiental ou RPPN
@@ -145,7 +151,9 @@ admin, email e analytics.
 - [ ] Ecossistemas ameacados + areas prioritarias
 
 ### Bloco 2E — NDVI Sentinel
-- [ ] Analise de vegetacao por satelite (apoio para MA e Servidao)
+- [x] Analise de vegetacao por satelite (apoio para MA e Servidao)
+- [x] Servico sentinel-ndvi.ts portado do ACAM1 (OAuth CDSE + NDVI stats + imagem)
+**Status: BLOCO 2E CONCLUIDO — 2026-04-12 (incluido no Bloco 2B)**
 
 ### Bloco 2F — Comunicacao, admin, analytics
 - [ ] Email transacional (Resend): verificacao, compra, parecer, alertas

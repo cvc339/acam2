@@ -340,7 +340,7 @@ export async function gerarParecerPDF(dados: DadosParecer): Promise<Buffer> {
                 {pm.contexto_historico_ambiental.map((r, i) => (
                   <View key={i} style={{ padding: 6, backgroundColor: cores.neutral50, borderRadius: 4, marginBottom: 4 }}>
                     <Text style={{ fontSize: 7, color: cores.neutral500 }}>{r.tipo} ({r.ato_origem})</Text>
-                    <Text style={{ fontSize: 7, color: cores.neutral500, fontStyle: "italic", lineHeight: 1.5 }}>{r.motivo_reclassificacao}</Text>
+                    <Text style={{ fontSize: 7, color: cores.neutral500, lineHeight: 1.5 }}>{r.motivo_reclassificacao}</Text>
                   </View>
                 ))}
               </View>

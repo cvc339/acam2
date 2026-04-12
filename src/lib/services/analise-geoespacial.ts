@@ -660,6 +660,528 @@ export async function analisarImovelIDESisema(kmlContent: string): Promise<Resul
   }
 }
 
+// ============================================
+// COBERTURA VEGETAL DETALHADA (grade de pontos)
+// ============================================
+
+export interface ClasseCobertura {
+  codigo: number
+  classe: string
+  descricao: string
+  tipo: string
+  pontos: number
+  percentual: number
+  areaEstimadaHa: number
+}
+
+export interface ResultadoCoberturaDetalhada {
+  sucesso: boolean
+  pontosAnalisados: number
+  pontosTotal: number
+  classes: ClasseCobertura[]
+  totaisPorTipo: {
+    natural: { pontos: number; percentual: number; areaHa: number }
+    antropico: { pontos: number; percentual: number; areaHa: number }
+    indefinido: { pontos: number; percentual: number; areaHa: number }
+  }
+  fonte: string
+  ano: number
+  metodologia: string
+  erro?: string
+}
+
+async function consultarPontoMapBiomas(
+  layer: string,
+  lon: number,
+  lat: number,
+): Promise<{ codigo: number; classe: string; tipo: string } | null> {
+  const baseUrl = "https://geoserver.meioambiente.mg.gov.br/IDE/wms"
+  const buffer = 0.0001
+
+  const params = new URLSearchParams({
+    SERVICE: "WMS",
+    VERSION: "1.1.1",
+    REQUEST: "GetFeatureInfo",
+    LAYERS: layer,
+    QUERY_LAYERS: layer,
+    STYLES: "",
+    FORMAT: "image/png",
+    INFO_FORMAT: "application/json",
+    SRS: "EPSG:4674",
+    BBOX: `${lon - buffer},${lat - buffer},${lon + buffer},${lat + buffer}`,
+    WIDTH: "101",
+    HEIGHT: "101",
+    X: "50",
+    Y: "50",
+    FEATURE_COUNT: "1",
+  })
+
+  try {
+    const response = await fetch(`${baseUrl}?${params.toString()}`, {
+      signal: AbortSignal.timeout(10000),
+    })
+    if (!response.ok) return null
+
+    const data = await response.json() as { features?: Array<{ properties?: { GRAY_INDEX?: number; gray_index?: number } }> }
+    if (!data.features?.length) return null
+
+    const props = data.features[0]?.properties
+    const codigo = props?.GRAY_INDEX ?? props?.gray_index
+    if (codigo === undefined || codigo === null) return null
+
+    const info = MAPBIOMAS_CLASSES[codigo] || { classe: `Código ${codigo}`, tipo: "indefinido", descricao: `Código ${codigo}` }
+    return { codigo, classe: info.classe, tipo: info.tipo }
+  } catch {
+    return null
+  }
+}
+
+export interface MapaClassificacao {
+  width: number
+  height: number
+  bbox: number[] // [minLon, minLat, maxLon, maxLat]
+  dados: number[] // array compacto: código da classe por pixel (0 se fora)
+}
+
+/** Paleta de cores MapBiomas para renderização no frontend */
+export const MAPBIOMAS_CORES: Record<number, string> = {
+  3: "#1f8d49",   // Formação Florestal (verde escuro)
+  4: "#7dc975",   // Formação Savânica (verde claro)
+  11: "#519799",  // Campo Alagado
+  12: "#d6bc74",  // Formação Campestre
+  23: "#dd7e6b",  // Praia, Duna e Areal
+  29: "#ffaa5f",  // Afloramento Rochoso
+  33: "#0000ff",  // Rio, Lago e Oceano
+  9: "#7a5900",   // Silvicultura
+  15: "#ffd966",  // Pastagem
+  20: "#db4d4f",  // Cana
+  21: "#ffefc3",  // Mosaico de usos
+  24: "#d4271e",  // Área urbanizada
+  30: "#9c0027",  // Mineração
+  39: "#c27ba0",  // Soja
+  41: "#e787f8",  // Outras lavouras temporárias
+  46: "#cca0d4",  // Café
+  47: "#d082de",  // Citrus
+  48: "#cd49e4",  // Outras lavouras perenes
+  62: "#660066",  // Algodão
+  25: "#bdb76b",  // Outras áreas não vegetadas
+}
+
+async function analisarCoberturaWCS(
+  geometria: GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  areaHa: number,
+): Promise<(ResultadoCoberturaDetalhada & { mapaClassificacao?: MapaClassificacao }) | null> {
+  try {
+    const coords = geometria.type === "Polygon"
+      ? geometria.coordinates[0]
+      : geometria.coordinates[0][0]
+
+    const lons = coords.map((c) => c[0])
+    const lats = coords.map((c) => c[1])
+    const bboxObj = {
+      minLon: Math.min(...lons), maxLon: Math.max(...lons),
+      minLat: Math.min(...lats), maxLat: Math.max(...lats),
+    }
+
+    const coverageId = `IDE__${LAYER_MAPBIOMAS_NAT_ANT}`
+    const baseUrl = "https://geoserver.meioambiente.mg.gov.br/IDE/ows"
+
+    const params = new URLSearchParams({
+      service: "WCS",
+      version: "2.0.1",
+      request: "GetCoverage",
+      CoverageId: coverageId,
+      format: "image/tiff",
+    })
+    const url = `${baseUrl}?${params.toString()}&subset=Long(${bboxObj.minLon},${bboxObj.maxLon})&subset=Lat(${bboxObj.minLat},${bboxObj.maxLat})`
+
+    const response = await fetch(url, { signal: AbortSignal.timeout(30000) })
+    if (!response.ok) return null
+
+    const arrayBuffer = await response.arrayBuffer()
+    if (arrayBuffer.byteLength < 100) return null
+
+    const GeoTIFF = await import("geotiff")
+    const tiff = await GeoTIFF.fromArrayBuffer(arrayBuffer)
+    const image = await tiff.getImage()
+    const rasters = await image.readRasters()
+    const data = rasters[0] as Uint8Array | Float32Array
+    const width = image.getWidth()
+    const height = image.getHeight()
+    const imgBbox = image.getBoundingBox() // [minLon, minLat, maxLon, maxLat]
+    const resX = (imgBbox[2] - imgBbox[0]) / width
+    const resY = (imgBbox[3] - imgBbox[1]) / height
+
+    // Contar pixels por classe (point-in-polygon)
+    const contagem: Record<number, { codigo: number; classe: string; descricao: string; tipo: string; pontos: number }> = {}
+    let pixelsDentro = 0
+    const mapaData: number[] = []
+
+    for (let row = 0; row < height; row++) {
+      for (let col = 0; col < width; col++) {
+        const pixelLon = imgBbox[0] + (col + 0.5) * resX
+        const pixelLat = imgBbox[3] - (row + 0.5) * resY
+
+        let dentro = false
+        try {
+          dentro = turf.booleanPointInPolygon(turf.point([pixelLon, pixelLat]), geometria)
+        } catch { /* fora */ }
+
+        const valor = data[row * width + col]
+        if (!dentro || !valor) {
+          mapaData.push(0)
+          continue
+        }
+
+        pixelsDentro++
+        mapaData.push(valor)
+
+        if (!contagem[valor]) {
+          const info = MAPBIOMAS_CLASSES[valor] || { classe: `Código ${valor}`, tipo: "indefinido", descricao: `Código ${valor}` }
+          contagem[valor] = { codigo: valor, classe: info.classe, descricao: info.descricao, tipo: info.tipo, pontos: 0 }
+        }
+        contagem[valor].pontos++
+      }
+    }
+
+    if (pixelsDentro < 5) return null
+
+    const classes: ClasseCobertura[] = Object.values(contagem).map((c) => {
+      const percentual = parseFloat(((c.pontos / pixelsDentro) * 100).toFixed(1))
+      const areaEstimadaHa = parseFloat(((percentual / 100) * areaHa).toFixed(1))
+      return { codigo: c.codigo, classe: c.classe, descricao: c.descricao, tipo: c.tipo, pontos: c.pontos, percentual, areaEstimadaHa }
+    }).sort((a, b) => b.areaEstimadaHa - a.areaEstimadaHa)
+
+    const totaisPorTipo = { natural: { pontos: 0, percentual: 0, areaHa: 0 }, antropico: { pontos: 0, percentual: 0, areaHa: 0 }, indefinido: { pontos: 0, percentual: 0, areaHa: 0 } }
+    for (const c of classes) {
+      const tipo = (c.tipo === "natural" || c.tipo === "antropico") ? c.tipo : "indefinido"
+      totaisPorTipo[tipo].pontos += c.pontos
+      totaisPorTipo[tipo].percentual += c.percentual
+      totaisPorTipo[tipo].areaHa += c.areaEstimadaHa
+    }
+
+    console.log(`[WCS] ${pixelsDentro} pixels, ${classes.length} classes, mapa ${width}×${height}`)
+
+    return {
+      sucesso: true,
+      pontosAnalisados: pixelsDentro,
+      pontosTotal: pixelsDentro,
+      classes,
+      totaisPorTipo,
+      fonte: "MapBiomas Coleção 9 (WCS via IDE-Sisema)",
+      ano: 2023,
+      metodologia: `WCS raster ${width}×${height} pixels`,
+      mapaClassificacao: { width, height, bbox: imgBbox, dados: mapaData },
+    }
+  } catch (err) {
+    console.warn("[WCS] Falhou:", (err as Error).message, "— usando grade de pontos")
+    return null
+  }
+}
+
+export async function analisarCoberturaDetalhada(
+  geometria: GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  areaHa: number,
+  gridSize = 8,
+): Promise<ResultadoCoberturaDetalhada & { mapaClassificacao?: MapaClassificacao }> {
+  if (!geometria?.type || !geometria.coordinates) {
+    return {
+      sucesso: false,
+      erro: "Geometria inválida",
+      pontosAnalisados: 0,
+      pontosTotal: 0,
+      classes: [],
+      totaisPorTipo: { natural: { pontos: 0, percentual: 0, areaHa: 0 }, antropico: { pontos: 0, percentual: 0, areaHa: 0 }, indefinido: { pontos: 0, percentual: 0, areaHa: 0 } },
+      fonte: "MapBiomas Coleção 9",
+      ano: 2023,
+      metodologia: "N/A",
+    }
+  }
+
+  // Tentar WCS primeiro (cobertura total por pixel)
+  const resultadoWCS = await analisarCoberturaWCS(geometria, areaHa)
+  if (resultadoWCS) return resultadoWCS
+
+  // Fallback: grade de pontos
+  console.log("[COBERTURA] WCS indisponível, usando grade de pontos")
+
+  const coords = geometria.type === "Polygon"
+    ? geometria.coordinates[0]
+    : (geometria as GeoJSON.MultiPolygon).coordinates[0][0]
+
+  const lons = coords.map((c) => c[0])
+  const lats = coords.map((c) => c[1])
+  const minLon = Math.min(...lons), maxLon = Math.max(...lons)
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats)
+
+  const stepLon = (maxLon - minLon) / (gridSize - 1)
+  const stepLat = (maxLat - minLat) / (gridSize - 1)
+
+  const pontos: { lon: number; lat: number }[] = []
+  for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize; j++) {
+      pontos.push({ lon: minLon + i * stepLon, lat: minLat + j * stepLat })
+    }
+  }
+
+  const contagem: Record<string, { codigo: number; classe: string; descricao: string; tipo: string; pontos: number }> = {}
+  let pontosValidos = 0
+
+  for (let idx = 0; idx < pontos.length; idx++) {
+    const ponto = pontos[idx]
+
+    const resultado = await consultarPontoMapBiomas(LAYER_MAPBIOMAS_NAT_ANT, ponto.lon, ponto.lat)
+    if (resultado) {
+      const chave = `${resultado.codigo}_${resultado.classe}`
+      if (!contagem[chave]) {
+        const info = MAPBIOMAS_CLASSES[resultado.codigo] || { classe: resultado.classe, tipo: resultado.tipo, descricao: resultado.classe }
+        contagem[chave] = { codigo: resultado.codigo, classe: info.classe, descricao: info.descricao, tipo: info.tipo, pontos: 0 }
+      }
+      contagem[chave].pontos++
+      pontosValidos++
+    }
+
+    // Pausa a cada 5 pontos para não sobrecarregar o servidor
+    if (idx % 5 === 0 && idx > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+  }
+
+  if (pontosValidos === 0) {
+    return {
+      sucesso: false,
+      erro: "Nenhum ponto válido retornado pelo MapBiomas",
+      pontosAnalisados: 0,
+      pontosTotal: pontos.length,
+      classes: [],
+      totaisPorTipo: { natural: { pontos: 0, percentual: 0, areaHa: 0 }, antropico: { pontos: 0, percentual: 0, areaHa: 0 }, indefinido: { pontos: 0, percentual: 0, areaHa: 0 } },
+      fonte: "MapBiomas Coleção 9",
+      ano: 2023,
+      metodologia: `Grade de ${gridSize}×${gridSize} pontos`,
+    }
+  }
+
+  const classes: ClasseCobertura[] = Object.values(contagem).map((c) => {
+    const percentual = parseFloat(((c.pontos / pontosValidos) * 100).toFixed(1))
+    const areaEstimadaHa = parseFloat(((percentual / 100) * areaHa).toFixed(1))
+    return { codigo: c.codigo, classe: c.classe, descricao: c.descricao, tipo: c.tipo, pontos: c.pontos, percentual, areaEstimadaHa }
+  }).sort((a, b) => b.areaEstimadaHa - a.areaEstimadaHa)
+
+  const totaisPorTipo = { natural: { pontos: 0, percentual: 0, areaHa: 0 }, antropico: { pontos: 0, percentual: 0, areaHa: 0 }, indefinido: { pontos: 0, percentual: 0, areaHa: 0 } }
+  for (const c of classes) {
+    const tipo = (c.tipo === "natural" || c.tipo === "antropico") ? c.tipo : "indefinido"
+    totaisPorTipo[tipo].pontos += c.pontos
+    totaisPorTipo[tipo].percentual += c.percentual
+    totaisPorTipo[tipo].areaHa += c.areaEstimadaHa
+  }
+  for (const tipo of Object.keys(totaisPorTipo) as Array<keyof typeof totaisPorTipo>) {
+    totaisPorTipo[tipo].percentual = parseFloat(totaisPorTipo[tipo].percentual.toFixed(1))
+    totaisPorTipo[tipo].areaHa = parseFloat(totaisPorTipo[tipo].areaHa.toFixed(1))
+  }
+
+  console.log(`[COBERTURA] ${pontosValidos}/${pontos.length} pontos — Natural: ${totaisPorTipo.natural.percentual}% | Antrópico: ${totaisPorTipo.antropico.percentual}%`)
+
+  return {
+    sucesso: true,
+    pontosAnalisados: pontosValidos,
+    pontosTotal: pontos.length,
+    classes,
+    totaisPorTipo,
+    fonte: "MapBiomas Coleção 9 (via IDE-Sisema)",
+    ano: 2023,
+    metodologia: `Grade de ${gridSize}×${gridSize} pontos sobre a área`,
+  }
+}
+
+// ============================================
+// DINÂMICA DE COBERTURA VEGETAL (temporal)
+// ============================================
+
+const LAYERS_MAPBIOMAS_ANTERIORES = [
+  { ano: 2020, camada: "ide_1403_mg_nat_ant_mapbiomas_col9_2020" },
+  { ano: 2019, camada: "ide_1403_mg_nat_ant_mapbiomas_col9_2019" },
+  { ano: 2018, camada: "ide_1403_mg_nat_ant_mapbiomas_col9_2018" },
+  { ano: 2018, camada: "ide_1403_mg_nat_ant_mapbiomas_col8_2018" },
+  { ano: 2018, camada: "ide_1403_mg_nat_ant_mapbiomas_col7_2018" },
+]
+
+export interface ResultadoDinamicaVegetal {
+  sucesso: boolean
+  periodoAnalisado: string
+  fonteDados: string
+  pontosAnalisados: number
+  transicoes: {
+    coberturaEstavel: { ha: number; percentual: number; descricao: string }
+    perdaCobertura: { ha: number; percentual: number; descricao: string }
+    ganhoCobertura: { ha: number; percentual: number; descricao: string }
+    usoAntropicoEstavel: { ha: number; percentual: number; descricao: string }
+  }
+  tendencia: "POSITIVA" | "NEGATIVA" | "ESTÁVEL"
+  interpretacao: string
+  ressalva: string
+  erro?: string
+}
+
+export async function analisarDinamicaVegetal(
+  geometria: GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  areaHa: number,
+): Promise<ResultadoDinamicaVegetal> {
+  if (!geometria?.coordinates) {
+    return {
+      sucesso: false,
+      erro: "Geometria inválida",
+      periodoAnalisado: "",
+      fonteDados: "",
+      pontosAnalisados: 0,
+      transicoes: {
+        coberturaEstavel: { ha: 0, percentual: 0, descricao: "" },
+        perdaCobertura: { ha: 0, percentual: 0, descricao: "" },
+        ganhoCobertura: { ha: 0, percentual: 0, descricao: "" },
+        usoAntropicoEstavel: { ha: 0, percentual: 0, descricao: "" },
+      },
+      tendencia: "ESTÁVEL",
+      interpretacao: "",
+      ressalva: "",
+    }
+  }
+
+  // Encontrar camada anterior disponível
+  const coords = geometria.type === "Polygon"
+    ? geometria.coordinates[0]
+    : (geometria as GeoJSON.MultiPolygon).coordinates[0][0]
+  const lons = coords.map((c) => c[0])
+  const lats = coords.map((c) => c[1])
+  const centroide = { lon: (Math.min(...lons) + Math.max(...lons)) / 2, lat: (Math.min(...lats) + Math.max(...lats)) / 2 }
+
+  let camadaAnterior: { ano: number; camada: string } | null = null
+  for (const layer of LAYERS_MAPBIOMAS_ANTERIORES) {
+    const teste = await consultarPontoMapBiomas(layer.camada, centroide.lon, centroide.lat)
+    if (teste) {
+      camadaAnterior = layer
+      break
+    }
+  }
+
+  if (!camadaAnterior) {
+    return {
+      sucesso: false,
+      erro: "Nenhuma camada MapBiomas anterior disponível",
+      periodoAnalisado: "",
+      fonteDados: "",
+      pontosAnalisados: 0,
+      transicoes: {
+        coberturaEstavel: { ha: 0, percentual: 0, descricao: "" },
+        perdaCobertura: { ha: 0, percentual: 0, descricao: "" },
+        ganhoCobertura: { ha: 0, percentual: 0, descricao: "" },
+        usoAntropicoEstavel: { ha: 0, percentual: 0, descricao: "" },
+      },
+      tendencia: "ESTÁVEL",
+      interpretacao: "",
+      ressalva: "",
+    }
+  }
+
+  // Grade 8x8 para comparação temporal
+  const gridSize = 8
+  const minLon = Math.min(...lons), maxLon = Math.max(...lons)
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats)
+  const stepLon = (maxLon - minLon) / (gridSize - 1)
+  const stepLat = (maxLat - minLat) / (gridSize - 1)
+
+  let coberturaEstavel = 0
+  let perdaCobertura = 0
+  let ganhoCobertura = 0
+  let antropicoEstavel = 0
+  let pontosValidos = 0
+
+  for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize; j++) {
+      const lon = minLon + i * stepLon
+      const lat = minLat + j * stepLat
+
+      const [atual, anterior] = await Promise.all([
+        consultarPontoMapBiomas(LAYER_MAPBIOMAS_NAT_ANT, lon, lat),
+        consultarPontoMapBiomas(camadaAnterior.camada, lon, lat),
+      ])
+
+      if (!atual || !anterior) continue
+      pontosValidos++
+
+      const eraNatural = anterior.tipo === "natural"
+      const ehNatural = atual.tipo === "natural"
+
+      if (eraNatural && ehNatural) coberturaEstavel++
+      else if (eraNatural && !ehNatural) perdaCobertura++
+      else if (!eraNatural && ehNatural) ganhoCobertura++
+      else antropicoEstavel++
+
+      // Pausa a cada 5 pares
+      if (pontosValidos % 5 === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+    }
+  }
+
+  if (pontosValidos === 0) {
+    return {
+      sucesso: false,
+      erro: "Nenhum ponto válido para comparação temporal",
+      periodoAnalisado: `${camadaAnterior.ano}-2023`,
+      fonteDados: "MapBiomas Coleção 9 (via IDE-Sisema)",
+      pontosAnalisados: 0,
+      transicoes: {
+        coberturaEstavel: { ha: 0, percentual: 0, descricao: "" },
+        perdaCobertura: { ha: 0, percentual: 0, descricao: "" },
+        ganhoCobertura: { ha: 0, percentual: 0, descricao: "" },
+        usoAntropicoEstavel: { ha: 0, percentual: 0, descricao: "" },
+      },
+      tendencia: "ESTÁVEL",
+      interpretacao: "",
+      ressalva: "",
+    }
+  }
+
+  const pctEstavel = parseFloat(((coberturaEstavel / pontosValidos) * 100).toFixed(1))
+  const pctPerda = parseFloat(((perdaCobertura / pontosValidos) * 100).toFixed(1))
+  const pctGanho = parseFloat(((ganhoCobertura / pontosValidos) * 100).toFixed(1))
+  const pctAntropico = parseFloat(((antropicoEstavel / pontosValidos) * 100).toFixed(1))
+
+  const haEstavel = parseFloat(((pctEstavel / 100) * areaHa).toFixed(1))
+  const haPerda = parseFloat(((pctPerda / 100) * areaHa).toFixed(1))
+  const haGanho = parseFloat(((pctGanho / 100) * areaHa).toFixed(1))
+  const haAntropico = parseFloat(((pctAntropico / 100) * areaHa).toFixed(1))
+
+  const saldo = pctGanho - pctPerda
+  let tendencia: "POSITIVA" | "NEGATIVA" | "ESTÁVEL"
+  if (saldo > 5) tendencia = "POSITIVA"
+  else if (saldo < -5) tendencia = "NEGATIVA"
+  else tendencia = "ESTÁVEL"
+
+  const interpretacao = tendencia === "ESTÁVEL"
+    ? `A área apresenta tendência estável no período ${camadaAnterior.ano}-2023. A cobertura vegetal permaneceu predominantemente estável. ${pctEstavel}% da área manteve cobertura vegetal nativa no período.`
+    : tendencia === "POSITIVA"
+      ? `A área apresenta tendência positiva (regeneração) no período ${camadaAnterior.ano}-2023. Ganho de ${pctGanho}% de cobertura nativa, com perda de apenas ${pctPerda}%.`
+      : `A área apresenta tendência negativa (desmatamento) no período ${camadaAnterior.ano}-2023. Perda de ${pctPerda}% de cobertura nativa, com ganho de apenas ${pctGanho}%.`
+
+  console.log(`[DINÂMICA] ${camadaAnterior.ano}-2023: Estável ${pctEstavel}% | Perda ${pctPerda}% | Ganho ${pctGanho}% → ${tendencia}`)
+
+  return {
+    sucesso: true,
+    periodoAnalisado: `${camadaAnterior.ano}-2023`,
+    fonteDados: "MapBiomas Coleção 9 (via IDE-Sisema)",
+    pontosAnalisados: pontosValidos,
+    transicoes: {
+      coberturaEstavel: { ha: haEstavel, percentual: pctEstavel, descricao: "Cobertura vegetal nativa mantida no período" },
+      perdaCobertura: { ha: haPerda, percentual: pctPerda, descricao: "Perda de cobertura florestal no período" },
+      ganhoCobertura: { ha: haGanho, percentual: pctGanho, descricao: "Ganho de cobertura florestal no período (regeneração)" },
+      usoAntropicoEstavel: { ha: haAntropico, percentual: pctAntropico, descricao: "Uso antrópico mantido no período" },
+    },
+    tendencia,
+    interpretacao,
+    ressalva: "Mudanças na cobertura vegetal podem decorrer de múltiplas causas, incluindo atividade antrópica, incêndios florestais, queimas prescritas ou eventos climáticos. A identificação da causa requer investigação de campo.",
+  }
+}
+
 // Re-exportar constantes de camadas para uso externo
 export const LAYERS = {
   UCS: LAYER_UCS,
