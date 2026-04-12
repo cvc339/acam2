@@ -149,7 +149,7 @@ export default function MataAtlanticaPage() {
                 <li>Vegetação nativa do Bioma MA</li>
               </ul>
             </div>
-            <div className="acam-modalidade-destaque"><strong>Ferramenta disponível:</strong> Análise de Servidão/RPPN (7 créditos)</div>
+            <div className="acam-modalidade-destaque"><strong>Ferramenta disponível:</strong> <a href="/ferramentas/analise-servidao" className="acam-btn acam-btn-primary acam-btn-sm ml-2">Acessar ferramenta (7 créditos)</a></div>
           </div>
           <div className="acam-modalidade-card">
             <span className="acam-modalidade-badge">Opção 3</span>

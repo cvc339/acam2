@@ -1182,6 +1182,149 @@ export async function analisarDinamicaVegetal(
   }
 }
 
+// ============================================
+// CONSULTAS ECOLÓGICAS (Art. 50, Decreto 47.749)
+// Camadas IDE-Sisema para similaridade ecológica
+// e ganho ambiental (§1º)
+// ============================================
+
+const LAYER_FITOFISIONOMIA = "ide_2401_mg_heterogeneidade_fitofisionomias_pol"
+const LAYER_AREAS_PRIORITARIAS = "ide_2401_mg_areas_prioritarias_conservacao_pol"
+const LAYER_AREAS_RECUPERACAO = "ide_2401_mg_areas_prioritarias_recuperacao_pol"
+const LAYER_PRIORIDADE_FLORA = "ide_2401_mg_prioridade_conservacao_flora_pol"
+const LAYER_PRIORIDADE_FAUNA = "ide_2401_mg_prioridade_conservacao_mamiferos_pol"
+const LAYER_PRIORIDADE_AVIFAUNA = "ide_2401_mg_prioridade_conservacao_avifauna_pol"
+const LAYER_CORREDORES = [
+  "ide_2013_mg_corredor_ecologico_sossego_caratinga_pol",
+  "ide_2013_mg_corredor_ecologico_espinhaco_serra_curral_pol",
+  "ide_2013_mg_corredor_ecologico_serra_moeda_aredes_pol",
+]
+
+export interface ResultadoFitofisionomia {
+  sucesso: boolean
+  fitofisionomia: string | null
+  heterogeneidade: string | null
+  propriedades: Record<string, unknown>
+  erro?: string
+}
+
+export async function consultarFitofisionomia(bbox: BBox, centroide: Centroide): Promise<ResultadoFitofisionomia> {
+  let resultado = await consultarWFSPorCentroide(LAYER_FITOFISIONOMIA, centroide)
+  if (!resultado.sucesso) resultado = await consultarWFS(LAYER_FITOFISIONOMIA, bbox)
+
+  if (!resultado.sucesso) return { sucesso: false, fitofisionomia: null, heterogeneidade: null, propriedades: {}, erro: resultado.erro }
+  if (resultado.features.length === 0) return { sucesso: true, fitofisionomia: null, heterogeneidade: null, propriedades: {}, erro: "Área não encontrada na camada de fitofisionomias" }
+
+  const props = resultado.features[0].properties as Record<string, unknown>
+
+  return {
+    sucesso: true,
+    fitofisionomia: (props.fitofisionomia as string) || (props.FITOFISIONOMIA as string) || (props.nome as string) || (props.NOME as string) || null,
+    heterogeneidade: (props.heterogeneidade as string) || (props.HETEROGENEIDADE as string) || (props.classe as string) || null,
+    propriedades: props,
+  }
+}
+
+export interface ResultadoAreaPrioritaria {
+  sucesso: boolean
+  emAreaPrioritaria: boolean
+  categoria: string | null
+  importancia: string | null
+  propriedades: Record<string, unknown>
+}
+
+export async function consultarAreasPrioritarias(bbox: BBox, centroide: Centroide): Promise<ResultadoAreaPrioritaria> {
+  let resultado = await consultarWFSPorCentroide(LAYER_AREAS_PRIORITARIAS, centroide)
+  if (!resultado.sucesso) resultado = await consultarWFS(LAYER_AREAS_PRIORITARIAS, bbox)
+
+  if (!resultado.sucesso || resultado.features.length === 0) {
+    // Tentar camada de recuperação como fallback
+    let resultadoRec = await consultarWFSPorCentroide(LAYER_AREAS_RECUPERACAO, centroide)
+    if (!resultadoRec.sucesso) resultadoRec = await consultarWFS(LAYER_AREAS_RECUPERACAO, bbox)
+
+    if (resultadoRec.sucesso && resultadoRec.features.length > 0) {
+      const props = resultadoRec.features[0].properties as Record<string, unknown>
+      return {
+        sucesso: true,
+        emAreaPrioritaria: true,
+        categoria: "Área prioritária para recuperação",
+        importancia: (props.importancia as string) || (props.IMPORTANCIA as string) || (props.prioridade as string) || null,
+        propriedades: props,
+      }
+    }
+
+    return { sucesso: true, emAreaPrioritaria: false, categoria: null, importancia: null, propriedades: {} }
+  }
+
+  const props = resultado.features[0].properties as Record<string, unknown>
+  return {
+    sucesso: true,
+    emAreaPrioritaria: true,
+    categoria: (props.categoria as string) || (props.CATEGORIA as string) || "Área prioritária para conservação",
+    importancia: (props.importancia as string) || (props.IMPORTANCIA as string) || (props.prioridade as string) || (props.PRIORIDADE as string) || null,
+    propriedades: props,
+  }
+}
+
+export interface ResultadoCorredorEcologico {
+  sucesso: boolean
+  emCorredor: boolean
+  nome: string | null
+  propriedades: Record<string, unknown>
+}
+
+export async function consultarCorredorEcologico(bbox: BBox, centroide: Centroide): Promise<ResultadoCorredorEcologico> {
+  for (const layer of LAYER_CORREDORES) {
+    let resultado = await consultarWFSPorCentroide(layer, centroide)
+    if (!resultado.sucesso) resultado = await consultarWFS(layer, bbox)
+
+    if (resultado.sucesso && resultado.features.length > 0) {
+      const props = resultado.features[0].properties as Record<string, unknown>
+      return {
+        sucesso: true,
+        emCorredor: true,
+        nome: (props.nome as string) || (props.NOME as string) || (props.corredor as string) || layer.replace("ide_2013_mg_corredor_ecologico_", "").replace(/_pol$/, ""),
+        propriedades: props,
+      }
+    }
+  }
+
+  return { sucesso: true, emCorredor: false, nome: null, propriedades: {} }
+}
+
+export interface ResultadoPrioridadeBiodiversidade {
+  sucesso: boolean
+  flora: { prioritaria: boolean; categoria: string | null; propriedades: Record<string, unknown> }
+  fauna: { prioritaria: boolean; categoria: string | null; propriedades: Record<string, unknown> }
+  avifauna: { prioritaria: boolean; categoria: string | null; propriedades: Record<string, unknown> }
+}
+
+export async function consultarPrioridadeBiodiversidade(bbox: BBox, centroide: Centroide): Promise<ResultadoPrioridadeBiodiversidade> {
+  async function consultar(layer: string): Promise<{ prioritaria: boolean; categoria: string | null; propriedades: Record<string, unknown> }> {
+    let resultado = await consultarWFSPorCentroide(layer, centroide)
+    if (!resultado.sucesso) resultado = await consultarWFS(layer, bbox)
+
+    if (!resultado.sucesso || resultado.features.length === 0) {
+      return { prioritaria: false, categoria: null, propriedades: {} }
+    }
+
+    const props = resultado.features[0].properties as Record<string, unknown>
+    return {
+      prioritaria: true,
+      categoria: (props.importancia as string) || (props.IMPORTANCIA as string) || (props.prioridade as string) || (props.PRIORIDADE as string) || (props.categoria as string) || null,
+      propriedades: props,
+    }
+  }
+
+  const [flora, fauna, avifauna] = await Promise.all([
+    consultar(LAYER_PRIORIDADE_FLORA),
+    consultar(LAYER_PRIORIDADE_FAUNA),
+    consultar(LAYER_PRIORIDADE_AVIFAUNA),
+  ])
+
+  return { sucesso: true, flora, fauna, avifauna }
+}
+
 // Re-exportar constantes de camadas para uso externo
 export const LAYERS = {
   UCS: LAYER_UCS,

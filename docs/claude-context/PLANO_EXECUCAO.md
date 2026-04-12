@@ -143,8 +143,12 @@ admin, email e analytics.
 **Status: BLOCO 2B CONCLUIDO — 2026-04-12**
 
 ### Bloco 2C — Analise de Servidao/RPPN (7cr) [modalidade 1.1]
-- [ ] Analise geoespacial para servidao ambiental ou RPPN
-- [ ] Aparece em: Comp. Mata Atlantica (1.1)
+- [x] Analise geoespacial para servidao ambiental ou RPPN
+- [x] Criterios Art. 50 + ganho ambiental (§1º)
+- [x] Fitofisionomia detalhada (IDE-Sisema)
+- [x] Areas prioritarias conservacao + corredores ecologicos + biodiversidade
+- [x] Aparece em: Comp. Mata Atlantica (1.1)
+**Status: BLOCO 2C CONCLUIDO — 2026-04-12**
 
 ### Bloco 2D — Calculadora SNUC (7cr) [modalidade 5.1]
 - [ ] Sobreposicao UCs + fatores FR3a/FR4/FR5
