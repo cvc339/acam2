@@ -7,6 +7,8 @@ import type { ResultadoAnalise, DadosMatricula } from "@/lib/services/analise-do
 import { analisarMatriculaPipeline } from "@/lib/services/analise-matricula"
 import type { ResultadoPipeline } from "@/lib/services/analise-matricula"
 import { calcularMVAR, consultarVTN } from "@/lib/services/mvar"
+import { analisarImovelIDESisema, processarKML, processarGeoJSON } from "@/lib/services/analise-geoespacial"
+import type { ResultadoIDESisema } from "@/lib/services/analise-geoespacial"
 
 const CUSTO_CREDITOS = 5
 const FERRAMENTA_ID = "analise-matricula"
@@ -55,6 +57,7 @@ export async function POST(request: Request) {
     const municipio = formData.get("municipio") as string || ""
     const matriculaFile = formData.get("matricula") as File | null
     const cndFile = formData.get("cnd") as File | null
+    const kmlFile = formData.get("kml") as File | null  // opcional — sobreposição com UCs
 
     if (!matriculaFile) return NextResponse.json({ erro: "Matrícula (PDF) é obrigatória." }, { status: 400 })
 
@@ -91,10 +94,32 @@ export async function POST(request: Request) {
 
     const matriculaBuffer = await uploadFile(matriculaFile, "matricula")
     const cndBuffer = cndFile ? await uploadFile(cndFile, "cnd") : null
+    if (kmlFile) await uploadFile(kmlFile, "kml")
+
+    // Análise geoespacial (opcional — se KML enviado)
+    let resultadoGeo: ResultadoIDESisema | null = null
+    if (kmlFile) {
+      const kmlContent = Buffer.from(await kmlFile.arrayBuffer()).toString("utf-8")
+      const kmlNome = kmlFile.name.toLowerCase()
+      const resultadoKML = kmlNome.endsWith(".geojson") || kmlNome.endsWith(".json")
+        ? processarGeoJSON(kmlContent)
+        : await processarKML(kmlContent)
+
+      if (resultadoKML.sucesso) {
+        resultadoGeo = await analisarImovelIDESisema(kmlContent)
+      }
+    }
 
     // Pipeline matrícula + CND em paralelo
+    const opcoesUC = resultadoGeo ? {
+      imovelEmUC: resultadoGeo.ucs_encontradas.some((uc) => uc.protecao_integral),
+      nomeUC: resultadoGeo.ucs_encontradas.find((uc) => uc.protecao_integral)?.nome ?? null,
+      categoriaUC: resultadoGeo.ucs_encontradas.find((uc) => uc.protecao_integral)?.categoria ?? null,
+      percentualSobreposicao: resultadoGeo.ucs_encontradas.find((uc) => uc.protecao_integral)?.percentual_sobreposicao ?? null,
+    } : {}
+
     const [pipelineMatricula, resultadoCND] = await Promise.all([
-      analisarMatriculaPipeline(matriculaBuffer, {}),
+      analisarMatriculaPipeline(matriculaBuffer, opcoesUC),
       cndBuffer ? analisarCND(cndBuffer) : Promise.resolve(null),
     ])
 
@@ -146,6 +171,14 @@ export async function POST(request: Request) {
       cnd: resultadoCND ? { tipo: resultadoCND.tipo, cib: resultadoCND.cib, data_emissao: resultadoCND.data_emissao, data_validade: resultadoCND.data_validade, area_hectares: resultadoCND.area_hectares, nome_contribuinte: resultadoCND.nome_contribuinte } : null,
       mvar: mvarResult,
       vtn: vtn.encontrado ? { encontrado: true, municipio: vtn.municipio, valor_referencia: vtn.valor_referencia, valor_estimado: vtn.valor_estimado, exercicio: vtn.exercicio } : null,
+      // Geoespacial (opcional — se KML enviado)
+      ide_sisema: resultadoGeo ? {
+        sucesso: resultadoGeo.sucesso,
+        ucs: resultadoGeo.ucs_encontradas,
+        total_ucs: resultadoGeo.total_ucs,
+        bbox: resultadoGeo.bbox,
+        centroide: resultadoGeo.centroide,
+      } : null,
       tokens: pm.tokens_consumidos,
     }
 
@@ -156,7 +189,7 @@ export async function POST(request: Request) {
       const pdfBuffer = await gerarParecerPDF({
         nomeImovel: nomeImovel || pm.imovel.denominacao || "", municipio: municipio || pm.imovel.municipio || "",
         estado: "MG", areaHa: pm.imovel.area_ha || 0, areaFonte: "Matrícula",
-        ferramenta: FERRAMENTA_ID, pipeline: pm, mvar: mvarResult, ideSisema: null,
+        ferramenta: FERRAMENTA_ID, pipeline: pm, mvar: mvarResult, ideSisema: resultadoGeo,
         cnd: resultadoCND ? { tipo: resultadoCND.tipo, cib: resultadoCND.cib, data_emissao: resultadoCND.data_emissao, data_validade: resultadoCND.data_validade, area_hectares: resultadoCND.area_hectares, nome_contribuinte: resultadoCND.nome_contribuinte } : null,
         vtn: vtn.encontrado ? { encontrado: true, municipio: vtn.municipio ?? null, valor_referencia: vtn.valor_referencia ?? null, valor_estimado: vtn.valor_estimado ?? null, exercicio: vtn.exercicio ?? null } : null,
       })

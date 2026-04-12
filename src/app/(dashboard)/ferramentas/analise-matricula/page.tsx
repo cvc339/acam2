@@ -95,8 +95,10 @@ export default function AnaliseMatriculaPage() {
   const [municipio, setMunicipio] = useState("")
   const [matriculaFile, setMatriculaFile] = useState<File | null>(null)
   const [cndFile, setCndFile] = useState<File | null>(null)
+  const [kmlFile, setKmlFile] = useState<File | null>(null)
   const matriculaRef = useRef<HTMLInputElement>(null)
   const cndRef = useRef<HTMLInputElement>(null)
+  const kmlRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit() {
     setErro("")
@@ -108,6 +110,7 @@ export default function AnaliseMatriculaPage() {
       formData.append("municipio", municipio)
       formData.append("matricula", matriculaFile)
       if (cndFile) formData.append("cnd", cndFile)
+      if (kmlFile) formData.append("kml", kmlFile)
       const res = await fetch("/api/consultas/analise-matricula", { method: "POST", body: formData })
       const data = await res.json()
       if (!res.ok) { setErro(data.erro || "Erro ao processar consulta."); setLoading(false); return }
@@ -380,12 +383,27 @@ export default function AnaliseMatriculaPage() {
           <AlertResult>Para melhores resultados, utilize documentos em PDF com <strong>texto selecionável</strong>.</AlertResult>
         </div>
 
+        <div className="acam-card">
+          <div className="acam-section-title">Arquivo Geoespacial (opcional)</div>
+          <div className="acam-section-desc">Se disponível, envie o perímetro do imóvel para verificar sobreposição com Unidades de Conservação (federais, estaduais e municipais).</div>
+
+          <input ref={kmlRef} type="file" accept=".kml,.kmz,.geojson,.json" style={{ display: "none" }} onChange={(e) => setKmlFile(e.target.files?.[0] || null)} />
+
+          <div className="acam-upload-card" onClick={() => kmlRef.current?.click()}>
+            <h2>Perímetro do Imóvel</h2>
+            <p>KML, KMZ ou GeoJSON — para verificação de UCs</p>
+            <div className={`acam-upload-zone ${kmlFile ? "acam-upload-zone-success" : ""}`}>
+              <p>{kmlFile ? `✓ ${kmlFile.name}` : "Clique para selecionar (opcional)"}</p>
+            </div>
+          </div>
+        </div>
+
         {erro && <div className="acam-alert acam-alert-error">{erro}</div>}
 
         {loading && <EtapasProgresso />}
 
         {!loading && <AlertResult>
-          <strong>O que será analisado:</strong> A matrícula será processada por IA para extrair proprietários, ônus, gravames e dados registrais. A cadeia de titularidade será resolvida e a transmissibilidade avaliada. Se a CND-ITR for incluída, os dados fiscais serão cruzados. O resultado incluirá pontuação MVAR (viabilidade de aquisição) e valor de referência (VTN).
+          <strong>O que será analisado:</strong> A matrícula será processada por IA para extrair proprietários, ônus, gravames e dados registrais. A cadeia de titularidade será resolvida e a transmissibilidade avaliada. Se a CND-ITR for incluída, os dados fiscais serão cruzados. Se o arquivo geoespacial for incluído, será verificada sobreposição com Unidades de Conservação (federais, estaduais e municipais). O resultado incluirá pontuação MVAR e valor de referência (VTN).
         </AlertResult>}
 
         <button className="acam-btn acam-btn-primary w-full" onClick={handleSubmit} disabled={loading}>
