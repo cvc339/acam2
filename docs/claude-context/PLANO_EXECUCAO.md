@@ -166,15 +166,16 @@ admin, email e analytics.
 **Status: BLOCO 2E CONCLUIDO — 2026-04-12 (incluido no Bloco 2B)**
 
 ### Bloco 2F — Comunicacao, admin, analytics
-- [ ] Email transacional (Resend): verificacao, compra, parecer, alertas
-- [ ] Lead capture + consentimento LGPD + exportacao CSV
+- [x] Email transacional (Resend): boas-vindas, compra confirmada, resposta fale conosco
+- [x] Lead capture na landing page + consentimento LGPD + exportacao CSV
+- [x] Fale Conosco: formulario usuario + gestao admin com resposta + email ao usuario
 - [x] Admin: painel completo com 3 camadas de seguranca (middleware + layout + API)
   - [x] Dashboard com KPIs (usuarios, creditos, receita, consultas)
   - [x] Gestao de usuarios (lista, busca, detalhe, ajuste de creditos)
   - [x] Configuracoes (UFEMG, preco credito, pacotes, custo ferramentas)
   - [x] Viewer de consultas com filtros (ferramenta, status, paginacao)
   - [x] Gestao de leads + exportacao CSV
-- [ ] Analytics: uso por ferramenta
+- [x] Analytics: uso por ferramenta (integrado no painel admin — Uso e Faturamento)
 
 ### Pipeline de Analise de Matricula (reescrita completa — prioridade maxima)
 - [x] Nivel 1: Multi-pass basico (substituido pelo pipeline v3)

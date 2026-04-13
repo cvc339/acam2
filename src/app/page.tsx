@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { LeadCaptureForm } from "@/components/acam/lead-capture-form"
 
 // Ícones SVG minimalistas P&B para cada compensação
 const icons: Record<string, React.ReactNode> = {
@@ -694,6 +695,37 @@ export default function Home() {
         }}>
           Criar conta gratuita
         </Link>
+      </section>
+
+      {/* NEWSLETTER / LEAD CAPTURE */}
+      <section className="landing-section" style={{
+        background: "var(--primary-50)",
+        textAlign: "center",
+      }}>
+        <div style={{ maxWidth: "560px", margin: "0 auto" }}>
+          <p style={{
+            fontSize: "0.7rem", fontWeight: 600,
+            color: "var(--accent)", letterSpacing: "0.15em",
+            textTransform: "uppercase", marginBottom: "12px",
+          }}>
+            Fique por dentro
+          </p>
+          <h2 style={{
+            fontFamily: "var(--font-family-heading)",
+            fontSize: "clamp(1.6rem, 3vw, 2.4rem)",
+            fontWeight: 700, lineHeight: 1.2,
+            color: "var(--primary-600)", marginBottom: "12px",
+          }}>
+            Receba novidades do ACAM
+          </h2>
+          <p style={{
+            fontSize: "0.9rem", color: "var(--neutral-500)",
+            lineHeight: 1.7, marginBottom: "32px",
+          }}>
+            Atualizações sobre novas ferramentas, mudanças na legislação e dicas para compensações ambientais.
+          </p>
+          <LeadCaptureForm />
+        </div>
       </section>
 
       {/* FOOTER */}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { creditos } from "@/lib/creditos"
 import { createHmac } from "crypto"
+import { enviarEmail, templateCompraConfirmada } from "@/lib/email/enviar"
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -172,6 +173,32 @@ export async function POST(request: Request) {
 
       if (!resultado.sucesso) {
         console.error("[webhook] Erro ao creditar:", resultado.erro)
+      } else {
+        // Enviar email de confirmação (fire-and-forget)
+        try {
+          const { data: perfil } = await admin
+            .from("perfis")
+            .select("nome, email")
+            .eq("id", usuarioId)
+            .single()
+
+          if (perfil?.email) {
+            const saldo = await creditos.consultarSaldo(usuarioId)
+            enviarEmail(
+              perfil.email,
+              "Compra confirmada — ACAM",
+              templateCompraConfirmada({
+                nome: perfil.nome || "Usuário",
+                pacote: pagamento.pacote,
+                creditos: Number(pagamento.creditos),
+                valor: Number(pagamento.valor),
+                saldoAtual: saldo,
+              }),
+            )
+          }
+        } catch (err) {
+          console.error("[webhook] Erro ao enviar email:", err)
+        }
       }
     }
 

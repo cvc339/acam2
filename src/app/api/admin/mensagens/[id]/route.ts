@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { verificarAdmin } from "@/lib/admin/auth"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { enviarEmail, templateRespostaContato } from "@/lib/email/enviar"
 
 /**
  * PUT /api/admin/mensagens/[id]
@@ -39,6 +40,29 @@ export async function PUT(
     if (error) {
       console.error("[admin/mensagens] Erro:", error)
       return NextResponse.json({ erro: "Erro ao salvar resposta" }, { status: 500 })
+    }
+
+    // Enviar email de notificação ao usuário (fire-and-forget)
+    try {
+      const { data: mensagem } = await admin
+        .from("mensagens_contato")
+        .select("nome, email, mensagem")
+        .eq("id", id)
+        .single()
+
+      if (mensagem?.email) {
+        enviarEmail(
+          mensagem.email,
+          "Respondemos sua mensagem — ACAM",
+          templateRespostaContato({
+            nome: mensagem.nome || "Usuário",
+            mensagemOriginal: mensagem.mensagem,
+            resposta: resposta.trim(),
+          }),
+        )
+      }
+    } catch (err) {
+      console.error("[admin/mensagens] Erro ao enviar email:", err)
     }
 
     return NextResponse.json({ sucesso: true })
