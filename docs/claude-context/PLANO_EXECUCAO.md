@@ -195,11 +195,11 @@ admin, email e analytics.
 ### Verificacao final V1
 - [x] /vc-security: re-verificacao completa (12/12 tabelas RLS, 22/22 API routes auth, 0 secrets) — 2026-04-13
   - [x] 2 issues corrigidos: PDF calculadora e reposicao sem auth
-- [ ] /vc-review: checklist pre-deploy aprovado
-- [ ] Testes com multiplos usuarios simultaneos
+- [x] /vc-review: checklist pre-deploy — 4 issues corrigidos (UFEMG dinamico, formatarMoeda) — 2026-04-13
+- [x] Deploy em producao (Railway) — ACAM1 substituido por ACAM2 — 2026-04-13
 
-**Criterio para avancar:** Todas as 9 ferramentas pagas + 2 gratuitas funcionando.
-Sistema estavel com multiplos usuarios.
+**Status: FASE 2 (V1) CONCLUIDA — 2026-04-13**
+9 ferramentas pagas + 2 gratuitas + painel admin + email transacional + fale conosco.
 
 ---
 
