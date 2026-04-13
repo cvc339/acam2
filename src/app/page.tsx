@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { LeadCaptureForm } from "@/components/acam/lead-capture-form"
 
 // Ícones SVG minimalistas P&B para cada compensação
@@ -101,7 +102,30 @@ const compensacoes = [
   },
 ]
 
-export default function Home() {
+export default async function Home() {
+  // Buscar preços do banco para a seção de pacotes
+  const admin = createAdminClient()
+  const { data: configPrecos } = await admin
+    .from("configuracoes")
+    .select("valor")
+    .eq("chave", "precos")
+    .single()
+
+  const precos = configPrecos?.valor as { credito_avulso: number; pacotes: Array<{ nome: string; creditos: number; desconto: number }> } | null
+  const base = precos?.credito_avulso ?? 12
+
+  const pacotesLanding = [
+    { tier: "Avulso", qtd: "1", preco: `R$ ${base}`, per: `R$ ${base}/un`, feat: false },
+    ...(precos?.pacotes || [
+      { nome: "Básico", creditos: 10, desconto: 0.17 },
+      { nome: "Intermediário", creditos: 25, desconto: 0.25 },
+      { nome: "Premium", creditos: 50, desconto: 0.33 },
+    ]).map((p) => {
+      const valor = Math.round(p.creditos * base * (1 - p.desconto))
+      const perUn = Math.round(valor / p.creditos)
+      return { tier: p.nome, qtd: String(p.creditos), preco: `R$ ${valor}`, per: `R$ ${perUn}/un`, feat: p.nome === "Intermediário" || p.nome === "Intermediario" }
+    }),
+  ]
   return (
     <div style={{ fontFamily: "var(--font-family)" }}>
 
@@ -554,12 +578,7 @@ export default function Home() {
             </p>
 
             <div className="landing-grid-4">
-              {[
-                { tier: "Avulso", qtd: "1", preco: "R$ 12", per: "R$ 12/un", feat: false },
-                { tier: "Básico", qtd: "10", preco: "R$ 100", per: "R$ 10/un", feat: false },
-                { tier: "Intermediário", qtd: "25", preco: "R$ 225", per: "R$ 9/un", feat: true },
-                { tier: "Premium", qtd: "50", preco: "R$ 400", per: "R$ 8/un", feat: false },
-              ].map((p) => (
+              {pacotesLanding.map((p) => (
                 <div key={p.tier} style={{
                   background: p.feat ? "var(--primary-600)" : "white",
                   color: p.feat ? "var(--text-on-dark)" : "var(--neutral-900)",

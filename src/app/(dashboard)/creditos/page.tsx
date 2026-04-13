@@ -6,12 +6,14 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { StatusBadge } from "@/components/acam"
 
-const pacotes = [
-  { id: "avulso", nome: "Avulso", creditos: 1, valor: 12, per: "R$ 12/un" },
-  { id: "basico", nome: "Básico", creditos: 10, valor: 100, per: "R$ 10/un" },
-  { id: "intermediario", nome: "Intermediário", creditos: 25, valor: 225, per: "R$ 9/un", destaque: true },
-  { id: "premium", nome: "Premium", creditos: 50, valor: 400, per: "R$ 8/un" },
-]
+interface Pacote {
+  id: string
+  nome: string
+  creditos: number
+  valor: number
+  per: string
+  destaque?: boolean
+}
 
 export default function CreditosPage() {
   const searchParams = useSearchParams()
@@ -19,6 +21,7 @@ export default function CreditosPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [saldo, setSaldo] = useState<number>(0)
   const [mensagem, setMensagem] = useState("")
+  const [pacotes, setPacotes] = useState<Pacote[]>([])
 
   useEffect(() => {
     if (statusParam === "sucesso") {
@@ -41,7 +44,32 @@ export default function CreditosPage() {
         setSaldo(data?.saldo ?? 0)
       }
     }
+
+    async function fetchPacotes() {
+      try {
+        const res = await fetch("/api/pagamento/pacotes")
+        const data = await res.json()
+        if (data.sucesso && data.pacotes) {
+          // Marcar o intermediário como destaque
+          const lista = data.pacotes.map((p: Pacote) => ({
+            ...p,
+            destaque: p.id === "intermediario",
+          }))
+          setPacotes(lista)
+        }
+      } catch {
+        // Fallback se API falhar
+        setPacotes([
+          { id: "avulso", nome: "Avulso", creditos: 1, valor: 12, per: "R$ 12/un" },
+          { id: "basico", nome: "Básico", creditos: 10, valor: 100, per: "R$ 10/un" },
+          { id: "intermediario", nome: "Intermediário", creditos: 25, valor: 225, per: "R$ 9/un", destaque: true },
+          { id: "premium", nome: "Premium", creditos: 50, valor: 400, per: "R$ 8/un" },
+        ])
+      }
+    }
+
     fetchSaldo()
+    fetchPacotes()
   }, [statusParam])
 
   async function handleComprar(pacoteId: string) {

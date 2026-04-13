@@ -2,11 +2,26 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 
-const PACOTES: Record<string, { nome: string; creditos: number; valor: number }> = {
+// Fallback caso o banco não tenha configuração (nunca deveria acontecer em produção)
+const PACOTES_FALLBACK: Record<string, { nome: string; creditos: number; valor: number }> = {
   avulso: { nome: "Avulso", creditos: 1, valor: 12.00 },
   basico: { nome: "Básico", creditos: 10, valor: 100.00 },
   intermediario: { nome: "Intermediário", creditos: 25, valor: 225.00 },
   premium: { nome: "Premium", creditos: 50, valor: 400.00 },
+}
+
+/** Monta pacotes a partir da tabela configuracoes */
+function montarPacotes(precos: { credito_avulso: number; pacotes: Array<{ nome: string; creditos: number; desconto: number }> }): Record<string, { nome: string; creditos: number; valor: number }> {
+  const base = precos.credito_avulso
+  const resultado: Record<string, { nome: string; creditos: number; valor: number }> = {
+    avulso: { nome: "Avulso", creditos: 1, valor: base },
+  }
+  for (const p of precos.pacotes) {
+    const id = p.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    const valor = parseFloat((p.creditos * base * (1 - p.desconto)).toFixed(2))
+    resultado[id] = { nome: p.nome, creditos: p.creditos, valor }
+  }
+  return resultado
 }
 
 export async function POST(request: Request) {
@@ -17,6 +32,19 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ erro: "Não autenticado" }, { status: 401 })
     }
+
+    const admin = createAdminClient()
+
+    // Buscar preços do banco
+    const { data: configPrecos } = await admin
+      .from("configuracoes")
+      .select("valor")
+      .eq("chave", "precos")
+      .single()
+
+    const PACOTES = configPrecos?.valor
+      ? montarPacotes(configPrecos.valor as { credito_avulso: number; pacotes: Array<{ nome: string; creditos: number; desconto: number }> })
+      : PACOTES_FALLBACK
 
     const { pacote } = await request.json()
 
@@ -36,7 +64,6 @@ export async function POST(request: Request) {
     }
 
     // Buscar dados do usuario
-    const admin = createAdminClient()
     const { data: perfil } = await admin
       .from("perfis")
       .select("nome, email")
