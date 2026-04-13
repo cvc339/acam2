@@ -4,7 +4,8 @@ import { NextResponse } from "next/server"
 import { enviarEmail, templateBoasVindas } from "@/lib/email/enviar"
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
+  const origin = process.env.NEXT_PUBLIC_APP_URL || "https://acam.com.br"
   const code = searchParams.get("code")
   const tokenHash = searchParams.get("token_hash") || searchParams.get("code")
   const type = searchParams.get("type") as "signup" | "recovery" | "magiclink" | "email" | null
