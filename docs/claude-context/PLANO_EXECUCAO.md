@@ -192,7 +192,8 @@ admin, email e analytics.
 - [ ] Nivel 3: Validacao de schema com Zod (rejeitar extracoes impossiveis, re-extrair)
 
 ### Verificacao final V1
-- [ ] /vc-security: re-verificacao completa (todas as tabelas)
+- [x] /vc-security: re-verificacao completa (12/12 tabelas RLS, 22/22 API routes auth, 0 secrets) — 2026-04-13
+  - [x] 2 issues corrigidos: PDF calculadora e reposicao sem auth
 - [ ] /vc-review: checklist pre-deploy aprovado
 - [ ] Testes com multiplos usuarios simultaneos
 
