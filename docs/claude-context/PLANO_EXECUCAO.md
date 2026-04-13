@@ -205,7 +205,22 @@ admin, email e analytics.
 
 ## Fase 3 — V2 (evolucao pos-feedback)
 
-- [ ] Fluxo + Normas (2cr) — PDFs processuais + legislacao consolidada
+### Pipeline de Matricula — melhorias
+- [ ] Nivel 2: Few-shot examples no prompt (exemplos reais anonimizados)
+- [ ] Nivel 3: Validacao de schema com Zod (rejeitar extracoes impossiveis, re-extrair)
+
+### Consultor de Compensacoes (IA + base normativa)
+- [ ] Base normativa administravel: tabela com normas classificadas (federal, estadual, portarias, termos de referencia)
+- [ ] Admin: CRUD de documentos normativos com categorias (tipo, esfera, compensacao, vigencia)
+- [ ] Chat IA (Claude API + RAG): usuario pergunta, IA responde citando artigos e fontes
+- [ ] Citacao obrigatoria: toda resposta referencia norma, artigo e paragrafo
+- [ ] Disclaimer: assistente de pesquisa, nao parecer tecnico
+- [ ] Historico de perguntas (admin acompanha o que usuarios perguntam)
+- [ ] Decisao pendente: modelo de cobranca (creditos por pergunta? pacote? gratuito?)
+- [ ] Decisao pendente: alcance (apenas legislacao? incluir jurisprudencia? termos de referencia?)
+- [ ] Decisao pendente: responsabilidade profissional — avaliar risco reputacional
+
+### Outras melhorias
 - [ ] Melhorias de UX baseadas em feedback real
 - [ ] Otimizacoes de performance
 - [ ] Expansao para outros estados (alem de MG)
@@ -219,7 +234,7 @@ admin, email e analytics.
 |---|---|---|
 | MVP | dest-uc-base (5cr), calc-impl-uc (2cr), 3 requerimentos (0.5cr cada) | avaliacao, calc-intervencao |
 | V1 | dest-uc-app (6cr), dest-uc-ma (7cr), dest-servidao (7cr), calc-snuc (7cr) | — |
-| V2 | fluxo+normas (2cr) | — |
+| V2 | consultor-ia (?cr), pipeline matricula melhorado | — |
 
 ---
 
