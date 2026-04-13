@@ -44,6 +44,22 @@ export function maskTel(value: string): string {
   return v
 }
 
+/** Aplica máscara de moeda: R$ 1.234.567,89 */
+export function maskBRL(value: string): string {
+  const digits = value.replace(/\D/g, "")
+  if (!digits) return ""
+  // Converte para centavos → formata com separadores pt-BR
+  const centavos = parseInt(digits, 10)
+  const reais = centavos / 100
+  return reais.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+/** Remove máscara BRL e retorna número (ex: "1.234,56" → 1234.56) */
+export function unmaskBRL(value: string): number {
+  const limpo = value.replace(/[^\d,]/g, "").replace(",", ".")
+  return parseFloat(limpo) || 0
+}
+
 /** Aplica máscara de data: DD/MM/AAAA */
 export function maskDate(value: string): string {
   let v = value.replace(/\D/g, "").slice(0, 8)

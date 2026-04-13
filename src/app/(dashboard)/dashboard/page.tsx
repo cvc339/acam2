@@ -24,7 +24,7 @@ const ferramentas = [
   // APP
   { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: true, href: "/ferramentas/destinacao-uc-app" },
   // SNUC
-  { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: true },
+  { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: true, href: "/ferramentas/calculadora-snuc" },
   { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-snuc" },
   // Análise documental
   { nome: "Análise de Matrícula", descricao: "Viabilidade registral, MVAR, transmissibilidade", compensacao: "Todas", creditos: "5", ativo: true, href: "/ferramentas/analise-matricula" },
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
       </AlertResult>
 
       {/* Ações rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Link href="/checklist" className="no-underline">
           <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer h-full">
             <IconBox className="mx-auto mb-3">✓</IconBox>
@@ -91,6 +91,13 @@ export default async function DashboardPage() {
             <IconBox color="blue" className="mx-auto mb-3">R</IconBox>
             <h4 className="font-medium text-sm">Extrato de créditos</h4>
             <p className="text-xs text-muted-foreground mt-1">Histórico de uso</p>
+          </div>
+        </Link>
+        <Link href="/fale-conosco" className="no-underline">
+          <div className="acam-card acam-card-hover acam-card-compact text-center cursor-pointer h-full">
+            <IconBox color="green" className="mx-auto mb-3">✉</IconBox>
+            <h4 className="font-medium text-sm">Fale Conosco</h4>
+            <p className="text-xs text-muted-foreground mt-1">Sugestões e dúvidas</p>
           </div>
         </Link>
       </div>

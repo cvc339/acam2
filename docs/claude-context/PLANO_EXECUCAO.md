@@ -151,8 +151,14 @@ admin, email e analytics.
 **Status: BLOCO 2C CONCLUIDO — 2026-04-12**
 
 ### Bloco 2D — Calculadora SNUC (7cr) [modalidade 5.1]
-- [ ] Sobreposicao UCs + fatores FR3a/FR4/FR5
-- [ ] Ecossistemas ameacados + areas prioritarias
+- [x] Sobreposicao UCs + fatores FR3a/FR4/FR5
+- [x] Ecossistemas ameacados + areas prioritarias
+- [x] Wizard 3 etapas: upload ADA (opcional) + VR/FR + FT/FA
+- [x] Analise geoespacial IDE-Sisema (UCs, ZA, MA, cavidades, areas prioritarias)
+- [x] Calculo GI = FR+FT+FA (cap 0.5) e CA = VR × (GI/100)
+- [x] PDF React-PDF com template ACAM2
+- [x] Testes unitarios para modulo de calculo
+**Status: BLOCO 2D CONCLUIDO — 2026-04-13**
 
 ### Bloco 2E — NDVI Sentinel
 - [x] Analise de vegetacao por satelite (apoio para MA e Servidao)
@@ -162,7 +168,12 @@ admin, email e analytics.
 ### Bloco 2F — Comunicacao, admin, analytics
 - [ ] Email transacional (Resend): verificacao, compra, parecer, alertas
 - [ ] Lead capture + consentimento LGPD + exportacao CSV
-- [ ] Admin: estatisticas, precos, UFEMG, usuarios, consultas
+- [x] Admin: painel completo com 3 camadas de seguranca (middleware + layout + API)
+  - [x] Dashboard com KPIs (usuarios, creditos, receita, consultas)
+  - [x] Gestao de usuarios (lista, busca, detalhe, ajuste de creditos)
+  - [x] Configuracoes (UFEMG, preco credito, pacotes, custo ferramentas)
+  - [x] Viewer de consultas com filtros (ferramenta, status, paginacao)
+  - [x] Gestao de leads + exportacao CSV
 - [ ] Analytics: uso por ferramenta
 
 ### Pipeline de Analise de Matricula (reescrita completa — prioridade maxima)

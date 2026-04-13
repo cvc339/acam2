@@ -63,6 +63,30 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
+  // Rotas admin: exigem autenticacao + is_admin
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(url)
+    }
+
+    const { data: perfil } = await supabase
+      .from('perfis')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+
+    if (!perfil?.is_admin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+
+    return supabaseResponse
+  }
+
   // Se nao autenticado e rota protegida, redirecionar para login
   if (!user && !isPublicRoute(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone()

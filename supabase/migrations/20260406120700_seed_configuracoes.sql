@@ -21,6 +21,7 @@ VALUES (
       "dest-servidao": {"creditos": 7, "nome": "Analise de Servidao/RPPN"},
       "calc-impl-uc": {"creditos": 2, "nome": "Calculo de Implantacao/Manutencao de UC"},
       "calc-snuc": {"creditos": 7, "nome": "Calculadora SNUC"},
+      "analise-matricula": {"creditos": 5, "nome": "Analise de Matricula"},
       "req-mineraria": {"creditos": 0.5, "nome": "Requerimento Mineraria"},
       "req-mata-atlantica": {"creditos": 0.5, "nome": "Requerimento Mata Atlantica"},
       "req-snuc": {"creditos": 0.5, "nome": "Requerimento SNUC"}

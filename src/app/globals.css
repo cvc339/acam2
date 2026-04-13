@@ -1711,6 +1711,65 @@ body.page-public {
 .acam-card-border-error { border-left: 4px solid var(--error); }
 .acam-card-border-warning { border-left: 4px solid var(--warning); }
 .acam-card-border-success { border-left: 4px solid var(--success); }
+.acam-card-border-primary { border-left: 4px solid var(--primary-600); }
+
+/* --- Admin layout --- */
+.acam-admin-container {
+  display: flex !important;
+  flex-direction: row !important;
+  flex: 1 1 0%;
+  min-height: 0;
+}
+.acam-admin-aside {
+  width: 14rem;
+  min-width: 14rem;
+  flex-shrink: 0;
+  border-right: 1px solid var(--grey-200);
+  background: var(--grey-50);
+}
+.acam-admin-main {
+  flex: 1 1 0%;
+  padding: 2rem 1.5rem;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* --- Admin sidebar --- */
+.acam-admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-4) 0;
+}
+.acam-admin-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--grey-600);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.acam-admin-sidebar-item:hover {
+  background: var(--grey-100);
+  color: var(--primary-700);
+}
+.acam-admin-sidebar-item-active {
+  background: var(--primary-50);
+  color: var(--primary-700);
+  font-weight: 600;
+  border-right: 3px solid var(--primary-600);
+}
+.acam-admin-sidebar-icon {
+  width: 1.25rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* --- Admin stat card --- */
+.acam-stat-card { text-align: center; padding: 1.25rem; }
+.acam-stat-card-value { font-size: 1.75rem; font-weight: 800; color: var(--primary-600); line-height: 1.2; }
+.acam-stat-card-label { font-size: 0.8rem; color: var(--grey-500); margin-top: 0.25rem; }
 
 /* Botão de opção do wizard — movido para inline no componente (Tailwind v4 purga classes custom) */
 
