@@ -18,7 +18,7 @@ function montarPacotes(precos: { credito_avulso: number; pacotes: Array<{ nome: 
   }
   for (const p of precos.pacotes) {
     const id = p.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    const valor = parseFloat((p.creditos * base * (1 - p.desconto)).toFixed(2))
+    const valor = Math.round(p.creditos * base * (1 - p.desconto))
     resultado[id] = { nome: p.nome, creditos: p.creditos, valor }
   }
   return resultado

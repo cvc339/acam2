@@ -199,7 +199,7 @@ export function ConfigEditor({ configMap }: Props) {
                     />
                   </td>
                   <td className="text-sm font-semibold">
-                    {fmt(pacote.creditos * precos.credito_avulso * (1 - pacote.desconto))}
+                    {fmt(Math.round(pacote.creditos * precos.credito_avulso * (1 - pacote.desconto)))}
                   </td>
                 </tr>
               ))}

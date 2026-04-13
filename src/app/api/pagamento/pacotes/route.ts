@@ -37,12 +37,12 @@ export async function GET() {
 
   const base = precos.credito_avulso
   const pacotes = [
-    { id: "avulso", nome: "Avulso", creditos: 1, valor: base, per: `R$ ${base}/un` },
+    { id: "avulso", nome: "Avulso", creditos: 1, valor: Math.round(base), per: `R$ ${base.toFixed(2).replace(".", ",")}/cr` },
     ...precos.pacotes.map((p) => {
-      const valor = parseFloat((p.creditos * base * (1 - p.desconto)).toFixed(2))
-      const perUn = parseFloat((valor / p.creditos).toFixed(0))
+      const valor = Math.round(p.creditos * base * (1 - p.desconto))
+      const perUn = (valor / p.creditos).toFixed(2).replace(".", ",")
       const id = p.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      return { id, nome: p.nome, creditos: p.creditos, valor, per: `R$ ${perUn}/un` }
+      return { id, nome: p.nome, creditos: p.creditos, valor, per: `R$ ${perUn}/cr` }
     }),
   ]
 

@@ -115,15 +115,15 @@ export default async function Home() {
   const base = precos?.credito_avulso ?? 12
 
   const pacotesLanding = [
-    { tier: "Avulso", qtd: "1", preco: `R$ ${base}`, per: `R$ ${base}/un`, feat: false },
+    { tier: "Avulso", qtd: "1", preco: `R$ ${Math.round(base)}`, per: `R$ ${base.toFixed(2).replace(".", ",")}/cr`, feat: false },
     ...(precos?.pacotes || [
       { nome: "Básico", creditos: 10, desconto: 0.17 },
       { nome: "Intermediário", creditos: 25, desconto: 0.25 },
       { nome: "Premium", creditos: 50, desconto: 0.33 },
     ]).map((p) => {
       const valor = Math.round(p.creditos * base * (1 - p.desconto))
-      const perUn = Math.round(valor / p.creditos)
-      return { tier: p.nome, qtd: String(p.creditos), preco: `R$ ${valor}`, per: `R$ ${perUn}/un`, feat: p.nome === "Intermediário" || p.nome === "Intermediario" }
+      const perUn = (valor / p.creditos).toFixed(2).replace(".", ",")
+      return { tier: p.nome, qtd: String(p.creditos), preco: `R$ ${valor}`, per: `R$ ${perUn}/cr`, feat: p.nome === "Intermediário" || p.nome === "Intermediario" }
     }),
   ]
   return (
