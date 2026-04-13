@@ -29,6 +29,17 @@ const FLUXO_ADMINISTRATIVO = [
 export default function CalculoModalidade2Page() {
   const router = useRouter()
   const [ufemg, setUfemg] = useState({ ano: 2026, valor: 5.7899 })
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=ufemg")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.valor?.ano && data.valor?.valor) {
+          setUfemg({ ano: data.valor.ano, valor: data.valor.valor })
+        }
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
   const [area, setArea] = useState("")
   const [tipoVegetacao, setTipoVegetacao] = useState<TipoVegetacao | "">("")
   const [resultado, setResultado] = useState<ResultadoModalidade2 | null>(null)

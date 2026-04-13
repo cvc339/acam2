@@ -95,10 +95,17 @@ export default function CalculadoraPage() {
 
   const [etapaAtual, setEtapaAtual] = useState(0)
 
-  // Buscar UFEMG
+  // Buscar UFEMG da tabela configuracoes
   useEffect(() => {
-    fetch("/api/pagamento/pacotes")
+    fetch("/api/configuracoes?chave=ufemg")
       .then((r) => r.json())
+      .then((data) => {
+        if (data.valor?.ano && data.valor?.valor) {
+          setUfemg({ ano: data.valor.ano, valor: data.valor.valor })
+        } else {
+          setUfemgFallback(true)
+        }
+      })
       .catch(() => { setUfemgFallback(true) })
   }, [])
 

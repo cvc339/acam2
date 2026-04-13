@@ -1,20 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { HeaderLogo } from "@/components/acam"
 import { downloadPDF } from "@/lib/pdf/download"
+import { formatBRL as formatarMoeda } from "@/lib/format"
 import { PRODUTOS, calcularReposicaoItem } from "@/lib/calculo/intervencao"
-
-function formatarMoeda(valor: number): string {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor)
-}
 
 // Apenas produtos de floresta nativa (que geram reposição)
 const produtosNativa = PRODUTOS.filter((p) => p.arvores > 0)
 
 export default function ReposicaoFlorestalPage() {
-  const [ufemg] = useState({ ano: 2026, valor: 5.7899 })
+  const [ufemg, setUfemg] = useState({ ano: 2026, valor: 5.7899 })
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=ufemg")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.valor?.ano && data.valor?.valor) {
+          setUfemg({ ano: data.valor.ano, valor: data.valor.valor })
+        }
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
   const [volumes, setVolumes] = useState<Record<string, number>>({})
   const [calculado, setCalculado] = useState(false)
 
