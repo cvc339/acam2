@@ -8,6 +8,7 @@ const publicRoutes = [
   '/login',
   '/registro',
   '/recuperar-senha',
+  '/atualizar-senha',
   '/styleguide',
   '/compensacoes',
   '/checklist',
