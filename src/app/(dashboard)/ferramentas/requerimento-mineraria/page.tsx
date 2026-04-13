@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -19,7 +19,6 @@ import {
   empreendedorInicial,
   correspondenciaInicial,
   processoMinerariaInicial,
-  CUSTO_REQUERIMENTO,
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
 import { DatePicker } from "@/components/acam/date-picker"
@@ -30,6 +29,18 @@ const ETAPAS = ["Responsável", "Empreendedor", "Correspondência", "Processo", 
 
 export default function RequerimentoMinerariaPage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(0.5)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["req-mineraria"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
+
   const [etapa, setEtapa] = useState(0)
   const [erro, setErro] = useState("")
   const [loading, setLoading] = useState(false)
@@ -85,7 +96,7 @@ export default function RequerimentoMinerariaPage() {
     setErro("")
     try {
       // Debitar créditos antes de gerar
-      const debito = await debitarCreditos(CUSTO_REQUERIMENTO, "req-mineraria", `Requerimento Minerária — ${form.empreendedor.razaoSocial || "N/A"}`)
+      const debito = await debitarCreditos(custoCreditos, "req-mineraria", `Requerimento Minerária — ${form.empreendedor.razaoSocial || "N/A"}`)
       if (!debito.ok) { setErro(debito.erro); setLoading(false); return }
 
       // Gerar PDF
@@ -135,7 +146,7 @@ export default function RequerimentoMinerariaPage() {
     <WizardShell
       titulo="Requerimento Compensação Minerária"
       subtitulo="Anexo I — Lei Estadual nº 20.922/2013"
-      custoCreditos={CUSTO_REQUERIMENTO}
+      custoCreditos={custoCreditos}
       etapas={ETAPAS}
       etapaAtual={etapa}
       onVoltar={() => { setErro(""); setEtapa((e) => e - 1) }}
@@ -177,7 +188,7 @@ export default function RequerimentoMinerariaPage() {
       )}
 
       {etapa === 4 && (
-        <StepRevisaoMineraria form={form} />
+        <StepRevisaoMineraria form={form} custoCreditos={custoCreditos} />
       )}
     </WizardShell>
   )
@@ -264,7 +275,7 @@ function StepProcessoMineraria({ dados, onChange }: { dados: ProcessoMineraria; 
 // STEP: REVISÃO MINERÁRIA
 // ============================================
 
-function StepRevisaoMineraria({ form }: { form: FormMineraria }) {
+function StepRevisaoMineraria({ form, custoCreditos }: { form: FormMineraria; custoCreditos: number }) {
   const r = form.responsavel
   const e = form.empreendedor
   const p = form.processo
@@ -302,7 +313,7 @@ function StepRevisaoMineraria({ form }: { form: FormMineraria }) {
       </SummaryCard>
 
       <div className="acam-alert acam-alert-result" style={{ marginTop: "1rem" }}>
-        Este serviço consome <strong>{CUSTO_REQUERIMENTO} crédito</strong>
+        Este serviço consome <strong>{custoCreditos} crédito</strong>
       </div>
     </>
   )

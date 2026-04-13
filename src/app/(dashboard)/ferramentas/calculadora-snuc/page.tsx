@@ -18,7 +18,6 @@ import { downloadPDF } from "@/lib/pdf/download"
 import { debitarCreditos } from "@/lib/creditos/client"
 import { maskBRL, unmaskBRL } from "@/lib/masks"
 
-const CUSTO_CREDITOS = 7
 const FERRAMENTA_ID = "calc-snuc"
 
 // ============================================
@@ -49,6 +48,17 @@ interface ResultadoGeo {
 
 export default function CalculadoraSNUCPage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(7)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["calc-snuc"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
 
   // Estado geral
   const [etapa, setEtapa] = useState(1)
@@ -241,8 +251,8 @@ export default function CalculadoraSNUCPage() {
       return
     }
 
-    if (saldo !== null && saldo < CUSTO_CREDITOS) {
-      setErro(`Saldo insuficiente. Você tem ${saldo} créditos, mas esta ferramenta custa ${CUSTO_CREDITOS}.`)
+    if (saldo !== null && saldo < custoCreditos) {
+      setErro(`Saldo insuficiente. Você tem ${saldo} créditos, mas esta ferramenta custa ${custoCreditos}.`)
       return
     }
 
@@ -251,7 +261,7 @@ export default function CalculadoraSNUCPage() {
     try {
       // Debitar créditos
       const debito = await debitarCreditos(
-        CUSTO_CREDITOS,
+        custoCreditos,
         FERRAMENTA_ID,
         `Calculadora SNUC — VR ${fmt(vr)}`,
       )
@@ -285,7 +295,7 @@ export default function CalculadoraSNUCPage() {
       )
 
       setResultado(calc)
-      setSaldo((prev) => (prev !== null ? prev - CUSTO_CREDITOS : null))
+      setSaldo((prev) => (prev !== null ? prev - custoCreditos : null))
       router.refresh()
     } catch {
       setErro("Erro ao processar. Tente novamente.")
@@ -354,7 +364,7 @@ export default function CalculadoraSNUCPage() {
           </div>
           <div className="acam-service-header-cost">
             <div className="acam-service-header-cost-label">Custo</div>
-            <div className="acam-service-header-cost-value">{CUSTO_CREDITOS} créditos</div>
+            <div className="acam-service-header-cost-value">{custoCreditos} créditos</div>
           </div>
         </div>
       </div>
@@ -731,7 +741,7 @@ export default function CalculadoraSNUCPage() {
                       Calculando...
                     </span>
                   ) : (
-                    `Calcular (${CUSTO_CREDITOS} créditos)`
+                    `Calcular (${custoCreditos} créditos)`
                   )}
                 </button>
               </div>

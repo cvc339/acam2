@@ -18,8 +18,8 @@ import {
 import type { BBox, Centroide } from "@/lib/services/analise-geoespacial"
 import { avaliarCriteriosServidao } from "@/lib/services/criterios-servidao"
 import { analiseSentinel2 } from "@/lib/services/sentinel-ndvi"
+import { buscarCustoFerramenta } from "@/lib/creditos/custos"
 
-const CUSTO_CREDITOS = 6
 const FERRAMENTA_ID = "dest-servidao"
 
 /**
@@ -30,6 +30,7 @@ const FERRAMENTA_ID = "dest-servidao"
  * Foco: similaridade ecológica + ganho ambiental (§1º)
  */
 export async function POST(request: Request) {
+  const CUSTO_CREDITOS = await buscarCustoFerramenta("dest-servidao")
   const supabase = await createClient()
   const admin = createAdminClient()
 

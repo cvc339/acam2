@@ -3,36 +3,49 @@ import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { StatusBadge, IconBox, ServicesTable, AlertResult } from "@/components/acam"
 import { ChecklistResultado } from "@/components/acam/checklist-resultado"
+import { buscarTodosCustos } from "@/lib/creditos/custos"
 
 export const metadata: Metadata = {
   title: "Dashboard",
 }
 
 
-const ferramentas = [
-  // Gratuitas
-  { nome: "Calculadora de Intervenção Ambiental", descricao: "Taxa de expediente, taxa florestal e reposição florestal", compensacao: "Todas", creditos: "Gratuita", ativo: true, href: "/calculadora" },
-  { nome: "Cálculo de Reposição Florestal", descricao: "Cálculo com base nos quantitativos de nativa", compensacao: "Reposição Florestal", creditos: "Gratuita", ativo: true, href: "/reposicao-florestal" },
-  // Minerária
-  { nome: "Destinação em UC — Base", descricao: "Análise completa de viabilidade", compensacao: "Minerária / Reserva Legal", creditos: "5", ativo: true, href: "/ferramentas/destinacao-uc-base" },
-  { nome: "Cálculo Implantação/Manutenção UC", descricao: "Cálculo com UFEMG vigente", compensacao: "Minerária", creditos: "2", ativo: true, href: "/ferramentas/calculo-modalidade2" },
-  { nome: "Requerimento Minerária", descricao: "Preenchimento assistido + PDF", compensacao: "Minerária", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mineraria" },
-  // Mata Atlântica
-  { nome: "Destinação em UC — Mata Atlântica", descricao: "Análise com bacia, sub-bacia e bioma", compensacao: "Mata Atlântica", creditos: "7", ativo: true, href: "/ferramentas/destinacao-uc-ma" },
-  { nome: "Análise de Servidão/RPPN", descricao: "Análise para servidão ou RPPN", compensacao: "Mata Atlântica", creditos: "7", ativo: true, href: "/ferramentas/analise-servidao" },
-  { nome: "Requerimento Mata Atlântica", descricao: "Preenchimento assistido + PDF", compensacao: "Mata Atlântica", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-mata-atlantica" },
-  // APP
-  { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: "6", ativo: true, href: "/ferramentas/destinacao-uc-app" },
-  // SNUC
-  { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: "7", ativo: true, href: "/ferramentas/calculadora-snuc" },
-  { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: "0,5", ativo: true, href: "/ferramentas/requerimento-snuc" },
-  // Análise documental
-  { nome: "Análise de Matrícula", descricao: "Viabilidade registral, MVAR, transmissibilidade", compensacao: "Todas", creditos: "5", ativo: true, href: "/ferramentas/analise-matricula" },
-]
+function formatCreditos(custos: Record<string, number>, id: string, fallback: string): string {
+  const v = custos[id]
+  if (v == null) return fallback
+  return v === Math.floor(v) ? String(v) : String(v).replace(".", ",")
+}
+
+async function getFerramentas() {
+  const custos = await buscarTodosCustos()
+  return [
+    // Gratuitas
+    { nome: "Calculadora de Intervenção Ambiental", descricao: "Taxa de expediente, taxa florestal e reposição florestal", compensacao: "Todas", creditos: "Gratuita", ativo: true, href: "/calculadora" },
+    { nome: "Cálculo de Reposição Florestal", descricao: "Cálculo com base nos quantitativos de nativa", compensacao: "Reposição Florestal", creditos: "Gratuita", ativo: true, href: "/reposicao-florestal" },
+    // Minerária
+    { nome: "Destinação em UC — Base", descricao: "Análise completa de viabilidade", compensacao: "Minerária / Reserva Legal", creditos: formatCreditos(custos, "dest-uc-base", "5"), ativo: true, href: "/ferramentas/destinacao-uc-base" },
+    { nome: "Cálculo Implantação/Manutenção UC", descricao: "Cálculo com UFEMG vigente", compensacao: "Minerária", creditos: formatCreditos(custos, "calc-impl-uc", "2"), ativo: true, href: "/ferramentas/calculo-modalidade2" },
+    { nome: "Requerimento Minerária", descricao: "Preenchimento assistido + PDF", compensacao: "Minerária", creditos: formatCreditos(custos, "req-mineraria", "0,5"), ativo: true, href: "/ferramentas/requerimento-mineraria" },
+    // Mata Atlântica
+    { nome: "Destinação em UC — Mata Atlântica", descricao: "Análise com bacia, sub-bacia e bioma", compensacao: "Mata Atlântica", creditos: formatCreditos(custos, "dest-uc-ma", "7"), ativo: true, href: "/ferramentas/destinacao-uc-ma" },
+    { nome: "Análise de Servidão/RPPN", descricao: "Análise para servidão ou RPPN", compensacao: "Mata Atlântica", creditos: formatCreditos(custos, "dest-servidao", "7"), ativo: true, href: "/ferramentas/analise-servidao" },
+    { nome: "Requerimento Mata Atlântica", descricao: "Preenchimento assistido + PDF", compensacao: "Mata Atlântica", creditos: formatCreditos(custos, "req-mata-atlantica", "0,5"), ativo: true, href: "/ferramentas/requerimento-mata-atlantica" },
+    // APP
+    { nome: "Destinação em UC — APP", descricao: "Análise com bacia e sub-bacia", compensacao: "APP", creditos: formatCreditos(custos, "dest-uc-app", "6"), ativo: true, href: "/ferramentas/destinacao-uc-app" },
+    // SNUC
+    { nome: "Calculadora SNUC", descricao: "Sobreposição com UCs + fatores", compensacao: "SNUC", creditos: formatCreditos(custos, "calc-snuc", "7"), ativo: true, href: "/ferramentas/calculadora-snuc" },
+    { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: formatCreditos(custos, "req-snuc", "0,5"), ativo: true, href: "/ferramentas/requerimento-snuc" },
+    // Análise documental
+    { nome: "Análise de Matrícula", descricao: "Viabilidade registral, MVAR, transmissibilidade", compensacao: "Todas", creditos: formatCreditos(custos, "analise-matricula", "5"), ativo: true, href: "/ferramentas/analise-matricula" },
+  ]
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [{ data: { user } }, ferramentas] = await Promise.all([
+    supabase.auth.getUser(),
+    getFerramentas(),
+  ])
 
   const { data: consultas } = await supabase
     .from("consultas")

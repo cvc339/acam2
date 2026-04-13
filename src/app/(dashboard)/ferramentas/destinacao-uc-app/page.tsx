@@ -8,8 +8,6 @@ import { MapaImovel } from "@/components/acam/mapa-imovel"
 import { ComboboxMunicipio } from "@/components/acam/combobox-municipio"
 import { formatBRL, formatNum } from "@/lib/format"
 
-const CUSTO_CREDITOS = 6
-
 // ============================================
 // TIPOS DO PARECER
 // ============================================
@@ -198,6 +196,18 @@ function EtapasProgresso() {
 
 export default function DestinacaoUCAppPage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(6)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["dest-uc-app"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
+
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState("")
   const [resultado, setResultado] = useState<{ consultaId: string; parecer: Parecer } | null>(null)
@@ -531,7 +541,7 @@ export default function DestinacaoUCAppPage() {
           </div>
           <div className="acam-service-header-cost">
             <div className="acam-service-header-cost-label">Custo</div>
-            <div className="acam-service-header-cost-value">{CUSTO_CREDITOS} créditos</div>
+            <div className="acam-service-header-cost-value">{custoCreditos} créditos</div>
           </div>
         </div>
       </div>
@@ -617,7 +627,7 @@ export default function DestinacaoUCAppPage() {
         </AlertResult>}
 
         <button className="acam-btn acam-btn-primary w-full" onClick={handleSubmit} disabled={loading}>
-          {loading ? "Processando análise..." : `Analisar (${CUSTO_CREDITOS} créditos)`}
+          {loading ? "Processando análise..." : `Analisar (${custoCreditos} créditos)`}
         </button>
       </div>
     </div>

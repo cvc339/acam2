@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -19,7 +19,6 @@ import {
   empreendedorInicial,
   correspondenciaInicial,
   processoMataAtlanticaInicial,
-  CUSTO_REQUERIMENTO,
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
 import { DatePicker } from "@/components/acam/date-picker"
@@ -30,6 +29,18 @@ const ETAPAS = ["Responsável", "Empreendedor", "Correspondência", "Processo", 
 
 export default function RequerimentoMataAtlanticaPage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(0.5)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["req-mata-atlantica"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
+
   const [etapa, setEtapa] = useState(0)
   const [erro, setErro] = useState("")
   const [loading, setLoading] = useState(false)
@@ -84,7 +95,7 @@ export default function RequerimentoMataAtlanticaPage() {
     setErro("")
     try {
       // Debitar créditos antes de gerar
-      const debito = await debitarCreditos(CUSTO_REQUERIMENTO, "req-mata-atlantica", `Requerimento Mata Atlântica — ${form.empreendedor.razaoSocial || "N/A"}`)
+      const debito = await debitarCreditos(custoCreditos, "req-mata-atlantica", `Requerimento Mata Atlântica — ${form.empreendedor.razaoSocial || "N/A"}`)
       if (!debito.ok) { setErro(debito.erro); setLoading(false); return }
 
       // Gerar PDF
@@ -134,7 +145,7 @@ export default function RequerimentoMataAtlanticaPage() {
     <WizardShell
       titulo="Requerimento Compensação Mata Atlântica"
       subtitulo="Portaria IEF nº 30/2015"
-      custoCreditos={CUSTO_REQUERIMENTO}
+      custoCreditos={custoCreditos}
       etapas={ETAPAS}
       etapaAtual={etapa}
       onVoltar={() => { setErro(""); setEtapa((e) => e - 1) }}
@@ -176,7 +187,7 @@ export default function RequerimentoMataAtlanticaPage() {
       )}
 
       {etapa === 4 && (
-        <StepRevisaoMA form={form} />
+        <StepRevisaoMA form={form} custoCreditos={custoCreditos} />
       )}
     </WizardShell>
   )
@@ -278,7 +289,7 @@ function StepProcessoMA({ dados, onChange }: { dados: ProcessoMataAtlantica; onC
 // STEP: REVISÃO MATA ATLÂNTICA
 // ============================================
 
-function StepRevisaoMA({ form }: { form: FormMataAtlantica }) {
+function StepRevisaoMA({ form, custoCreditos }: { form: FormMataAtlantica; custoCreditos: number }) {
   const r = form.responsavel
   const e = form.empreendedor
   const p = form.processo
@@ -314,7 +325,7 @@ function StepRevisaoMA({ form }: { form: FormMataAtlantica }) {
       </SummaryCard>
 
       <div className="acam-alert acam-alert-result" style={{ marginTop: "1rem" }}>
-        Este serviço consome <strong>{CUSTO_REQUERIMENTO} crédito</strong>
+        Este serviço consome <strong>{custoCreditos} crédito</strong>
       </div>
     </>
   )

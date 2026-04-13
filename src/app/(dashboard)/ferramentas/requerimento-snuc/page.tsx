@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -21,7 +21,6 @@ import {
   correspondenciaInicial,
   processoSNUCInicial,
   ucsInicial,
-  CUSTO_REQUERIMENTO,
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
 import { DatePicker } from "@/components/acam/date-picker"
@@ -32,6 +31,18 @@ const ETAPAS = ["Responsável", "Empreendedor", "Empreendimento", "Correspondên
 
 export default function RequerimentoSNUCPage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(0.5)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["req-snuc"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
+
   const [etapa, setEtapa] = useState(0)
   const [erro, setErro] = useState("")
   const [loading, setLoading] = useState(false)
@@ -93,7 +104,7 @@ export default function RequerimentoSNUCPage() {
     setErro("")
     try {
       // Debitar créditos antes de gerar
-      const debito = await debitarCreditos(CUSTO_REQUERIMENTO, "req-snuc", `Requerimento SNUC — ${form.empreendimento.razaoSocial || "N/A"}`)
+      const debito = await debitarCreditos(custoCreditos, "req-snuc", `Requerimento SNUC — ${form.empreendimento.razaoSocial || "N/A"}`)
       if (!debito.ok) { setErro(debito.erro); setLoading(false); return }
 
       // Gerar PDF
@@ -143,7 +154,7 @@ export default function RequerimentoSNUCPage() {
     <WizardShell
       titulo="Requerimento SNUC"
       subtitulo="Compensação Ambiental — Lei 9.985/2000"
-      custoCreditos={CUSTO_REQUERIMENTO}
+      custoCreditos={custoCreditos}
       etapas={ETAPAS}
       etapaAtual={etapa}
       onVoltar={() => { setErro(""); setEtapa((e) => e - 1) }}
@@ -206,7 +217,7 @@ export default function RequerimentoSNUCPage() {
       )}
 
       {etapa === 6 && (
-        <StepRevisaoSNUC form={form} />
+        <StepRevisaoSNUC form={form} custoCreditos={custoCreditos} />
       )}
     </WizardShell>
   )
@@ -394,7 +405,7 @@ function StepUCs({ dados, onChange }: { dados: DadosUCs; onChange: (d: DadosUCs)
 // STEP: REVISÃO SNUC
 // ============================================
 
-function StepRevisaoSNUC({ form }: { form: FormSNUC }) {
+function StepRevisaoSNUC({ form, custoCreditos }: { form: FormSNUC; custoCreditos: number }) {
   const r = form.responsavel
   const emp = form.empreendedor
   const empr = form.empreendimento
@@ -444,7 +455,7 @@ function StepRevisaoSNUC({ form }: { form: FormSNUC }) {
       </SummaryCard>
 
       <div className="acam-alert acam-alert-result" style={{ marginTop: "1rem" }}>
-        Este serviço consome <strong>{CUSTO_REQUERIMENTO} crédito</strong>
+        Este serviço consome <strong>{custoCreditos} crédito</strong>
       </div>
     </>
   )

@@ -15,8 +15,6 @@ import { formatBRL as fmt, formatNum as fmtNum } from "@/lib/format"
 import { downloadPDF } from "@/lib/pdf/download"
 import { debitarCreditos } from "@/lib/creditos/client"
 
-const CUSTO_CREDITOS = 2
-
 const FLUXO_ADMINISTRATIVO = [
   { titulo: "Escolha da Unidade de Conservação", prazo: "1-2 semanas", desc: "Identificação e seleção da UC de Proteção Integral a ser beneficiada." },
   { titulo: "Contato com Órgão Gestor", prazo: "2-4 semanas", desc: "Articulação com o órgão gestor da UC para definição das ações." },
@@ -29,6 +27,7 @@ const FLUXO_ADMINISTRATIVO = [
 export default function CalculoModalidade2Page() {
   const router = useRouter()
   const [ufemg, setUfemg] = useState({ ano: 2026, valor: 5.7899 })
+  const [custoCreditos, setCustoCreditos] = useState(2)
 
   useEffect(() => {
     fetch("/api/configuracoes?chave=ufemg")
@@ -37,6 +36,13 @@ export default function CalculoModalidade2Page() {
         if (data.valor?.ano && data.valor?.valor) {
           setUfemg({ ano: data.valor.ano, valor: data.valor.valor })
         }
+      })
+      .catch(() => { /* mantém fallback */ })
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["calc-impl-uc"]?.creditos
+        if (v != null) setCustoCreditos(v)
       })
       .catch(() => { /* mantém fallback */ })
   }, [])
@@ -75,8 +81,8 @@ export default function CalculoModalidade2Page() {
       setErro("Selecione o tipo de vegetação.")
       return
     }
-    if (saldo !== null && saldo < CUSTO_CREDITOS) {
-      setErro(`Saldo insuficiente. Você tem ${saldo} créditos, mas esta ferramenta custa ${CUSTO_CREDITOS}.`)
+    if (saldo !== null && saldo < custoCreditos) {
+      setErro(`Saldo insuficiente. Você tem ${saldo} créditos, mas esta ferramenta custa ${custoCreditos}.`)
       return
     }
 
@@ -94,13 +100,13 @@ export default function CalculoModalidade2Page() {
       }
 
       // Debitar créditos
-      const debito = await debitarCreditos(CUSTO_CREDITOS, "calc-impl-uc", `Cálculo Modalidade 2 — ${fmtNum(areaNum)} ha de ${NOMES_VEGETACAO[tipoVegetacao]}`)
+      const debito = await debitarCreditos(custoCreditos, "calc-impl-uc", `Cálculo Modalidade 2 — ${fmtNum(areaNum)} ha de ${NOMES_VEGETACAO[tipoVegetacao]}`)
       if (!debito.ok) { setErro(debito.erro); setLoading(false); return }
 
       // Calcular
       const calc = calcularModalidade2(areaNum, tipoVegetacao, ufemg.valor, ufemg.ano)
       setResultado(calc)
-      setSaldo((prev) => (prev !== null ? prev - CUSTO_CREDITOS : null))
+      setSaldo((prev) => (prev !== null ? prev - custoCreditos : null))
       router.refresh() // atualiza saldo no header
     } catch {
       setErro("Erro ao processar. Tente novamente.")
@@ -132,7 +138,7 @@ export default function CalculoModalidade2Page() {
           </div>
           <div className="acam-service-header-cost">
             <div className="acam-service-header-cost-label">Custo</div>
-            <div className="acam-service-header-cost-value">{CUSTO_CREDITOS} créditos</div>
+            <div className="acam-service-header-cost-value">{custoCreditos} créditos</div>
           </div>
         </div>
       </div>
@@ -179,7 +185,7 @@ export default function CalculoModalidade2Page() {
               onClick={handleCalcular}
               disabled={loading}
             >
-              {loading ? "Calculando..." : `Calcular (${CUSTO_CREDITOS} créditos)`}
+              {loading ? "Calculando..." : `Calcular (${custoCreditos} créditos)`}
             </button>
           </div>
 

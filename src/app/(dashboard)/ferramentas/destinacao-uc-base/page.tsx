@@ -7,8 +7,6 @@ import { StatusBadge, AlertResult, DocumentoItem } from "@/components/acam"
 import { MapaImovel } from "@/components/acam/mapa-imovel"
 import { ComboboxMunicipio } from "@/components/acam/combobox-municipio"
 
-const CUSTO_CREDITOS = 5
-
 // ============================================
 // TIPOS DO PARECER (espelha API /api/consultas)
 // ============================================
@@ -252,6 +250,18 @@ function EtapasProgresso() {
 
 export default function DestinacaoUCBasePage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(5)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["dest-uc-base"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
+
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState("")
   const [resultado, setResultado] = useState<{ consultaId: string; parecer: Parecer } | null>(null)
@@ -728,7 +738,7 @@ export default function DestinacaoUCBasePage() {
           </div>
           <div className="acam-service-header-cost">
             <div className="acam-service-header-cost-label">Custo</div>
-            <div className="acam-service-header-cost-value">{CUSTO_CREDITOS} créditos</div>
+            <div className="acam-service-header-cost-value">{custoCreditos} créditos</div>
           </div>
         </div>
       </div>
@@ -801,7 +811,7 @@ export default function DestinacaoUCBasePage() {
         </AlertResult>}
 
         <button className="acam-btn acam-btn-primary" style={{ width: "100%" }} onClick={handleSubmit} disabled={loading}>
-          {loading ? "Processando análise..." : `Analisar Imóvel (${CUSTO_CREDITOS} créditos)`}
+          {loading ? "Processando análise..." : `Analisar Imóvel (${custoCreditos} créditos)`}
         </button>
       </div>
     </div>

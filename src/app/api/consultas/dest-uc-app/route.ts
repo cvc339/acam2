@@ -12,8 +12,8 @@ import {
 } from "@/lib/services/analise-geoespacial"
 import type { BBox, Centroide, ResultadoBacia } from "@/lib/services/analise-geoespacial"
 import { consultarVTN } from "@/lib/services/mvar"
+import { buscarCustoFerramenta } from "@/lib/creditos/custos"
 
-const CUSTO_CREDITOS = 6
 const FERRAMENTA_ID = "dest-uc-app"
 
 /**
@@ -31,6 +31,7 @@ const FERRAMENTA_ID = "dest-uc-app"
  * 3. Preferencialmente, na mesma sub-bacia hidrográfica?
  */
 export async function POST(request: Request) {
+  const CUSTO_CREDITOS = await buscarCustoFerramenta("dest-uc-app")
   const supabase = await createClient()
   const admin = createAdminClient()
 

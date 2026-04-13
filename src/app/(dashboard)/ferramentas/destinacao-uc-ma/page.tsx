@@ -10,8 +10,6 @@ import { ProgressBar } from "@/components/acam/progress-bar"
 import { MapaCobertura } from "@/components/acam/mapa-cobertura"
 import { formatBRL, formatNum } from "@/lib/format"
 
-const CUSTO_CREDITOS = 7
-
 // ============================================
 // TIPOS (espelha API /api/consultas/dest-uc-ma)
 // ============================================
@@ -105,6 +103,18 @@ function EtapasProgresso() {
 
 export default function DestinacaoUCMaPage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(7)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["dest-uc-ma"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
+
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState("")
   const [resultado, setResultado] = useState<{ consultaId: string; parecer: Parecer } | null>(null)
@@ -447,7 +457,7 @@ export default function DestinacaoUCMaPage() {
           </div>
           <div className="acam-service-header-cost">
             <div className="acam-service-header-cost-label">Custo</div>
-            <div className="acam-service-header-cost-value">{CUSTO_CREDITOS} créditos</div>
+            <div className="acam-service-header-cost-value">{custoCreditos} créditos</div>
           </div>
         </div>
       </div>
@@ -515,7 +525,7 @@ export default function DestinacaoUCMaPage() {
         </AlertResult>}
 
         <button className="acam-btn acam-btn-primary w-full" onClick={handleSubmit} disabled={loading}>
-          {loading ? "Processando análise..." : `Analisar (${CUSTO_CREDITOS} créditos)`}
+          {loading ? "Processando análise..." : `Analisar (${custoCreditos} créditos)`}
         </button>
       </div>
     </div>

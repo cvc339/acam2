@@ -19,8 +19,7 @@ import type { BBox, Centroide } from "@/lib/services/analise-geoespacial"
 import { calcularMVAR, consultarVTN } from "@/lib/services/mvar"
 import { avaliarCriteriosMA } from "@/lib/services/criterios-ma"
 import { analiseSentinel2 } from "@/lib/services/sentinel-ndvi"
-
-const CUSTO_CREDITOS = 7
+import { buscarCustoFerramenta } from "@/lib/creditos/custos"
 
 /** Converte ResultadoPipeline (v3) para o formato que calcularMVAR() espera */
 function pipelineParaMVAR(pm: ResultadoPipeline): ResultadoAnalise<DadosMatricula> {
@@ -70,6 +69,7 @@ const FERRAMENTA_ID = "dest-uc-ma"
  * Análises: MapBiomas, NDVI Sentinel-2, dinâmica vegetal, MVAR
  */
 export async function POST(request: Request) {
+  const CUSTO_CREDITOS = await buscarCustoFerramenta("dest-uc-ma")
   const supabase = await createClient()
   const admin = createAdminClient()
 

@@ -9,8 +9,8 @@ import type { ResultadoPipeline } from "@/lib/services/analise-matricula"
 import { calcularMVAR, consultarVTN } from "@/lib/services/mvar"
 import { analisarImovelIDESisema, processarKML, processarGeoJSON } from "@/lib/services/analise-geoespacial"
 import type { ResultadoIDESisema } from "@/lib/services/analise-geoespacial"
+import { buscarCustoFerramenta } from "@/lib/creditos/custos"
 
-const CUSTO_CREDITOS = 5
 const FERRAMENTA_ID = "analise-matricula"
 
 function pipelineParaMVAR(pm: ResultadoPipeline): ResultadoAnalise<DadosMatricula> {
@@ -42,6 +42,7 @@ function pipelineParaMVAR(pm: ResultadoPipeline): ResultadoAnalise<DadosMatricul
  * Pipeline v3 (3 LLM) + MVAR (4 dimensões) + VTN
  */
 export async function POST(request: Request) {
+  const CUSTO_CREDITOS = await buscarCustoFerramenta("analise-matricula")
   const supabase = await createClient()
   const admin = createAdminClient()
 

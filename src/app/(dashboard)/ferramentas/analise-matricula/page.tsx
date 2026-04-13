@@ -9,8 +9,6 @@ import { ComboboxMunicipio } from "@/components/acam/combobox-municipio"
 import { ProgressBar } from "@/components/acam/progress-bar"
 import { formatBRL, formatNum } from "@/lib/format"
 
-const CUSTO_CREDITOS = 5
-
 // Tipos
 
 interface Proprietario { nome: string; percentual: number | null; cpf: string | null; estado_civil: string | null; conjuge: string | null; regime_bens: string | null; ato_aquisitivo: string }
@@ -90,6 +88,18 @@ function EtapasProgresso() {
 
 export default function AnaliseMatriculaPage() {
   const router = useRouter()
+  const [custoCreditos, setCustoCreditos] = useState(5)
+
+  useEffect(() => {
+    fetch("/api/configuracoes?chave=precos")
+      .then((r) => r.json())
+      .then((data) => {
+        const v = data.valor?.ferramentas?.["analise-matricula"]?.creditos
+        if (v != null) setCustoCreditos(v)
+      })
+      .catch(() => { /* mantém fallback */ })
+  }, [])
+
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState("")
   const [resultado, setResultado] = useState<{ consultaId: string; parecer: Parecer } | null>(null)
@@ -398,7 +408,7 @@ export default function AnaliseMatriculaPage() {
           </div>
           <div className="acam-service-header-cost">
             <div className="acam-service-header-cost-label">Custo</div>
-            <div className="acam-service-header-cost-value">{CUSTO_CREDITOS} créditos</div>
+            <div className="acam-service-header-cost-value">{custoCreditos} créditos</div>
           </div>
         </div>
       </div>
@@ -456,7 +466,7 @@ export default function AnaliseMatriculaPage() {
         </AlertResult>}
 
         <button className="acam-btn acam-btn-primary w-full" onClick={handleSubmit} disabled={loading}>
-          {loading ? "Processando análise..." : `Analisar Matrícula (${CUSTO_CREDITOS} créditos)`}
+          {loading ? "Processando análise..." : `Analisar Matrícula (${custoCreditos} créditos)`}
         </button>
       </div>
     </div>
