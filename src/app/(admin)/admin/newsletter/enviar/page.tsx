@@ -17,11 +17,19 @@ export default async function AdminEnviarNewsletterPage() {
     .order("fonte")
     .order("relevancia", { ascending: false })
 
-  // Buscar assinantes ativos
-  const { count: totalAssinantes } = await admin
-    .from("radar_destinatarios")
-    .select("*", { count: "exact", head: true })
-    .eq("ativo", true)
+  // Contar destinatários únicos (3 fontes)
+  const emails = new Set<string>()
+
+  const { data: manuais } = await admin.from("radar_destinatarios").select("email").eq("ativo", true)
+  if (manuais) for (const d of manuais) emails.add(d.email.toLowerCase())
+
+  const { data: leads } = await admin.from("leads").select("email").eq("aceita_marketing", true)
+  if (leads) for (const l of leads) emails.add(l.email.toLowerCase())
+
+  const { data: perfis } = await admin.from("perfis").select("email")
+  if (perfis) for (const p of perfis) emails.add(p.email.toLowerCase())
+
+  const totalAssinantes = emails.size
 
   const itensDOU = itens?.filter((i) => i.fonte === "DOU") ?? []
   const itensMG = itens?.filter((i) => i.fonte === "MG") ?? []

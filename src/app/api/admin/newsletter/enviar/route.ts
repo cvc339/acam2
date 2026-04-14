@@ -26,14 +26,48 @@ export async function POST() {
     return NextResponse.json({ erro: "Nenhum item selecionado" }, { status: 400 })
   }
 
-  // 2. Buscar assinantes ativos
-  const { data: assinantes } = await admin
+  // 2. Buscar destinatários de 3 fontes (sem duplicação por email)
+  const emailsMap = new Map<string, string>() // email → nome
+
+  // Fonte 1: radar_destinatarios (manuais)
+  const { data: manuais } = await admin
     .from("radar_destinatarios")
     .select("email, nome")
     .eq("ativo", true)
 
-  if (!assinantes || assinantes.length === 0) {
-    return NextResponse.json({ erro: "Nenhum assinante ativo" }, { status: 400 })
+  if (manuais) {
+    for (const d of manuais) emailsMap.set(d.email.toLowerCase(), d.nome || "")
+  }
+
+  // Fonte 2: leads do ACAM (aceita_marketing)
+  const { data: leads } = await admin
+    .from("leads")
+    .select("email, nome")
+    .eq("aceita_marketing", true)
+
+  if (leads) {
+    for (const l of leads) {
+      const email = l.email.toLowerCase()
+      if (!emailsMap.has(email)) emailsMap.set(email, l.nome || "")
+    }
+  }
+
+  // Fonte 3: perfis de usuários (que aceitaram comunicações)
+  const { data: perfis } = await admin
+    .from("perfis")
+    .select("email")
+
+  if (perfis) {
+    for (const p of perfis) {
+      const email = p.email.toLowerCase()
+      if (!emailsMap.has(email)) emailsMap.set(email, "")
+    }
+  }
+
+  const assinantes = Array.from(emailsMap.entries()).map(([email, nome]) => ({ email, nome }))
+
+  if (assinantes.length === 0) {
+    return NextResponse.json({ erro: "Nenhum destinatário encontrado" }, { status: 400 })
   }
 
   // 3. Gerar HTML

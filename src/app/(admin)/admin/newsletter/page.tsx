@@ -31,7 +31,15 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
   // Stats
   const { count: totalItens } = await admin.from("radar_itens").select("*", { count: "exact", head: true })
   const { count: selecionados } = await admin.from("radar_itens").select("*", { count: "exact", head: true }).eq("incluir_email", true)
-  const { count: totalAssinantes } = await admin.from("radar_destinatarios").select("*", { count: "exact", head: true }).eq("ativo", true)
+  // Contar destinatários únicos (3 fontes: manuais + leads + perfis)
+  const emailsSet = new Set<string>()
+  const { data: dManuais } = await admin.from("radar_destinatarios").select("email").eq("ativo", true)
+  if (dManuais) for (const d of dManuais) emailsSet.add(d.email.toLowerCase())
+  const { data: dLeads } = await admin.from("leads").select("email").eq("aceita_marketing", true)
+  if (dLeads) for (const l of dLeads) emailsSet.add(l.email.toLowerCase())
+  const { data: dPerfis } = await admin.from("perfis").select("email")
+  if (dPerfis) for (const p of dPerfis) emailsSet.add(p.email.toLowerCase())
+  const totalAssinantes = emailsSet.size
   const { data: ultimoEnvio } = await admin.from("radar_envios").select("enviado_em, assunto").order("enviado_em", { ascending: false }).limit(1)
 
   return (
