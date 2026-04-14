@@ -291,7 +291,7 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
                 Monitoramento de normas e notícias ambientais
               </p>
               <p style="font-family:Arial,sans-serif;font-size:9px;margin:0;">
-                <a href="{{unsubscribe_url}}" style="color:rgba(245,240,232,0.3);text-decoration:underline;">Cancelar inscrição</a>
+                <a href="{{unsubscribe_url}}" style="color:${COBRE};text-decoration:underline;">Cancelar inscrição</a>
               </p>
             </td>
           </tr>
