@@ -18,8 +18,13 @@ export default function AtualizarSenhaPage() {
     e.preventDefault()
     setErro("")
 
-    if (senha.length < 6) {
-      setErro("A senha deve ter pelo menos 6 caracteres.")
+    if (senha.length < 8) {
+      setErro("A senha deve ter pelo menos 8 caracteres.")
+      return
+    }
+
+    if (!/[a-z]/.test(senha) || !/[A-Z]/.test(senha) || !/[0-9]/.test(senha)) {
+      setErro("A senha deve conter letras maiúsculas, minúsculas e números.")
       return
     }
 
@@ -34,7 +39,15 @@ export default function AtualizarSenhaPage() {
     const { error } = await supabase.auth.updateUser({ password: senha })
 
     if (error) {
-      setErro(error.message)
+      // Traduzir mensagens comuns do Supabase
+      const msg = error.message.toLowerCase()
+      if (msg.includes("weak") || msg.includes("easy to guess")) {
+        setErro("Senha muito fraca. Escolha uma senha mais forte, evitando sequências simples como '12345678' ou 'Abcd1234'.")
+      } else if (msg.includes("at least")) {
+        setErro("A senha deve ter pelo menos 8 caracteres, com letras maiúsculas, minúsculas e números.")
+      } else {
+        setErro(error.message)
+      }
       setLoading(false)
       return
     }
@@ -82,11 +95,11 @@ export default function AtualizarSenhaPage() {
                     <input
                       type="password"
                       className="acam-form-input"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres (maiúsculas, minúsculas e números)"
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                       autoComplete="new-password"
                     />
                   </div>
@@ -100,7 +113,7 @@ export default function AtualizarSenhaPage() {
                       value={confirmar}
                       onChange={(e) => setConfirmar(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                       autoComplete="new-password"
                     />
                   </div>

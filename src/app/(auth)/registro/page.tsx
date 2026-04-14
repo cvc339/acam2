@@ -26,8 +26,8 @@ export default function RegistroPage() {
       return
     }
 
-    if (senha.length < 6) {
-      setErro("A senha deve ter pelo menos 6 caracteres.")
+    if (senha.length < 8) {
+      setErro("A senha deve ter pelo menos 8 caracteres, com letras maiúsculas, minúsculas e números.")
       return
     }
 
