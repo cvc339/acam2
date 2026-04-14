@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/admin/usuarios", label: "Usuários", icon: "U" },
   { href: "/admin/configuracoes", label: "Configurações", icon: "⚙" },
   { href: "/admin/consultas", label: "Uso e Faturamento", icon: "$" },
+  { href: "/admin/newsletter", label: "Newsletter", icon: "N" },
   { href: "/admin/mensagens", label: "Mensagens", icon: "✉" },
   { href: "/admin/leads", label: "Leads", icon: "L" },
 ]
