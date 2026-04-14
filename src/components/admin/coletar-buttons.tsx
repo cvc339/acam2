@@ -15,7 +15,11 @@ export function ColetarButtons() {
     setErro("")
 
     try {
-      const res = await fetch("/api/admin/newsletter/coletar", {
+      const endpoint = fonte === "dou"
+        ? "/api/admin/newsletter/coletar-dou"
+        : "/api/admin/newsletter/coletar"
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fonte }),
@@ -24,7 +28,7 @@ export function ColetarButtons() {
       const data = await res.json()
 
       if (res.ok && data.sucesso) {
-        setResultado(`${data.inseridas} nova(s), ${data.duplicatas} duplicata(s), ${data.relevantes} relevante(s)`)
+        setResultado(`${data.inseridas} nova(s), ${data.duplicatas ?? 0} duplicata(s), ${data.relevantes} relevante(s)`)
         router.refresh()
       } else if (data.instrucoes) {
         setErro(data.instrucoes)
@@ -50,17 +54,17 @@ export function ColetarButtons() {
         </button>
         <button
           className="acam-btn acam-btn-secondary acam-btn-sm"
+          onClick={() => handleColetar("dou")}
+          disabled={!!loading}
+        >
+          {loading === "dou" ? "Coletando DOU..." : "Coletar DOU"}
+        </button>
+        <button
+          className="acam-btn acam-btn-ghost acam-btn-sm"
           onClick={() => handleColetar("mg")}
           disabled={!!loading}
         >
           MG (script local)
-        </button>
-        <button
-          className="acam-btn acam-btn-secondary acam-btn-sm"
-          onClick={() => handleColetar("dou")}
-          disabled={!!loading}
-        >
-          DOU (script local)
         </button>
       </div>
       {resultado && <div className="text-xs" style={{ color: "var(--success)" }}>{resultado}</div>}
