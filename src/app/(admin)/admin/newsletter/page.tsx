@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { StatusBadge } from "@/components/acam"
 import { NewsletterActions } from "@/components/admin/newsletter-actions"
+import { ColetarButtons } from "@/components/admin/coletar-buttons"
 
 export const metadata: Metadata = { title: "Admin — Newsletter" }
 
@@ -53,6 +54,12 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
           <a href="/admin/newsletter/assinantes" className="acam-btn acam-btn-ghost acam-btn-sm">Assinantes ({totalAssinantes ?? 0})</a>
           <a href="/admin/newsletter/enviar" className="acam-btn acam-btn-primary acam-btn-sm">Gerar e Enviar</a>
         </div>
+      </div>
+
+      {/* Coleta */}
+      <div className="acam-card">
+        <h3 className="font-semibold mb-3">Coletar normas e notícias</h3>
+        <ColetarButtons />
       </div>
 
       {/* Stats */}
