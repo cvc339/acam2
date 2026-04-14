@@ -26,7 +26,7 @@ export default async function AdminEnviarNewsletterPage() {
   const { data: leads } = await admin.from("leads").select("email").eq("aceita_marketing", true)
   if (leads) for (const l of leads) emails.add(l.email.toLowerCase())
 
-  const { data: perfis } = await admin.from("perfis").select("email")
+  const { data: perfis } = await admin.from("perfis").select("email").neq("aceita_newsletter", false)
   if (perfis) for (const p of perfis) emails.add(p.email.toLowerCase())
 
   const totalAssinantes = emails.size

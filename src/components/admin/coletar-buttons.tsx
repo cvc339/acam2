@@ -9,29 +9,33 @@ export function ColetarButtons() {
   const [resultado, setResultado] = useState("")
   const [erro, setErro] = useState("")
 
-  async function handleColetar(fonte: string) {
+  async function handleColetar(fonte: "rss" | "dou" | "mg") {
     setLoading(fonte)
     setResultado("")
     setErro("")
 
     try {
-      const endpoint = fonte === "dou"
-        ? "/api/admin/newsletter/coletar-dou"
-        : "/api/admin/newsletter/coletar"
+      const endpoints = {
+        rss: "/api/admin/newsletter/coletar",
+        dou: "/api/admin/newsletter/coletar-dou",
+        mg: "/api/admin/newsletter/coletar-mg",
+      }
 
-      const res = await fetch(endpoint, {
+      const res = await fetch(endpoints[fonte], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fonte }),
+        body: JSON.stringify({}),
       })
 
       const data = await res.json()
 
       if (res.ok && data.sucesso) {
-        setResultado(`${data.inseridas} nova(s), ${data.duplicatas ?? 0} duplicata(s), ${data.relevantes} relevante(s)`)
+        const partes = []
+        if (data.inseridas !== undefined) partes.push(`${data.inseridas} nova(s)`)
+        if (data.duplicatas !== undefined) partes.push(`${data.duplicatas} duplicata(s)`)
+        if (data.relevantes !== undefined) partes.push(`${data.relevantes} relevante(s)`)
+        setResultado(partes.join(", ") || "Coleta concluída")
         router.refresh()
-      } else if (data.instrucoes) {
-        setErro(data.instrucoes)
       } else {
         setErro(data.erro || "Erro na coleta.")
       }
@@ -57,14 +61,14 @@ export function ColetarButtons() {
           onClick={() => handleColetar("dou")}
           disabled={!!loading}
         >
-          {loading === "dou" ? "Coletando DOU..." : "Coletar DOU"}
+          {loading === "dou" ? "Coletando DOU..." : "Coletar DOU (Inlabs)"}
         </button>
         <button
-          className="acam-btn acam-btn-ghost acam-btn-sm"
+          className="acam-btn acam-btn-secondary acam-btn-sm"
           onClick={() => handleColetar("mg")}
           disabled={!!loading}
         >
-          MG (script local)
+          {loading === "mg" ? "Coletando MG..." : "Coletar MG (Puppeteer)"}
         </button>
       </div>
       {resultado && <div className="text-xs" style={{ color: "var(--success)" }}>{resultado}</div>}

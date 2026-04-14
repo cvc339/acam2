@@ -8,12 +8,14 @@ import { montarNewsletterHTML } from "@/lib/email/newsletter-template"
  * POST /api/admin/newsletter/enviar
  *
  * Gera o HTML da newsletter com os itens selecionados e envia para todos os assinantes ativos.
+ * Inclui link de descadastrar personalizado por email.
  */
 export async function POST() {
   const auth = await verificarAdmin()
   if (!auth.authorized) return auth.response
 
   const admin = createAdminClient()
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.acam.com.br"
 
   // 1. Buscar itens selecionados
   const { data: itens } = await admin
@@ -53,10 +55,11 @@ export async function POST() {
     }
   }
 
-  // Fonte 3: perfis de usuários (que aceitaram comunicações)
+  // Fonte 3: perfis de usuários (que não deram opt-out)
   const { data: perfis } = await admin
     .from("perfis")
     .select("email")
+    .neq("aceita_newsletter", false)
 
   if (perfis) {
     for (const p of perfis) {
@@ -71,8 +74,8 @@ export async function POST() {
     return NextResponse.json({ erro: "Nenhum destinatário encontrado" }, { status: 400 })
   }
 
-  // 3. Gerar HTML com template profissional
-  const { assunto, html } = montarNewsletterHTML(itens as Array<{
+  // 3. Gerar HTML com template (contém placeholder {{unsubscribe_url}})
+  const { assunto, html: htmlTemplate } = montarNewsletterHTML(itens as Array<{
     id: number; titulo: string; resumo: string | null; url: string | null;
     fonte: string; fonte_nome: string | null; categoria: string | null; data_publicacao: string | null
   }>)
@@ -86,14 +89,17 @@ export async function POST() {
   let enviados = 0
   const erros: string[] = []
 
-  // Enviar individualmente (Resend free tier não suporta batch)
+  // Enviar individualmente (personaliza link de descadastrar)
   for (const assinante of assinantes) {
     try {
+      const unsubUrl = `${appUrl}/api/newsletter/descadastrar?email=${encodeURIComponent(assinante.email)}`
+      const htmlPersonalizado = htmlTemplate.replace("{{unsubscribe_url}}", unsubUrl)
+
       const { error } = await resend.emails.send({
         from: REMETENTE,
         to: assinante.email,
         subject: assunto,
-        html,
+        html: htmlPersonalizado,
       })
 
       if (error) {
@@ -109,7 +115,7 @@ export async function POST() {
   // 5. Registrar envio
   await admin.from("radar_envios").insert({
     assunto,
-    conteudo_html: html,
+    conteudo_html: htmlTemplate,
     destinatarios_count: enviados,
     itens_count: itens.length,
   })

@@ -4,18 +4,23 @@ import { createAdminClient } from "@/lib/supabase/admin"
 
 /**
  * POST /api/admin/newsletter/toggle
- * Alterna incluir_email de um item do radar.
+ * Atualiza item do radar: incluir_email e/ou url.
  */
 export async function POST(request: Request) {
   const auth = await verificarAdmin()
   if (!auth.authorized) return auth.response
 
-  const { id, incluir_email } = await request.json()
+  const body = await request.json()
+  const { id, incluir_email, url } = body as { id: number; incluir_email?: boolean; url?: string }
 
   const admin = createAdminClient()
+  const updates: Record<string, unknown> = {}
+  if (incluir_email !== undefined) updates.incluir_email = incluir_email
+  if (url !== undefined) updates.url = url
+
   const { error } = await admin
     .from("radar_itens")
-    .update({ incluir_email })
+    .update(updates)
     .eq("id", id)
 
   if (error) {

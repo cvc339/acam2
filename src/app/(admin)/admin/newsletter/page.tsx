@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { StatusBadge } from "@/components/acam"
 import { NewsletterActions } from "@/components/admin/newsletter-actions"
+import { NewsletterEditUrl } from "@/components/admin/newsletter-edit-url"
 import { ColetarButtons } from "@/components/admin/coletar-buttons"
 
 export const metadata: Metadata = { title: "Admin — Newsletter" }
@@ -27,7 +28,15 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
     .limit(100)
 
   if (filtroFonte) query = query.eq("fonte", filtroFonte)
-  if (mostrarSelecionados) query = query.eq("incluir_email", true)
+  if (mostrarSelecionados) {
+    // Filtro "Selecionados": mostra apenas os marcados para envio
+    query = query.eq("incluir_email", true)
+  } else if (!filtroFonte) {
+    // Lista principal (sem filtro): esconde itens já selecionados
+    // Eles aparecem no filtro "Selecionados" para revisão
+    query = query.eq("incluir_email", false)
+  }
+  // Com filtro de fonte: mostra todos (selecionados e não) daquela fonte
 
   const { data: itens } = await query
 
@@ -40,7 +49,7 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
   if (dManuais) for (const d of dManuais) emailsSet.add(d.email.toLowerCase())
   const { data: dLeads } = await admin.from("leads").select("email").eq("aceita_marketing", true)
   if (dLeads) for (const l of dLeads) emailsSet.add(l.email.toLowerCase())
-  const { data: dPerfis } = await admin.from("perfis").select("email")
+  const { data: dPerfis } = await admin.from("perfis").select("email").neq("aceita_newsletter", false)
   if (dPerfis) for (const p of dPerfis) emailsSet.add(p.email.toLowerCase())
   const totalAssinantes = emailsSet.size
   const { data: ultimoEnvio } = await admin.from("radar_envios").select("enviado_em, assunto").order("enviado_em", { ascending: false }).limit(1)
@@ -112,6 +121,7 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
                 <div className="text-xs text-muted-foreground mt-1">
                   {item.data_publicacao && new Date(item.data_publicacao).toLocaleDateString("pt-BR")}
                   {item.url && <> · <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-600)" }}>Ver fonte</a></>}
+                  {" · "}<NewsletterEditUrl itemId={item.id} urlAtual={item.url} />
                 </div>
               </div>
             </div>
