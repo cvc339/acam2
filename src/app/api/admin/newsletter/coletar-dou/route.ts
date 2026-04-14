@@ -248,7 +248,7 @@ export async function POST(request: Request) {
 
             const { error } = await admin.from("radar_itens").insert({
               titulo: tituloFinal, resumo: (artigo.ementa || artigo.texto.slice(0, 300)).slice(0, 300),
-              url: artigo.id ? `https://www.in.gov.br/web/dou/-/${artigo.id}` : artigo.urlPdf || null,
+              url: artigo.urlPdf || null,
               fonte: "DOU", fonte_nome: `DOU ${artigo.secao}`, orgao: artigo.orgao,
               tipo: artigo.tipo, categoria, relevancia: pontuacao,
               palavras_chave: palavras, data_publicacao: dataISO, incluir_email: false,

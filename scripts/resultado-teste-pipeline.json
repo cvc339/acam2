@@ -1,0 +1,135 @@
+[
+  {
+    "modelo": "Sonnet (A+B+C)",
+    "matricula": "12669",
+    "acertos": 5,
+    "erros": 2,
+    "custo_usd": 0.061992,
+    "tempo_ms": 22449,
+    "detalhes": {
+      "acertos": [
+        "Qtd proprietários: 2 ✓",
+        "Área: 324.3614 ha ✓",
+        "Ônus ativos: 0 ✓",
+        "Semáforo: amarelo ✓",
+        "Georef: true ✓"
+      ],
+      "erros": [
+        "MARIA: 50% (esperado: 80%)",
+        "EUNAPIO: 50% (esperado: 20%)"
+      ]
+    },
+    "resultado": {
+      "proprietarios": [
+        {
+          "nome": "MARIA IOLANDA RODRIGUES DE SOUSA",
+          "percentual": 50
+        },
+        {
+          "nome": "EUNAPIO BOTELHO DE SOUSA",
+          "percentual": 50
+        }
+      ],
+      "area_ha": 324.3614,
+      "onus_ativos": 0,
+      "semaforo": "amarelo",
+      "georef_existente": true,
+      "confianca_ocr": "alta",
+      "outorga": [
+        {
+          "nome": "MARIA IOLANDA RODRIGUES DE SOUSA",
+          "exige_outorga": false
+        },
+        {
+          "nome": "EUNAPIO BOTELHO DE SOUSA",
+          "exige_outorga": true
+        }
+      ],
+      "restricoes_ambientais": 0,
+      "tokens": [
+        {
+          "etapa": "A-DadosImovel",
+          "input": 4145,
+          "output": 615
+        },
+        {
+          "etapa": "B-Atos",
+          "input": 4827,
+          "output": 786
+        },
+        {
+          "etapa": "C-Transmissibilidade",
+          "input": 1642,
+          "output": 609
+        }
+      ],
+      "analise_resumo": "Imóvel rural com 324,3614 hectares em situação regular para transmissão, com georreferenciamento em conformidade. Verificar necessidade de outorga conjugal e consentimento do coproprietário para alienação."
+    }
+  },
+  {
+    "modelo": "Opus (A+B+C)",
+    "matricula": "12669",
+    "acertos": 7,
+    "erros": 0,
+    "custo_usd": 0.33171,
+    "tempo_ms": 42575,
+    "detalhes": {
+      "acertos": [
+        "Qtd proprietários: 2 ✓",
+        "MARIA: 80% ✓",
+        "EUNAPIO: 20% ✓",
+        "Área: 324.3614 ha ✓",
+        "Ônus ativos: 0 ✓",
+        "Semáforo: amarelo ✓",
+        "Georef: true ✓"
+      ],
+      "erros": []
+    },
+    "resultado": {
+      "proprietarios": [
+        {
+          "nome": "MARIA IOLANDA RODRIGUES DE SOUSA",
+          "percentual": 80
+        },
+        {
+          "nome": "EUNAPIO BOTELHO DE SOUSA",
+          "percentual": 20
+        }
+      ],
+      "area_ha": 324.3614,
+      "onus_ativos": 0,
+      "semaforo": "amarelo",
+      "georef_existente": true,
+      "confianca_ocr": "alta",
+      "outorga": [
+        {
+          "nome": "MARIA IOLANDA RODRIGUES DE SOUSA",
+          "exige_outorga": false
+        },
+        {
+          "nome": "EUNAPIO BOTELHO DE SOUSA",
+          "exige_outorga": true
+        }
+      ],
+      "restricoes_ambientais": 0,
+      "tokens": [
+        {
+          "etapa": "A-DadosImovel",
+          "input": 4145,
+          "output": 639
+        },
+        {
+          "etapa": "B-Atos",
+          "input": 4827,
+          "output": 847
+        },
+        {
+          "etapa": "C-Transmissibilidade",
+          "input": 1627,
+          "output": 817
+        }
+      ],
+      "analise_resumo": "O imóvel rural de 324,36 ha encontra-se livre de ônus e com georreferenciamento devidamente certificado. A transmissão está condicionada à outorga conjugal do coproprietário Eunápio (20%) e ao exercício do direito de preferência pela coproprietária Maria Iolanda (80%)."
+    }
+  }
+]
