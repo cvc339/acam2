@@ -114,11 +114,12 @@ export async function POST() {
     itens_count: itens.length,
   })
 
-  // 6. Desmarcar itens (não deletar — soft reset)
+  // 6. Marcar itens como enviados (não deletar)
+  const idsEnviados = itens.map((i) => i.id)
   await admin
     .from("radar_itens")
-    .update({ incluir_email: false })
-    .eq("incluir_email", true)
+    .update({ incluir_email: false, enviado_em: new Date().toISOString() })
+    .in("id", idsEnviados)
 
   if (erros.length > 0) {
     console.error("[newsletter] Erros de envio:", erros)

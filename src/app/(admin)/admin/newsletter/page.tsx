@@ -17,10 +17,12 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
 
   const admin = createAdminClient()
 
-  // Buscar itens
+  // Buscar itens (apenas não enviados, ordenados por data de publicação)
   let query = admin
     .from("radar_itens")
     .select("*")
+    .is("enviado_em", null)
+    .order("data_publicacao", { ascending: false, nullsFirst: false })
     .order("coletado_em", { ascending: false })
     .limit(100)
 
@@ -30,8 +32,8 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
   const { data: itens } = await query
 
   // Stats
-  const { count: totalItens } = await admin.from("radar_itens").select("*", { count: "exact", head: true })
-  const { count: selecionados } = await admin.from("radar_itens").select("*", { count: "exact", head: true }).eq("incluir_email", true)
+  const { count: totalItens } = await admin.from("radar_itens").select("*", { count: "exact", head: true }).is("enviado_em", null)
+  const { count: selecionados } = await admin.from("radar_itens").select("*", { count: "exact", head: true }).eq("incluir_email", true).is("enviado_em", null)
   // Contar destinatários únicos (3 fontes: manuais + leads + perfis)
   const emailsSet = new Set<string>()
   const { data: dManuais } = await admin.from("radar_destinatarios").select("email").eq("ativo", true)
