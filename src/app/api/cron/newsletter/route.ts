@@ -215,7 +215,7 @@ async function coletarDOUDireto() {
           const { error } = await admin.from("radar_itens").insert({
             titulo: (ementa ? `[DOU] ${titulo}: ${ementa}` : `[DOU] ${titulo}`).slice(0, 500),
             resumo: (ementa || "").slice(0, 300) || null,
-            url: ga("pdfPage").replace(/&amp;/g, "&") || `https://www.in.gov.br/web/dou/-/${ga("idMateria")}`,
+            url: ga("idMateria") ? `https://www.in.gov.br/web/dou/-/${ga("idMateria")}` : ga("pdfPage").replace(/&amp;/g, "&") || null,
             fonte: "DOU", fonte_nome: `DOU ${ga("pubName")}`, orgao: ga("artCategory"), tipo: ga("artType"),
             categoria: "legislacao", relevancia: 50, palavras_chave: [],
             data_publicacao: dm ? `${dm[3]}-${dm[2]}-${dm[1]}` : dia, incluir_email: false,

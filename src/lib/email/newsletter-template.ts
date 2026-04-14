@@ -1,6 +1,6 @@
 /**
  * Template HTML da Newsletter — Radar Ambiental
- * Portado do radar-ambiental original com identidade Vieira Castro
+ * Identidade Vieira Castro Advogados
  */
 
 interface RadarItem {
@@ -20,20 +20,18 @@ const CREME = "#f5f0e8"
 const COBRE = "#c17f59"
 const VERDE_MEDIO = "#2d5a3f"
 
-const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
-
-function calcularEdicao(): number {
-  const agora = new Date()
-  const inicio = new Date(agora.getFullYear(), 0, 1)
-  return Math.ceil((agora.getTime() - inicio.getTime()) / (7 * 24 * 60 * 60 * 1000))
-}
-
+/** Remove tags HTML, entidades, URLs soltas, atributos CSS vazados */
 function limpar(texto: string): string {
   return texto
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/<[^>]*>/g, " ")
-    .replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&[a-z]+;/gi, " ")
-    .replace(/\bhttps?:\/\/\S+/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")          // blocos <style>
+    .replace(/<[^>]*>/g, " ")                                  // tags HTML
+    .replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+    .replace(/<[^>]*>/g, " ")                                  // tags que estavam escapadas
+    .replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&nbsp;/gi, " ")
+    .replace(/&[a-z]+;/gi, " ")                                // outras entidades
+    .replace(/\bhttps?:\/\/\S+/gi, "")                         // URLs soltas
+    .replace(/\b(?:p|a|div|span|img|br|class|style|href|src|width|height|alt|text-align|center|font-size|font-weight|color|margin|padding|border|background|display|vertical-align)\b\s*[:=]?\s*/gi, "") // atributos CSS/HTML vazados
+    .replace(/[{}]/g, " ")                                     // chaves de CSS
     .replace(/\s+/g, " ")
     .trim()
 }
@@ -44,7 +42,16 @@ function esc(texto: string): string {
 
 function fmtData(d: string | null): string {
   if (!d) return ""
-  const [ano, mes, dia] = d.split("-")
+  const partes = d.split("-")
+  if (partes.length !== 3) return d
+  return `${partes[2]}/${partes[1]}/${partes[0]}`
+}
+
+function fmtDataCompleta(): string {
+  const agora = new Date()
+  const dia = String(agora.getDate()).padStart(2, "0")
+  const mes = String(agora.getMonth() + 1).padStart(2, "0")
+  const ano = agora.getFullYear()
   return `${dia}/${mes}/${ano}`
 }
 
@@ -53,59 +60,52 @@ function normalizarFonte(fonteNome: string | null): string {
   return fonteNome.replace(/^DOU\s+DO\d+$/i, "DOU")
 }
 
+/** Extrai título e ementa de normas formatadas como "[DOU] TÍTULO: ementa" */
 function extrairTituloNorma(tituloCompleto: string): { titulo: string; ementa: string } {
   const limpo = limpar(tituloCompleto)
   const matchDOU = limpo.match(/^\[DOU\]\s*(.+?):\s*(.+)$/i)
   if (matchDOU) return { titulo: matchDOU[1].trim(), ementa: matchDOU[2].trim() }
-  const matchMG = limpo.match(/^(.+?)\s*[\u2014\u2013\-]+\s*(.+)$/)
+  const matchMG = limpo.match(/^(.+?)\s*[\u2014\u2013]+\s*(.+)$/)
   if (matchMG) return { titulo: matchMG[1].trim(), ementa: matchMG[2].trim() }
   return { titulo: limpo, ementa: "" }
 }
 
+/** Retorna resumo apenas se for diferente do título */
 function resumoDistinto(titulo: string, resumo: string | null): string {
   if (!resumo) return ""
   const r = limpar(resumo), t = limpar(titulo)
-  if (t.toLowerCase().includes(r.toLowerCase().slice(0, 60))) return ""
-  if (r.toLowerCase().includes(t.toLowerCase().slice(0, 60))) return ""
+  if (r.length < 20) return "" // muito curto, provavelmente lixo
+  if (t.toLowerCase().includes(r.toLowerCase().slice(0, 50))) return ""
+  if (r.toLowerCase().includes(t.toLowerCase().slice(0, 50))) return ""
   return r
 }
 
-// Card de norma federal
-function renderItemFederal(item: RadarItem, idx: number): string {
-  const escuro = idx === 0
-  const bg = escuro ? VERDE : "#ffffff"
-  const corTexto = escuro ? CREME : VERDE
-  const corEmenta = escuro ? "rgba(245,240,232,0.6)" : "#666666"
-  const corData = escuro ? "rgba(245,240,232,0.5)" : "#888888"
-  const borda = escuro ? "" : `border:1px solid rgba(26,58,42,0.1);`
-  const badgeBg = escuro ? COBRE : VERDE_MEDIO
-  const badgeCor = escuro ? "#ffffff" : CREME
-  const corLink = escuro ? COBRE : VERDE
-
+// Card de norma (federal ou estadual) — fundo branco uniforme
+function renderItemNorma(item: RadarItem): string {
   const badge = normalizarFonte(item.fonte_nome)
   const { titulo: tituloNorma, ementa } = extrairTituloNorma(item.titulo)
   const ementaFinal = ementa || resumoDistinto(item.titulo, item.resumo)
 
   const tituloHTML = item.url
-    ? `<a href="${esc(item.url)}" style="color:${corLink};text-decoration:none;" target="_blank">${esc(tituloNorma)}</a>`
-    : `<span style="color:${corTexto};">${esc(tituloNorma)}</span>`
+    ? `<a href="${esc(item.url)}" style="color:${VERDE};text-decoration:none;" target="_blank">${esc(tituloNorma)}</a>`
+    : `<span style="color:${VERDE};">${esc(tituloNorma)}</span>`
 
   return `
     <tr><td style="padding:0 0 12px 0;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${bg};border-radius:12px;${borda}">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;border:1px solid rgba(26,58,42,0.1);">
         <tr><td style="padding:20px;">
           <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td style="background-color:${badgeBg};color:${badgeCor};font-size:9px;padding:3px 8px;border-radius:4px;font-family:Arial,sans-serif;letter-spacing:1px;">${esc(badge)}</td>
-            <td style="padding-left:8px;font-size:11px;color:${corData};font-family:Arial,sans-serif;">${fmtData(item.data_publicacao)}</td>
+            <td style="background-color:${VERDE_MEDIO};color:${CREME};font-size:9px;padding:3px 8px;border-radius:4px;font-family:Arial,sans-serif;letter-spacing:1px;">${esc(badge)}</td>
+            <td style="padding-left:8px;font-size:11px;color:#888888;font-family:Arial,sans-serif;">${fmtData(item.data_publicacao)}</td>
           </tr></table>
-          <p style="font-family:Georgia,'Times New Roman',serif;font-size:15px;color:${corTexto};margin:12px 0 8px;line-height:1.4;">${tituloHTML}</p>
-          ${ementaFinal ? `<p style="font-family:Arial,sans-serif;font-size:12px;color:${corEmenta};margin:0;line-height:1.5;">${esc(ementaFinal.slice(0, 250))}</p>` : ""}
+          <p style="font-family:Georgia,'Times New Roman',serif;font-size:15px;color:${VERDE};margin:12px 0 8px;line-height:1.4;">${tituloHTML}</p>
+          ${ementaFinal ? `<p style="font-family:Arial,sans-serif;font-size:12px;color:#666666;margin:0;line-height:1.5;">${esc(ementaFinal.slice(0, 400))}</p>` : ""}
         </td></tr>
       </table>
     </td></tr>`
 }
 
-// Card de norma estadual
+// Card de norma estadual — com avatar do órgão
 function renderItemEstadual(item: RadarItem): string {
   const sigla = (item.fonte_nome || "MG").slice(0, 2).toUpperCase()
   const { titulo: tituloNorma, ementa } = extrairTituloNorma(item.titulo)
@@ -123,7 +123,7 @@ function renderItemEstadual(item: RadarItem): string {
             <td style="padding-left:12px;vertical-align:top;">
               <p style="font-family:Arial,sans-serif;font-size:10px;color:${COBRE};margin:0 0 4px;letter-spacing:1px;text-transform:uppercase;">${esc(item.fonte_nome || "MG")}${item.data_publicacao ? ` <span style="color:#888888;letter-spacing:0;text-transform:none;">&middot; ${fmtData(item.data_publicacao)}</span>` : ""}</p>
               <p style="font-family:Georgia,'Times New Roman',serif;font-size:13px;color:${VERDE};margin:0;line-height:1.3;">${tituloHTML}</p>
-              ${ementa ? `<p style="font-family:Arial,sans-serif;font-size:11px;color:#666666;margin:6px 0 0;line-height:1.4;">${esc(ementa.slice(0, 200))}</p>` : ""}
+              ${ementa ? `<p style="font-family:Arial,sans-serif;font-size:11px;color:#666666;margin:6px 0 0;line-height:1.4;">${esc(ementa.slice(0, 300))}</p>` : ""}
             </td>
           </tr></table>
         </td></tr>
@@ -131,7 +131,7 @@ function renderItemEstadual(item: RadarItem): string {
     </td></tr>`
 }
 
-// Item de notícia
+// Item de notícia — borda lateral estilo editorial
 const CORES_BORDA = [COBRE, VERDE_MEDIO, "#8a7a5a"]
 function renderItemNoticia(item: RadarItem, idx: number): string {
   const corBorda = CORES_BORDA[idx % CORES_BORDA.length]
@@ -152,7 +152,7 @@ function renderItemNoticia(item: RadarItem, idx: number): string {
         <td width="4" style="background-color:${corBorda};border-radius:2px;" valign="top">&nbsp;</td>
         <td style="padding-left:14px;">
           <p style="font-family:Georgia,'Times New Roman',serif;font-size:14px;color:${VERDE};margin:0 0 4px;line-height:1.4;">${tituloHTML}</p>
-          ${resumo ? `<p style="font-family:Arial,sans-serif;font-size:11px;color:#888888;margin:0;line-height:1.5;">${esc(resumo.slice(0, 150))}</p>` : ""}
+          ${resumo ? `<p style="font-family:Arial,sans-serif;font-size:11px;color:#888888;margin:0;line-height:1.5;">${esc(resumo.slice(0, 250))}</p>` : ""}
           ${metaPartes.length > 0 ? `<p style="font-family:Arial,sans-serif;font-size:10px;color:#999999;margin:4px 0 0;font-style:italic;">${metaPartes.join(" &middot; ")}</p>` : ""}
         </td>
       </tr></table>
@@ -174,11 +174,10 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
   const mg = itens.filter((i) => i.fonte === "MG")
   const rss = itens.filter((i) => i.fonte === "RSS")
 
-  const edicao = calcularEdicao()
+  const dataEdicao = fmtDataCompleta()
   const agora = new Date()
-  const mesAno = `${MESES[agora.getMonth()]} de ${agora.getFullYear()}`
-  const dataEnvio = agora.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
-  const assunto = `Radar Ambiental — ${dataEnvio}`
+  const mesAno = `${agora.toLocaleDateString("pt-BR", { month: "long" })} de ${agora.getFullYear()}`
+  const assunto = `Radar Ambiental — ${dataEdicao}`
 
   const partes: string[] = []
   if (dou.length > 0) partes.push(`${dou.length} norma${dou.length > 1 ? "s" : ""} federa${dou.length > 1 ? "is" : "l"}`)
@@ -198,7 +197,7 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
         <tr><td style="background-color:${VERDE};padding:32px 24px 28px;border-radius:12px 12px 0 0;">
           <p style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;color:${COBRE};margin:0 0 16px;text-transform:uppercase;">Vieira Castro Advogados</p>
           <p style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:normal;color:${CREME};margin:0 0 8px;line-height:1.2;">Radar Ambiental</p>
-          <p style="font-family:Arial,sans-serif;font-size:12px;color:rgba(245,240,232,0.6);margin:0;">Edição ${edicao} &middot; ${mesAno}</p>
+          <p style="font-family:Arial,sans-serif;font-size:12px;color:rgba(245,240,232,0.6);margin:0;">Edição: ${dataEdicao} &middot; ${mesAno}</p>
         </td></tr>
 
         <!-- INTRO -->
@@ -210,7 +209,7 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
         <tr><td style="background-color:${CREME};padding:0 24px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             ${renderTituloSecao("Normas federais")}
-            ${dou.map((item, i) => renderItemFederal(item, i)).join("")}
+            ${dou.map((item) => renderItemNorma(item)).join("")}
           </table>
         </td></tr>` : ""}
 
