@@ -336,36 +336,46 @@ export async function POST(request: Request) {
     loginForm.set("password", INLABS_PASSWORD)
 
     let loginResp: Response | null = null
-    const MAX_TENTATIVAS = 3
+    const MAX_TENTATIVAS = 5
+    // Backoff exponencial: 2s, 5s, 10s, 20s (soma ~37s antes de desistir)
+    const BACKOFF_MS = [2000, 5000, 10000, 20000]
 
     for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
-      loginResp = await fetch("https://inlabs.in.gov.br/logar.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-          "Cookie": sessionCookies.join("; "),
-          "Referer": "https://inlabs.in.gov.br/",
-          "Origin": "https://inlabs.in.gov.br",
-        },
-        body: loginForm.toString(),
-        redirect: "manual",
-      })
+      try {
+        loginResp = await fetch("https://inlabs.in.gov.br/logar.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Cookie": sessionCookies.join("; "),
+            "Referer": "https://inlabs.in.gov.br/",
+            "Origin": "https://inlabs.in.gov.br",
+          },
+          body: loginForm.toString(),
+          redirect: "manual",
+          signal: AbortSignal.timeout(15_000),
+        })
 
-      console.log(`[DOU] Login tentativa ${tentativa}/${MAX_TENTATIVAS}: status=${loginResp.status}`)
+        console.log(`[DOU] Login tentativa ${tentativa}/${MAX_TENTATIVAS}: status=${loginResp.status}`)
 
-      if (loginResp.status === 302 || loginResp.status === 301) break
+        if (loginResp.status === 302 || loginResp.status === 301) break
+      } catch (err) {
+        console.log(`[DOU] Login tentativa ${tentativa}/${MAX_TENTATIVAS}: exceção ${(err as Error).message}`)
+      }
+
       if (tentativa < MAX_TENTATIVAS) {
-        console.log(`[DOU] Aguardando 3s antes de retry...`)
-        await new Promise((r) => setTimeout(r, 3000))
+        const espera = BACKOFF_MS[tentativa - 1] ?? 20000
+        console.log(`[DOU] Aguardando ${espera}ms antes de retry...`)
+        await new Promise((r) => setTimeout(r, espera))
       }
     }
 
     if (!loginResp || (loginResp.status !== 302 && loginResp.status !== 301)) {
-      return NextResponse.json(
-        { erro: `Login INLABS falhou após ${MAX_TENTATIVAS} tentativas (status=${loginResp?.status})` },
-        { status: 500 },
-      )
+      const status = loginResp?.status ?? "timeout"
+      const msg = status === 502 || status === 503 || status === 504
+        ? `INLABS fora do ar (HTTP ${status}). Servidor do governo indisponível — tente novamente em alguns minutos.`
+        : `Login INLABS falhou após ${MAX_TENTATIVAS} tentativas (status=${status})`
+      return NextResponse.json({ erro: msg }, { status: 503 })
     }
 
     const loginCookies = extractCookies(loginResp)
@@ -410,19 +420,34 @@ export async function POST(request: Request) {
 
           console.log(`[DOU] Baixando ${dia} ${secao}...`)
 
-          const zipResp = await fetch(zipUrl, {
-            headers: {
-              "Cookie": allCookies.join("; "),
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-              "Referer": `https://inlabs.in.gov.br/index.php?p=${dia}`,
-            },
-            signal: AbortSignal.timeout(30_000),
-          })
+          // Retry com backoff exponencial (2s, 5s, 10s) — INLABS frequentemente retorna 502
+          let zipResp: Response | null = null
+          const MAX_ZIP_RETRIES = 3
+          const ZIP_BACKOFF = [2000, 5000, 10000]
 
-          console.log(`[DOU] ${secao} resposta: status=${zipResp.status}, content-type=${zipResp.headers.get("content-type")}`)
+          for (let t = 1; t <= MAX_ZIP_RETRIES; t++) {
+            try {
+              zipResp = await fetch(zipUrl, {
+                headers: {
+                  "Cookie": allCookies.join("; "),
+                  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                  "Referer": `https://inlabs.in.gov.br/index.php?p=${dia}`,
+                },
+                signal: AbortSignal.timeout(30_000),
+              })
 
-          if (!zipResp.ok) {
-            erros.push(`${secao}: HTTP ${zipResp.status}`)
+              console.log(`[DOU] ${dia} ${secao} tentativa ${t}/${MAX_ZIP_RETRIES}: status=${zipResp.status}`)
+              if (zipResp.ok) break
+              // 5xx transitório → retry. 4xx ou 200 com HTML → não adianta retry
+              if (zipResp.status < 500) break
+            } catch (err) {
+              console.log(`[DOU] ${dia} ${secao} tentativa ${t}: exceção ${(err as Error).message}`)
+            }
+            if (t < MAX_ZIP_RETRIES) await new Promise((r) => setTimeout(r, ZIP_BACKOFF[t - 1]))
+          }
+
+          if (!zipResp || !zipResp.ok) {
+            erros.push(`${dia} ${secao}: HTTP ${zipResp?.status ?? "timeout"} após ${MAX_ZIP_RETRIES} tentativas`)
             continue
           }
 
