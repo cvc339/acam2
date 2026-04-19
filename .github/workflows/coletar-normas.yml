@@ -9,7 +9,9 @@ name: Coletar normas (DOU + MG)
 
 on:
   schedule:
-    - cron: '0 10 * * *'   # 07:00 BRT (UTC-3) — DOU publicado ~05h; MG disponivel ~07h
+    - cron: '0 10 * * *'   # 07:00 BRT — DOU + MG
+    - cron: '0 11 * * *'   # 08:00 BRT — DOU apenas (retry caso INLABS tenha caido as 07h)
+    - cron: '0 12 * * *'   # 09:00 BRT — DOU apenas (segundo retry)
   workflow_dispatch:        # permite disparo manual pela UI do GitHub
 
 concurrency:
@@ -32,8 +34,9 @@ jobs:
             https://acam.com.br/api/admin/newsletter/coletar-dou
 
       - name: Coletar MG
-        if: always()
-        # Tolera falhas transient do portal da Assembleia MG.
+        # So roda no primeiro horario do dia (07h BRT) ou em disparo manual.
+        # MG raramente falha e e caro (puppeteer) — nao precisa de retries no mesmo dia.
+        if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
         continue-on-error: true
         run: |
           curl --fail-with-body --silent --show-error \
