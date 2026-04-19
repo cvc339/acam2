@@ -39,3 +39,23 @@ export async function verificarAdmin(): Promise<ResultadoAutorizado | ResultadoN
 
   return { authorized: true, userId: user.id }
 }
+
+/**
+ * Aceita acesso admin OU um token de cron (header: Authorization: Bearer <CRON_SECRET>).
+ *
+ * Usado por endpoints que sao acionados tanto manualmente pelo admin quanto
+ * por jobs agendados externos (GitHub Actions, etc.).
+ *
+ * Requer a variavel de ambiente CRON_SECRET configurada no servidor.
+ */
+export async function verificarAdminOuCron(request: Request): Promise<ResultadoAutorizado | ResultadoNegado> {
+  const cabecalho = request.headers.get("authorization") ?? ""
+  if (cabecalho.startsWith("Bearer ")) {
+    const token = cabecalho.slice(7).trim()
+    const secret = process.env.CRON_SECRET
+    if (secret && token && token === secret) {
+      return { authorized: true, userId: "cron" }
+    }
+  }
+  return verificarAdmin()
+}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { verificarAdmin } from "@/lib/admin/auth"
+import { verificarAdminOuCron } from "@/lib/admin/auth"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 /**
@@ -196,8 +196,8 @@ function categorizar(titulo: string, descricao: string): string {
 // API Route
 // ============================================================
 
-export async function POST() {
-  const auth = await verificarAdmin()
+export async function POST(request: Request) {
+  const auth = await verificarAdminOuCron(request)
   if (!auth.authorized) return auth.response
 
   const inicio = Date.now()

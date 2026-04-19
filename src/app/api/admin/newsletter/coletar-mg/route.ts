@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { verificarAdmin } from "@/lib/admin/auth"
+import { verificarAdminOuCron } from "@/lib/admin/auth"
 import { createAdminClient } from "@/lib/supabase/admin"
 import puppeteer from "puppeteer"
 
@@ -210,7 +210,7 @@ async function consultarOrgao(
 // ============================================================
 
 export async function POST(request: Request) {
-  const auth = await verificarAdmin()
+  const auth = await verificarAdminOuCron(request)
   if (!auth.authorized) return auth.response
 
   try {

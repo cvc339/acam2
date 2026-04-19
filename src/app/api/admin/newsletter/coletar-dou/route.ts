@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { verificarAdmin } from "@/lib/admin/auth"
+import { verificarAdminOuCron } from "@/lib/admin/auth"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { unzipSync } from "fflate"
 
@@ -268,7 +268,7 @@ function extractCookies(resp: Response): string[] {
 // ============================================================
 
 export async function POST(request: Request) {
-  const auth = await verificarAdmin()
+  const auth = await verificarAdminOuCron(request)
   if (!auth.authorized) return auth.response
 
   const INLABS_EMAIL = process.env.INLABS_EMAIL
