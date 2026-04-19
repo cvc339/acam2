@@ -22,6 +22,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Coletar DOU
+        # Tolera falhas transient do INLABS (governo). Se cair hoje, amanha roda de novo.
+        continue-on-error: true
         run: |
           curl --fail-with-body --silent --show-error \
             --max-time 300 \
@@ -30,7 +32,9 @@ jobs:
             https://acam.com.br/api/admin/newsletter/coletar-dou
 
       - name: Coletar MG
-        if: always()  # roda mesmo se DOU falhar
+        if: always()
+        # Tolera falhas transient do portal da Assembleia MG.
+        continue-on-error: true
         run: |
           curl --fail-with-body --silent --show-error \
             --max-time 420 \
