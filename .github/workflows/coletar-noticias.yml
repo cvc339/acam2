@@ -1,0 +1,31 @@
+name: Coletar noticias (RSS)
+
+# Coleta de feeds RSS de noticias ambientais.
+# Roda 2x ao dia para pegar o ciclo matutino e o vespertino.
+#
+# Pre-requisitos:
+#   - Secret CRON_SECRET configurado em "Settings > Secrets and variables > Actions"
+#   - Mesma string como variavel de ambiente CRON_SECRET no Railway (acam.com.br)
+
+on:
+  schedule:
+    - cron: '30 10 * * *'  # 07:30 BRT — apos a coleta de normas
+    - cron: '0 20 * * *'   # 17:00 BRT — ciclo da tarde
+  workflow_dispatch:
+
+concurrency:
+  group: coletar-noticias
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Coletar RSS
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --max-time 180 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://acam.com.br/api/admin/newsletter/coletar

@@ -1,0 +1,39 @@
+name: Coletar normas (DOU + MG)
+
+# Coleta diaria de normas dos Diarios Oficiais (Uniao + Minas Gerais).
+# Cada fonte tem uma unica publicacao diaria, entao uma execucao por dia basta.
+#
+# Pre-requisitos:
+#   - Secret CRON_SECRET configurado em "Settings > Secrets and variables > Actions"
+#   - Mesma string como variavel de ambiente CRON_SECRET no Railway (acam.com.br)
+
+on:
+  schedule:
+    - cron: '0 10 * * *'   # 07:00 BRT (UTC-3) — DOU publicado ~05h; MG disponivel ~07h
+  workflow_dispatch:        # permite disparo manual pela UI do GitHub
+
+concurrency:
+  group: coletar-normas
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Coletar DOU
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --max-time 300 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://acam.com.br/api/admin/newsletter/coletar-dou
+
+      - name: Coletar MG
+        if: always()  # roda mesmo se DOU falhar
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --max-time 420 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://acam.com.br/api/admin/newsletter/coletar-mg
