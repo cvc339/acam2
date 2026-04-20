@@ -6,12 +6,12 @@ import { gerarSlug } from "@/lib/admin/slug"
 
 const criarSchema = z.object({
   titulo: z.string().min(1).max(500),
-  slug: z.string().max(100).optional(),
-  resumo: z.string().optional(),
-  conteudo: z.string().optional(),
-  categoria: z.string().optional(),
-  autor: z.string().optional(),
-  capa_url: z.string().url().optional().or(z.literal("")),
+  slug: z.string().max(100).nullable().optional(),
+  resumo: z.string().nullable().optional(),
+  conteudo: z.string().nullable().optional(),
+  categoria: z.string().nullable().optional(),
+  autor: z.string().nullable().optional(),
+  capa_url: z.string().url().nullable().optional().or(z.literal("")),
   status: z.enum(["rascunho", "publicado", "arquivado"]).optional(),
 })
 
