@@ -95,8 +95,12 @@ function parseRascunhoClaude(texto: string): {
 
   // Separar cabecalho (metadados) do corpo, via linha com apenas "---"
   const sepMatch = texto.match(/\n---+[ \t]*\n/)
-  const cabecalho = sepMatch ? texto.slice(0, sepMatch.index) : texto
-  const corpo = sepMatch ? texto.slice(sepMatch.index + sepMatch[0].length).trim() : ""
+  let cabecalho = texto
+  let corpo = ""
+  if (sepMatch && sepMatch.index !== undefined) {
+    cabecalho = texto.slice(0, sepMatch.index)
+    corpo = texto.slice(sepMatch.index + sepMatch[0].length).trim()
+  }
 
   if (corpo) {
     resultado.conteudo = corpo
