@@ -36,6 +36,117 @@ function gerarSlug(texto: string): string {
     .slice(0, 100)
 }
 
+/**
+ * Mapeia nome de categoria (label ou valor) para o valor canonico do select.
+ * Aceita variacoes: "Compensacoes ambientais", "compensacoes-ambientais",
+ * "Direito ambiental — geral", etc.
+ */
+function normalizarCategoria(valor: string): string {
+  const limpo = valor
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[—–]/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+
+  // Match direto pelo value do select
+  const matchValor = CATEGORIAS.find((c) => c.value === limpo)
+  if (matchValor) return matchValor.value
+
+  // Heuristicas por palavras-chave
+  if (limpo.includes("compens")) return "compensacoes-ambientais"
+  if (limpo.includes("licenci")) return "licenciamento"
+  if (limpo.includes("compliance") || limpo.includes("socio")) return "compliance-socioambiental"
+  if (limpo.includes("regulat")) return "regulatorio"
+  if (limpo.includes("due") || limpo.includes("diligence") || limpo.includes("diligencia")) return "due-diligence"
+  return "geral"
+}
+
+/**
+ * Parseia a saida do Project do Claude no formato:
+ *
+ *   Título: ...
+ *   Resumo: ...
+ *   Categoria sugerida: ...
+ *   ---
+ *   [corpo em markdown]
+ *
+ * Tolerante a variacoes: **negrito** nos labels, acentuacao no label,
+ * "Categoria" com ou sem "sugerida", multiplas linhas no resumo.
+ */
+function parseRascunhoClaude(texto: string): {
+  titulo?: string
+  resumo?: string
+  categoria?: string
+  conteudo?: string
+  camposPreenchidos: string[]
+} {
+  const resultado: {
+    titulo?: string
+    resumo?: string
+    categoria?: string
+    conteudo?: string
+    camposPreenchidos: string[]
+  } = { camposPreenchidos: [] }
+
+  // Separar cabecalho (metadados) do corpo, via linha com apenas "---"
+  const sepMatch = texto.match(/\n---+[ \t]*\n/)
+  const cabecalho = sepMatch ? texto.slice(0, sepMatch.index) : texto
+  const corpo = sepMatch ? texto.slice(sepMatch.index + sepMatch[0].length).trim() : ""
+
+  if (corpo) {
+    resultado.conteudo = corpo
+    resultado.camposPreenchidos.push("Conteúdo")
+  }
+
+  // Parse label-a-label do cabecalho
+  const linhas = cabecalho.split(/\r?\n/)
+  let campoAtual: "titulo" | "resumo" | "categoria" | null = null
+  let buffer: string[] = []
+
+  const flush = () => {
+    if (campoAtual && buffer.length) {
+      const val = buffer.join("\n").trim()
+      if (val) {
+        if (campoAtual === "categoria") {
+          resultado.categoria = normalizarCategoria(val)
+          resultado.camposPreenchidos.push("Categoria")
+        } else {
+          resultado[campoAtual] = val
+          resultado.camposPreenchidos.push(
+            campoAtual === "titulo" ? "Título" : "Resumo"
+          )
+        }
+      }
+    }
+    buffer = []
+  }
+
+  const regexLabel = /^\s*(?:\*\*|__)?\s*(t[íi]tulo|resumo|categoria)(?:\s+sugerida)?\s*(?:\*\*|__)?\s*:\s*(.*)$/i
+
+  for (const linha of linhas) {
+    const m = linha.match(regexLabel)
+    if (m) {
+      flush()
+      const rotulo = m[1].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      campoAtual =
+        rotulo === "titulo" ? "titulo" :
+        rotulo === "resumo" ? "resumo" :
+        rotulo === "categoria" ? "categoria" : null
+      if (campoAtual && m[2]) buffer.push(m[2])
+    } else if (campoAtual) {
+      buffer.push(linha)
+    }
+  }
+  flush()
+
+  return resultado
+}
+
 interface Props {
   artigo?: Artigo
 }
@@ -57,6 +168,35 @@ export function ArtigoForm({ artigo }: Props) {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState("")
   const [mensagem, setMensagem] = useState("")
+
+  // Estado do painel "Colar do Claude"
+  const [colarAberto, setColarAberto] = useState(false)
+  const [colarTexto, setColarTexto] = useState("")
+  const [colarFeedback, setColarFeedback] = useState("")
+
+  function handleColarParse() {
+    const parsed = parseRascunhoClaude(colarTexto)
+    if (parsed.camposPreenchidos.length === 0) {
+      setColarFeedback(
+        "Não encontrei os rótulos esperados (Título:, Resumo:, Categoria sugerida:, ---). Confira se colou o rascunho inteiro."
+      )
+      return
+    }
+    if (parsed.titulo) {
+      setTitulo(parsed.titulo)
+      if (!slugManual) setSlug(gerarSlug(parsed.titulo))
+    }
+    if (parsed.resumo) setResumo(parsed.resumo)
+    if (parsed.categoria) setCategoria(parsed.categoria)
+    if (parsed.conteudo) setConteudo(parsed.conteudo)
+    setColarFeedback(`Preenchido: ${parsed.camposPreenchidos.join(", ")}.`)
+    // fechar o painel apos 1.5s
+    setTimeout(() => {
+      setColarAberto(false)
+      setColarTexto("")
+      setColarFeedback("")
+    }, 1500)
+  }
 
   function handleTituloChange(valor: string) {
     setTitulo(valor)
@@ -111,6 +251,96 @@ export function ArtigoForm({ artigo }: Props) {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      {/* Painel "Colar do Claude" — só aparece na criação */}
+      {!editando && (
+        <div
+          style={{
+            border: `1px dashed ${colarAberto ? "var(--primary-600)" : "var(--grey-200)"}`,
+            borderRadius: "0.5rem",
+            padding: colarAberto ? "1rem" : "0.6rem 0.875rem",
+            background: colarAberto ? "var(--primary-50)" : "transparent",
+            transition: "all 0.15s",
+          }}
+        >
+          {!colarAberto ? (
+            <button
+              type="button"
+              onClick={() => setColarAberto(true)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--primary-600)",
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                width: "100%",
+                textAlign: "left",
+                padding: 0,
+              }}
+            >
+              <span>📋</span>
+              <span>Colar rascunho do Claude.ai (preenche todos os campos de uma vez)</span>
+            </button>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              <label className="text-xs font-medium text-muted-foreground">
+                Cole o texto completo que o Claude devolveu, incluindo os rótulos Título:, Resumo:, Categoria sugerida: e o corpo após ---
+              </label>
+              <textarea
+                className="acam-form-input"
+                value={colarTexto}
+                onChange={(e) => setColarTexto(e.target.value)}
+                rows={8}
+                autoFocus
+                style={{
+                  width: "100%",
+                  fontFamily: "ui-monospace, 'Courier New', monospace",
+                  fontSize: "0.85rem",
+                  resize: "vertical",
+                }}
+                placeholder={"Título: ...\nResumo: ...\nCategoria sugerida: ...\n---\n[corpo do artigo]"}
+              />
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={handleColarParse}
+                  className="acam-btn acam-btn-primary acam-btn-sm"
+                  disabled={!colarTexto.trim()}
+                >
+                  Preencher campos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setColarAberto(false)
+                    setColarTexto("")
+                    setColarFeedback("")
+                  }}
+                  className="acam-btn acam-btn-ghost acam-btn-sm"
+                >
+                  Cancelar
+                </button>
+                {colarFeedback && (
+                  <span
+                    className="text-xs"
+                    style={{
+                      color: colarFeedback.startsWith("Preenchido")
+                        ? "var(--success)"
+                        : "var(--error)",
+                    }}
+                  >
+                    {colarFeedback}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Linha 1: título */}
       <div>
         <label className="text-xs font-medium text-muted-foreground" style={{ display: "block", marginBottom: "0.25rem" }}>
