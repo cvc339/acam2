@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { StatusBadge } from "@/components/acam"
+import { StatusBadge, CTAConsultoria } from "@/components/acam"
 import {
   calcularModalidade2,
   NOMES_VEGETACAO,
@@ -280,6 +280,8 @@ export default function CalculoModalidade2Page() {
               Ir para Dashboard
             </Link>
           </div>
+
+          <CTAConsultoria contexto="mineraria" />
         </>
       )}
       </div>

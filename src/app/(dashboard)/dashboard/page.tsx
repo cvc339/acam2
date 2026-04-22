@@ -37,6 +37,8 @@ async function getFerramentas() {
     { nome: "Requerimento SNUC", descricao: "Preenchimento assistido + PDF", compensacao: "SNUC", creditos: formatCreditos(custos, "req-snuc", "0,5"), ativo: true, href: "/ferramentas/requerimento-snuc" },
     // Análise documental
     { nome: "Análise de Matrícula", descricao: "Viabilidade registral, MVAR, transmissibilidade", compensacao: "Todas", creditos: formatCreditos(custos, "analise-matricula", "5"), ativo: true, href: "/ferramentas/analise-matricula" },
+    // Consultoria
+    { nome: "Consultoria — Reunião técnica", descricao: "Converse 30 min online com especialista em compensações", compensacao: "Todas", creditos: formatCreditos(custos, "consultoria", "15"), ativo: true, href: "/ferramentas/consultoria" },
   ]
 }
 

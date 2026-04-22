@@ -24,6 +24,7 @@ import {
 } from "@/lib/requerimentos/types"
 import { TIPOS_LICENCA } from "@/lib/masks"
 import { DatePicker } from "@/components/acam/date-picker"
+import { CTAConsultoria } from "@/components/acam"
 import { downloadPDF } from "@/lib/pdf/download"
 import { debitarCreditos } from "@/lib/creditos/client"
 
@@ -143,6 +144,9 @@ export default function RequerimentoSNUCPage() {
             <button className="acam-btn acam-btn-primary" onClick={() => { setConcluido(false); setEtapa(0); setForm({ responsavel: responsavelInicial, empreendedor: empreendedorInicial, empreendimento: { ...empreendedorInicial }, correspondencia: correspondenciaInicial, processo: processoSNUCInicial, ucs: ucsInicial }) }}>
               Novo Requerimento
             </button>
+          </div>
+          <div style={{ marginTop: "var(--spacing-6)" }}>
+            <CTAConsultoria contexto="requerimento" />
           </div>
           <Link href="/dashboard" className="text-sm text-muted-foreground mt-4 inline-block" style={{ textDecoration: "none" }}>← Voltar ao dashboard</Link>
         </div>

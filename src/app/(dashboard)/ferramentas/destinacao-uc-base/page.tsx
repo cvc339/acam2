@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { StatusBadge, AlertResult, DocumentoItem } from "@/components/acam"
+import { StatusBadge, AlertResult, CTAConsultoria, DocumentoItem } from "@/components/acam"
 import { MapaImovel } from "@/components/acam/mapa-imovel"
 import { ComboboxMunicipio } from "@/components/acam/combobox-municipio"
 
@@ -711,6 +711,8 @@ export default function DestinacaoUCBasePage() {
           }}>Baixar Relatório PDF</button>
           <Link href="/dashboard" className="acam-btn acam-btn-secondary">Voltar ao dashboard</Link>
         </div>
+
+        <CTAConsultoria contexto="destinacao-uc" />
       </div>
     )
   }

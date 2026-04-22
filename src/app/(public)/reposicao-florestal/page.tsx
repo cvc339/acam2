@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { HeaderLogo } from "@/components/acam"
+import { HeaderLogo, CTAConsultoria } from "@/components/acam"
 import { downloadPDF } from "@/lib/pdf/download"
 import { formatBRL as formatarMoeda } from "@/lib/format"
 import { PRODUTOS, calcularReposicaoItem } from "@/lib/calculo/intervencao"
@@ -163,6 +163,10 @@ export default function ReposicaoFlorestalPage() {
                 console.error("Erro ao gerar PDF:", err)
               }
             }}>Salvar PDF</button>
+
+            <div style={{ marginTop: "var(--spacing-6)" }}>
+              <CTAConsultoria contexto="calculadora" />
+            </div>
           </div>
         )}
 

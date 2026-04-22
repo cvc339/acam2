@@ -20,6 +20,7 @@ const CUSTOS_FALLBACK: Record<string, number> = {
   "req-mineraria": 0.5,
   "req-mata-atlantica": 0.5,
   "req-snuc": 0.5,
+  "consultoria": 15,
 }
 
 let _cache: Record<string, number> | null = null

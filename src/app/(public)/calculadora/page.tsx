@@ -8,6 +8,7 @@ import {
   type Atividade,
   type Produto,
 } from "@/lib/calculo/intervencao"
+import { CTAConsultoria } from "@/components/acam"
 
 function Accordion({ titulo, children, defaultOpen = false }: { titulo: string; children: React.ReactNode; defaultOpen?: boolean }) {
   const [aberto, setAberto] = useState(defaultOpen)
@@ -723,6 +724,10 @@ export default function CalculadoraPage() {
                     }
                   }}>Salvar PDF</button>
                   <button className="acam-btn acam-btn-ghost" style={{ width: "100%" }} onClick={reiniciar}>Nova Simulação</button>
+                </div>
+
+                <div style={{ marginTop: "var(--spacing-6)" }}>
+                  <CTAConsultoria contexto="calculadora" />
                 </div>
               </div>
             )

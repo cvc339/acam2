@@ -2087,3 +2087,46 @@ body.page-public {
     border-radius: var(--radius-lg);
     font-size: 0.875rem;
 }
+
+/* ============================================
+   CTA Consultoria — fim de páginas de resultado
+   ============================================ */
+
+.acam-cta-consultoria {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--spacing-4);
+    align-items: center;
+}
+
+.acam-cta-consultoria-texto h3 {
+    margin: 0 0 var(--spacing-2);
+    color: var(--primary-600);
+}
+
+.acam-cta-consultoria-texto p {
+    margin: 0 0 var(--spacing-2);
+}
+
+.acam-cta-consultoria-texto p:last-child {
+    margin-bottom: 0;
+}
+
+.acam-cta-consultoria-acao {
+    align-self: center;
+}
+
+@media (max-width: 640px) {
+    .acam-cta-consultoria {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+
+    .acam-cta-consultoria-acao {
+        width: 100%;
+    }
+
+    .acam-cta-consultoria-acao .acam-btn {
+        width: 100%;
+    }
+}

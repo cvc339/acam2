@@ -1,0 +1,31 @@
+name: Lembretes de consultoria
+
+# Dispara lembretes 24h e 1h antes das reunioes de consultoria.
+# Roda a cada 15 minutos. Janela de busca no endpoint eh de 30 min,
+# cobrindo eventual delay do GitHub Actions em horarios de pico.
+#
+# Pre-requisitos:
+#   - Secret CRON_SECRET configurado em "Settings > Secrets and variables > Actions"
+#   - Mesma string como variavel de ambiente CRON_SECRET no Railway (acam.com.br)
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: consultoria-lembretes
+  cancel-in-progress: false
+
+jobs:
+  lembretes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Disparar lembretes
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --max-time 60 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://acam.com.br/api/cron/consultoria-lembretes

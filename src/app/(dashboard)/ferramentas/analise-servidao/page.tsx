@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertResult } from "@/components/acam"
+import { AlertResult, CTAConsultoria } from "@/components/acam"
 import { MapaImovel } from "@/components/acam/mapa-imovel"
 import { ComboboxMunicipio } from "@/components/acam/combobox-municipio"
 import { ProgressBar } from "@/components/acam/progress-bar"
@@ -308,6 +308,8 @@ export default function AnaliseServidaoPage() {
           }}>Baixar Relatório PDF</button>
           <Link href="/dashboard" className="acam-btn acam-btn-secondary">Voltar ao dashboard</Link>
         </div>
+
+        <CTAConsultoria contexto="servidao" />
       </div>
     )
   }

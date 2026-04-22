@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { StatusBadge } from "@/components/acam"
+import { StatusBadge, CTAConsultoria } from "@/components/acam"
 import {
   FATORES_FR,
   OPCOES_FT,
@@ -996,6 +996,8 @@ function ResultadoView({
           Ir para Dashboard
         </Link>
       </div>
+
+      <CTAConsultoria contexto="snuc" />
     </>
   )
 }
