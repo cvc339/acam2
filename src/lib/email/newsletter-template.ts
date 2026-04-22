@@ -15,6 +15,18 @@ interface RadarItem {
   data_publicacao: string | null
 }
 
+export interface ArtigoNewsletter {
+  id: string
+  titulo: string
+  slug: string
+  resumo: string | null
+  autor: string
+  publicado_em: string | null
+}
+
+const VIEIRA_CASTRO_URL =
+  process.env.NEXT_PUBLIC_VIEIRA_CASTRO_URL || "https://vieiracastro.com.br"
+
 // Cores da paleta
 const VERDE = "#1a3a2a"
 const CREME = "#f5f0e8"
@@ -183,6 +195,39 @@ function renderItemNoticia(item: RadarItem, idx: number): string {
       </tr>`
 }
 
+/** Card de artigo — editorial destacado, link externo para Vieira Castro Advogados */
+function renderItemArtigo(artigo: ArtigoNewsletter): string {
+  const link = `${VIEIRA_CASTRO_URL}/artigos/${artigo.slug}`
+  const resumo = artigo.resumo ? limpar(artigo.resumo) : ""
+  const dataPub = artigo.publicado_em ? fmtData(artigo.publicado_em.slice(0, 10)) : ""
+
+  return `
+      <tr>
+        <td style="padding:0 0 14px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;border:1px solid rgba(26,58,42,0.12);">
+            <tr>
+              <td style="padding:22px 22px 18px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background-color:${COBRE};color:#ffffff;font-size:9px;padding:3px 8px;border-radius:4px;font-family:Arial,sans-serif;letter-spacing:1px;">ARTIGO</td>
+                    ${dataPub ? `<td style="padding-left:8px;font-size:11px;color:#888888;font-family:Arial,sans-serif;">${dataPub}</td>` : ""}
+                  </tr>
+                </table>
+                <p style="font-family:Georgia,'Times New Roman',serif;font-size:17px;color:${VERDE};margin:12px 0 10px;line-height:1.35;font-weight:normal;">
+                  <a href="${esc(link)}" style="color:${VERDE};text-decoration:none;" target="_blank">${esc(artigo.titulo)}</a>
+                </p>
+                ${resumo ? `<p style="font-family:Georgia,'Times New Roman',serif;font-size:13px;color:#555555;margin:0 0 12px;line-height:1.6;">${esc(resumo.slice(0, 280))}${resumo.length > 280 ? "…" : ""}</p>` : ""}
+                <p style="font-family:Arial,sans-serif;font-size:11px;color:#888888;margin:0;">
+                  Por ${esc(artigo.autor)} &middot;
+                  <a href="${esc(link)}" style="color:${COBRE};text-decoration:none;" target="_blank">Ler no site</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`
+}
+
 /** Separador de seção */
 function renderTituloSecao(titulo: string): string {
   return `
@@ -202,7 +247,10 @@ function renderTituloSecao(titulo: string): string {
 // Montagem final
 // ============================================================
 
-export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; html: string } {
+export function montarNewsletterHTML(
+  itens: RadarItem[],
+  artigos: ArtigoNewsletter[] = []
+): { assunto: string; html: string } {
   const dou = itens.filter((i) => i.fonte === "DOU")
   const mg = itens.filter((i) => i.fonte === "MG")
   const rss = itens.filter((i) => i.fonte === "RSS")
@@ -212,6 +260,7 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
 
   // Resumo de abertura
   const partes: string[] = []
+  if (artigos.length > 0) partes.push(`${artigos.length} artigo${artigos.length > 1 ? "s" : ""}`)
   if (dou.length > 0) partes.push(`${dou.length} norma${dou.length > 1 ? "s" : ""} federa${dou.length > 1 ? "is" : "l"}`)
   if (mg.length > 0) partes.push(`${mg.length} norma${mg.length > 1 ? "s" : ""} estadua${mg.length > 1 ? "is" : "l"}`)
   if (rss.length > 0) partes.push(`${rss.length} notícia${rss.length > 1 ? "s" : ""}`)
@@ -224,33 +273,63 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
+  <style>
+    :root { color-scheme: light only; supported-color-schemes: light only; }
+    /* Bloqueia inversao de cores em dark mode (Apple Mail / Outlook mobile) */
+    [data-ogsc] body, [data-ogsc] table, [data-ogsc] td { background-color: inherit !important; color: inherit !important; }
+
+    /* Mobile: tabelas 100% de largura, padding reduzido */
+    @media only screen and (max-width: 520px) {
+      .acam-nl-container { width: 100% !important; max-width: 100% !important; }
+      .acam-nl-outer-pad { padding: 16px 8px !important; }
+      .acam-nl-section-pad { padding-left: 16px !important; padding-right: 16px !important; }
+      .acam-nl-header-pad { padding: 24px 18px 20px !important; }
+      .acam-nl-footer-pad { padding: 20px 16px !important; }
+      .acam-nl-intro-pad { padding: 18px 16px !important; }
+      .acam-nl-title { font-size: 22px !important; }
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#e8e4dc;font-family:Arial,'Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background-color:#e8e4dc;font-family:Arial,'Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;color:#3a3a2e;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#e8e4dc;">
     <tr>
-      <td align="center" style="padding:32px 16px;">
-        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;">
+      <td align="center" class="acam-nl-outer-pad" style="padding:32px 16px;">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" class="acam-nl-container" style="max-width:480px;width:100%;">
 
           <!-- HEADER -->
           <tr>
-            <td style="background-color:${VERDE};padding:32px 24px 28px;border-radius:12px 12px 0 0;">
+            <td class="acam-nl-header-pad" style="background-color:${VERDE};padding:32px 24px 28px;border-radius:12px 12px 0 0;">
               <p style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;color:${COBRE};margin:0 0 16px;text-transform:uppercase;">Vieira Castro Advogados</p>
-              <p style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:normal;color:${CREME};margin:0 0 8px;line-height:1.2;">Radar Ambiental</p>
+              <p class="acam-nl-title" style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:normal;color:${CREME};margin:0 0 8px;line-height:1.2;">Radar Ambiental</p>
               <p style="font-family:Arial,sans-serif;font-size:12px;color:rgba(245,240,232,0.6);margin:0;">Edição: ${dataEdicao}</p>
             </td>
           </tr>
 
           <!-- INTRO -->
           <tr>
-            <td style="background-color:${CREME};padding:24px;">
+            <td class="acam-nl-intro-pad" style="background-color:${CREME};padding:24px;">
               <p style="font-family:Georgia,'Times New Roman',serif;font-size:13px;color:#3a3a2e;line-height:1.7;margin:0;">${resumoAbertura}</p>
             </td>
           </tr>
 
+          <!-- ARTIGOS (antes das normas — cereja do bolo) -->
+          ${artigos.length > 0 ? `
+          <tr>
+            <td class="acam-nl-section-pad" style="background-color:${CREME};padding:0 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                ${renderTituloSecao("Artigos")}
+                ${artigos.map((a) => renderItemArtigo(a)).join("")}
+              </table>
+            </td>
+          </tr>
+          ` : ""}
+
           <!-- NORMAS FEDERAIS -->
           ${dou.length > 0 ? `
           <tr>
-            <td style="background-color:${CREME};padding:0 24px;">
+            <td class="acam-nl-section-pad" style="background-color:${CREME};padding:0 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 ${renderTituloSecao("Normas federais")}
                 ${dou.map((item) => renderItemFederal(item)).join("")}
@@ -262,7 +341,7 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
           <!-- NORMAS ESTADUAIS -->
           ${mg.length > 0 ? `
           <tr>
-            <td style="background-color:${CREME};padding:0 24px;">
+            <td class="acam-nl-section-pad" style="background-color:${CREME};padding:0 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 ${renderTituloSecao("Normas estaduais &middot; MG")}
                 ${mg.map((item) => renderItemEstadual(item)).join("")}
@@ -274,7 +353,7 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
           <!-- NOTÍCIAS -->
           ${rss.length > 0 ? `
           <tr>
-            <td style="background-color:${CREME};padding:0 24px 24px;">
+            <td class="acam-nl-section-pad" style="background-color:${CREME};padding:0 24px 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 ${renderTituloSecao("Notícias")}
                 ${rss.map((item, i) => renderItemNoticia(item, i)).join("")}
@@ -285,7 +364,7 @@ export function montarNewsletterHTML(itens: RadarItem[]): { assunto: string; htm
 
           <!-- FOOTER -->
           <tr>
-            <td style="background-color:${VERDE};padding:24px;text-align:center;border-radius:0 0 12px 12px;">
+            <td class="acam-nl-footer-pad" style="background-color:${VERDE};padding:24px;text-align:center;border-radius:0 0 12px 12px;">
               <p style="font-family:Arial,sans-serif;font-size:10px;color:rgba(245,240,232,0.4);margin:0 0 12px;line-height:1.6;">
                 Vieira Castro Advogados<br>
                 Monitoramento de normas e notícias ambientais

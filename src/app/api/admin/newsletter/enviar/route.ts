@@ -3,6 +3,7 @@ import { verificarAdmin } from "@/lib/admin/auth"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getResend, REMETENTE } from "@/lib/email/resend"
 import { montarNewsletterHTML } from "@/lib/email/newsletter-template"
+import type { ArtigoNewsletter } from "@/lib/email/newsletter-template"
 
 /**
  * POST /api/admin/newsletter/enviar
@@ -17,16 +18,28 @@ export async function POST() {
   const admin = createAdminClient()
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.acam.com.br"
 
-  // 1. Buscar itens selecionados
-  const { data: itens } = await admin
-    .from("radar_itens")
-    .select("*")
-    .eq("incluir_email", true)
-    .order("fonte")
-    .order("relevancia", { ascending: false })
+  // 1. Buscar itens selecionados (radar) e artigos selecionados
+  const [{ data: itens }, { data: artigos }] = await Promise.all([
+    admin
+      .from("radar_itens")
+      .select("*")
+      .eq("incluir_email", true)
+      .order("fonte")
+      .order("relevancia", { ascending: false }),
+    admin
+      .from("artigos")
+      .select("id, titulo, slug, resumo, autor, publicado_em")
+      .eq("status", "publicado")
+      .eq("incluir_newsletter", true)
+      .is("enviado_newsletter_em", null)
+      .order("publicado_em", { ascending: false }),
+  ])
 
-  if (!itens || itens.length === 0) {
-    return NextResponse.json({ erro: "Nenhum item selecionado" }, { status: 400 })
+  const temItens = (itens?.length ?? 0) > 0
+  const temArtigos = (artigos?.length ?? 0) > 0
+
+  if (!temItens && !temArtigos) {
+    return NextResponse.json({ erro: "Nenhum item ou artigo selecionado" }, { status: 400 })
   }
 
   // 2. Buscar destinatários de 3 fontes (sem duplicação por email)
@@ -75,10 +88,13 @@ export async function POST() {
   }
 
   // 3. Gerar HTML com template (contém placeholder {{unsubscribe_url}})
-  const { assunto, html: htmlTemplate } = montarNewsletterHTML(itens as Array<{
-    id: number; titulo: string; resumo: string | null; url: string | null;
-    fonte: string; fonte_nome: string | null; categoria: string | null; data_publicacao: string | null
-  }>)
+  const { assunto, html: htmlTemplate } = montarNewsletterHTML(
+    (itens ?? []) as Array<{
+      id: number; titulo: string; resumo: string | null; url: string | null;
+      fonte: string; fonte_nome: string | null; categoria: string | null; data_publicacao: string | null
+    }>,
+    (artigos ?? []) as ArtigoNewsletter[]
+  )
 
   // 4. Enviar via Resend
   const resend = getResend()
@@ -117,15 +133,26 @@ export async function POST() {
     assunto,
     conteudo_html: htmlTemplate,
     destinatarios_count: enviados,
-    itens_count: itens.length,
+    itens_count: (itens?.length ?? 0) + (artigos?.length ?? 0),
   })
 
-  // 6. Marcar itens como enviados (não deletar)
-  const idsEnviados = itens.map((i) => i.id)
-  await admin
-    .from("radar_itens")
-    .update({ incluir_email: false, enviado_em: new Date().toISOString() })
-    .in("id", idsEnviados)
+  // 6. Marcar itens do radar como enviados
+  if (itens && itens.length > 0) {
+    const idsItens = itens.map((i) => i.id)
+    await admin
+      .from("radar_itens")
+      .update({ incluir_email: false, enviado_em: new Date().toISOString() })
+      .in("id", idsItens)
+  }
+
+  // 7. Marcar artigos como enviados — não aparecem mais para reseleção
+  if (artigos && artigos.length > 0) {
+    const idsArtigos = artigos.map((a) => a.id)
+    await admin
+      .from("artigos")
+      .update({ incluir_newsletter: false, enviado_newsletter_em: new Date().toISOString() })
+      .in("id", idsArtigos)
+  }
 
   if (erros.length > 0) {
     console.error("[newsletter] Erros de envio:", erros)
@@ -134,7 +161,8 @@ export async function POST() {
   return NextResponse.json({
     sucesso: true,
     destinatarios: enviados,
-    itens: itens.length,
+    itens: itens?.length ?? 0,
+    artigos: artigos?.length ?? 0,
     erros: erros.length,
   })
 }

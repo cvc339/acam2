@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { StatusBadge } from "@/components/acam"
 import { NewsletterActions } from "@/components/admin/newsletter-actions"
 import { NewsletterEditUrl } from "@/components/admin/newsletter-edit-url"
+import { NewsletterArtigoActions } from "@/components/admin/newsletter-artigo-actions"
 import { ColetarButtons } from "@/components/admin/coletar-buttons"
 
 export const metadata: Metadata = { title: "Admin — Newsletter" }
@@ -39,6 +40,16 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
   // Com filtro de fonte: mostra todos (selecionados e não) daquela fonte
 
   const { data: itens } = await query
+
+  // Artigos publicados ainda não enviados
+  const { data: artigosElegiveis } = await admin
+    .from("artigos")
+    .select("id, titulo, resumo, categoria, publicado_em, incluir_newsletter")
+    .eq("status", "publicado")
+    .is("enviado_newsletter_em", null)
+    .order("publicado_em", { ascending: false })
+
+  const artigosSelecionados = (artigosElegiveis ?? []).filter((a) => a.incluir_newsletter).length
 
   // Stats
   const { count: totalItens } = await admin.from("radar_itens").select("*", { count: "exact", head: true }).is("enviado_em", null)
@@ -93,7 +104,37 @@ export default async function AdminNewsletterPage({ searchParams }: Props) {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Artigos elegíveis */}
+      {artigosElegiveis && artigosElegiveis.length > 0 && (
+        <div className="acam-card">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
+            <h3 className="font-semibold">Artigos publicados</h3>
+            <span className="text-sm text-muted-foreground">
+              {artigosSelecionados} de {artigosElegiveis.length} selecionado{artigosSelecionados !== 1 ? "s" : ""}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground" style={{ marginBottom: "0.75rem" }}>
+            Artigos publicados no site Vieira Castro Advogados. Depois de enviados, não aparecem mais aqui (não reenviar o mesmo artigo).
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {artigosElegiveis.map((a) => (
+              <div key={a.id} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", padding: "0.5rem", borderRadius: "var(--radius-md)", border: "1px solid var(--border)" }}>
+                <NewsletterArtigoActions artigoId={a.id} incluir={a.incluir_newsletter} />
+                <div style={{ flex: 1 }}>
+                  <div className="text-sm font-medium">{a.titulo}</div>
+                  {a.resumo && <div className="text-xs text-muted-foreground mt-1" style={{ lineHeight: 1.5 }}>{a.resumo.slice(0, 200)}{a.resumo.length > 200 ? "…" : ""}</div>}
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {a.publicado_em && new Date(a.publicado_em).toLocaleDateString("pt-BR")}
+                    {a.categoria && <> · {a.categoria}</>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filtros (itens do radar) */}
       <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         <a href="/admin/newsletter" className={`acam-btn acam-btn-sm ${!filtroFonte && !mostrarSelecionados ? "acam-btn-primary" : "acam-btn-ghost"}`}>Todos</a>
         <a href="/admin/newsletter?fonte=DOU" className={`acam-btn acam-btn-sm ${filtroFonte === "DOU" ? "acam-btn-primary" : "acam-btn-ghost"}`}>DOU</a>

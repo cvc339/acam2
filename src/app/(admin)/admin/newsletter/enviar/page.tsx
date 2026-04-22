@@ -9,13 +9,22 @@ export const metadata: Metadata = { title: "Admin — Enviar Newsletter" }
 export default async function AdminEnviarNewsletterPage() {
   const admin = createAdminClient()
 
-  // Buscar itens selecionados
-  const { data: itens } = await admin
-    .from("radar_itens")
-    .select("*")
-    .eq("incluir_email", true)
-    .order("fonte")
-    .order("relevancia", { ascending: false })
+  // Buscar itens selecionados (radar) e artigos selecionados
+  const [{ data: itens }, { data: artigos }] = await Promise.all([
+    admin
+      .from("radar_itens")
+      .select("*")
+      .eq("incluir_email", true)
+      .order("fonte")
+      .order("relevancia", { ascending: false }),
+    admin
+      .from("artigos")
+      .select("id, titulo, resumo, autor, publicado_em")
+      .eq("status", "publicado")
+      .eq("incluir_newsletter", true)
+      .is("enviado_newsletter_em", null)
+      .order("publicado_em", { ascending: false }),
+  ])
 
   // Contar destinatários únicos (3 fontes)
   const emails = new Set<string>()
@@ -35,6 +44,8 @@ export default async function AdminEnviarNewsletterPage() {
   const itensMG = itens?.filter((i) => i.fonte === "MG") ?? []
   const itensRSS = itens?.filter((i) => i.fonte === "RSS") ?? []
   const totalItens = itens?.length ?? 0
+  const totalArtigos = artigos?.length ?? 0
+  const totalGeral = totalItens + totalArtigos
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-6)" }}>
@@ -44,17 +55,34 @@ export default async function AdminEnviarNewsletterPage() {
         </Link>
         <h2 style={{ color: "var(--primary-600)" }}>Enviar Newsletter</h2>
         <p className="text-sm text-muted-foreground">
-          {totalItens} itens selecionados · {totalAssinantes ?? 0} assinantes ativos
+          {totalArtigos > 0 && <>{totalArtigos} artigo{totalArtigos > 1 ? "s" : ""} · </>}
+          {totalItens} ite{totalItens === 1 ? "m" : "ns"} do radar · {totalAssinantes ?? 0} assinantes ativos
         </p>
       </div>
 
-      {totalItens === 0 ? (
+      {totalGeral === 0 ? (
         <div className="acam-card" style={{ textAlign: "center", padding: "3rem" }}>
-          <p className="text-muted-foreground mb-4">Nenhum item selecionado para envio.</p>
-          <Link href="/admin/newsletter" className="acam-btn acam-btn-primary acam-btn-sm">Selecionar itens</Link>
+          <p className="text-muted-foreground mb-4">Nenhum item ou artigo selecionado para envio.</p>
+          <Link href="/admin/newsletter" className="acam-btn acam-btn-primary acam-btn-sm">Selecionar</Link>
         </div>
       ) : (
         <>
+          {/* Artigos */}
+          {artigos && artigos.length > 0 && (
+            <div className="acam-card">
+              <h3 className="font-semibold mb-3">
+                <StatusBadge variant="accent">Artigos</StatusBadge>
+                <span className="ml-2">Artigos do Vieira Castro Advogados ({totalArtigos})</span>
+              </h3>
+              {artigos.map((a) => (
+                <div key={a.id} style={{ padding: "0.4rem 0", borderBottom: "1px solid var(--grey-100)" }}>
+                  <div className="text-sm font-medium">{a.titulo}</div>
+                  {a.resumo && <div className="text-xs text-muted-foreground">{a.resumo.slice(0, 150)}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Preview por seção */}
           {itensDOU.length > 0 && (
             <div className="acam-card">
@@ -104,9 +132,11 @@ export default async function AdminEnviarNewsletterPage() {
           {/* Botão de envio */}
           <div className="acam-card" style={{ textAlign: "center", padding: "2rem" }}>
             <p className="text-sm text-muted-foreground mb-4">
-              Serão enviados <strong>{totalItens} itens</strong> para <strong>{totalAssinantes ?? 0} assinantes</strong>.
+              Serão enviados{" "}
+              {totalArtigos > 0 && <><strong>{totalArtigos} artigo{totalArtigos > 1 ? "s" : ""}</strong> + </>}
+              <strong>{totalItens} ite{totalItens === 1 ? "m" : "ns"}</strong> para <strong>{totalAssinantes ?? 0} assinantes</strong>.
             </p>
-            <EnviarNewsletterButton totalItens={totalItens} totalAssinantes={totalAssinantes ?? 0} />
+            <EnviarNewsletterButton totalItens={totalGeral} totalAssinantes={totalAssinantes ?? 0} />
           </div>
         </>
       )}
