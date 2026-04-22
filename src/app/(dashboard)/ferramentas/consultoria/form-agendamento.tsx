@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { AlertResult } from "@/components/acam"
+import { DatePicker } from "@/components/acam/date-picker"
 import type { Slot } from "@/lib/consultoria/types"
 import { CUSTO_CONSULTORIA, MINUTOS_REUNIAO } from "@/lib/consultoria/types"
 
@@ -28,9 +29,17 @@ function formatarHora(horaISO: string): string {
   return horaISO.slice(0, 5)
 }
 
+/** Converte DD/MM/AAAA → YYYY-MM-DD (ou null se inválido) */
+function ddmmyyyyParaISO(data: string): string | null {
+  const match = data.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) return null
+  return `${match[3]}-${match[2]}-${match[1]}`
+}
+
 export function FormAgendamento({ slots, saldo, emailUsuario }: Props) {
   const router = useRouter()
 
+  const [dataEscolhida, setDataEscolhida] = useState<string>("") // DD/MM/AAAA
   const [slotSelecionado, setSlotSelecionado] = useState<string | null>(null)
   const [email, setEmail] = useState(emailUsuario)
   const [observacoes, setObservacoes] = useState("")
@@ -48,7 +57,15 @@ export function FormAgendamento({ slots, saldo, emailUsuario }: Props) {
     return map
   }, [slots])
 
+  const dataISO = ddmmyyyyParaISO(dataEscolhida)
+  const slotsDoDia = dataISO ? slotsPorDia[dataISO] ?? [] : []
+
   const saldoInsuficiente = saldo < CUSTO_CONSULTORIA
+
+  function handleDataChange(novaData: string) {
+    setDataEscolhida(novaData)
+    setSlotSelecionado(null) // reseta o slot ao trocar de dia
+  }
 
   async function submeter(e: React.FormEvent) {
     e.preventDefault()
@@ -137,15 +154,6 @@ export function FormAgendamento({ slots, saldo, emailUsuario }: Props) {
     )
   }
 
-  if (slots.length === 0) {
-    return (
-      <AlertResult status="warning" statusLabel="Sem horários disponíveis">
-        <h3>Nenhum horário liberado para as próximas duas semanas</h3>
-        <p>Volte em breve para conferir novos horários. Você também pode entrar em contato pelo Fale Conosco para solicitar um horário fora da grade.</p>
-      </AlertResult>
-    )
-  }
-
   return (
     <form onSubmit={submeter} style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-6)" }}>
       {erro && (
@@ -155,35 +163,46 @@ export function FormAgendamento({ slots, saldo, emailUsuario }: Props) {
       )}
 
       <section>
-        <h3>1. Escolha um horário</h3>
+        <h3>1. Escolha o dia e o horário</h3>
         <p className="text-sm text-muted-foreground" style={{ marginBottom: "var(--spacing-4)" }}>
-          Reunião online de {MINUTOS_REUNIAO} minutos. Você recebe o link por e-mail após confirmar.
+          Selecione a data desejada. Os horários disponíveis aparecem na sequência. Reunião online de {MINUTOS_REUNIAO} minutos.
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-5)" }}>
-          {Object.entries(slotsPorDia).map(([data, slotsDoDia]) => (
-            <div key={data}>
-              <div style={{ fontWeight: 600, marginBottom: "var(--spacing-2)" }}>
-                {formatarCabecalhoDia(data)}
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--spacing-2)" }}>
-                {slotsDoDia.map((slot) => {
-                  const selecionado = slotSelecionado === slot.id
-                  return (
-                    <button
-                      key={slot.id}
-                      type="button"
-                      onClick={() => setSlotSelecionado(slot.id)}
-                      className={`acam-btn acam-btn-sm ${selecionado ? "acam-btn-primary" : "acam-btn-outline"}`}
-                    >
-                      {formatarHora(slot.hora_inicio)} – {formatarHora(slot.hora_fim)}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
+        <div className="acam-form-group" style={{ maxWidth: "16rem" }}>
+          <label className="acam-form-label" htmlFor="data-reuniao">Data</label>
+          <DatePicker value={dataEscolhida} onChange={handleDataChange} />
         </div>
+
+        {dataISO && (
+          <div style={{ marginTop: "var(--spacing-4)" }}>
+            {slotsDoDia.length > 0 ? (
+              <>
+                <div style={{ fontWeight: 600, marginBottom: "var(--spacing-2)" }}>
+                  Horários disponíveis — {formatarCabecalhoDia(dataISO)}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--spacing-2)" }}>
+                  {slotsDoDia.map((slot) => {
+                    const selecionado = slotSelecionado === slot.id
+                    return (
+                      <button
+                        key={slot.id}
+                        type="button"
+                        onClick={() => setSlotSelecionado(slot.id)}
+                        className={`acam-btn acam-btn-sm ${selecionado ? "acam-btn-primary" : "acam-btn-outline"}`}
+                      >
+                        {formatarHora(slot.hora_inicio)} – {formatarHora(slot.hora_fim)}
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Não há horários disponíveis nesta data. Por favor, escolha outra.
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       <section>
