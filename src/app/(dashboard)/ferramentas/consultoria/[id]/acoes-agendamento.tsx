@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
+import { DatePicker } from "@/components/acam/date-picker"
 import type { AgendamentoComSlot, Slot } from "@/lib/consultoria/types"
 import { HORAS_ANTECEDENCIA_REAGENDAMENTO } from "@/lib/consultoria/types"
 
@@ -12,16 +13,22 @@ interface Props {
   motivoNaoReagendar?: string
 }
 
-const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
-const MESES = [
-  "jan", "fev", "mar", "abr", "mai", "jun",
-  "jul", "ago", "set", "out", "nov", "dez",
+const DIAS_SEMANA_LONGO = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+const MESES_LONGO = [
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
 ]
 
-function formatarDia(dataISO: string): string {
+function formatarCabecalhoDia(dataISO: string): string {
   const [ano, mes, dia] = dataISO.split("-").map(Number)
   const d = new Date(ano, mes - 1, dia)
-  return `${DIAS_SEMANA[d.getDay()]} ${dia}/${MESES[d.getMonth()]}`
+  return `${DIAS_SEMANA_LONGO[d.getDay()]}, ${dia} de ${MESES_LONGO[d.getMonth()]}`
+}
+
+function ddmmyyyyParaISO(data: string): string | null {
+  const match = data.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!match) return null
+  return `${match[3]}-${match[2]}-${match[1]}`
 }
 
 export function AcoesAgendamento({
@@ -32,9 +39,28 @@ export function AcoesAgendamento({
 }: Props) {
   const router = useRouter()
   const [modo, setModo] = useState<"ver" | "reagendar">("ver")
+  const [dataEscolhida, setDataEscolhida] = useState<string>("")
   const [novoSlot, setNovoSlot] = useState<string | null>(null)
   const [processando, setProcessando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+
+  const slotsPorDia = useMemo(() => {
+    const map: Record<string, Slot[]> = {}
+    for (const s of slotsDisponiveis) {
+      if (s.id === agendamento.slot_id) continue
+      if (!map[s.data]) map[s.data] = []
+      map[s.data].push(s)
+    }
+    return map
+  }, [slotsDisponiveis, agendamento.slot_id])
+
+  const dataISO = ddmmyyyyParaISO(dataEscolhida)
+  const slotsDoDia = dataISO ? slotsPorDia[dataISO] ?? [] : []
+
+  function handleDataChange(novaData: string) {
+    setDataEscolhida(novaData)
+    setNovoSlot(null)
+  }
 
   async function reagendar() {
     if (!novoSlot) return
@@ -93,13 +119,6 @@ export function AcoesAgendamento({
   }
 
   if (modo === "reagendar") {
-    const slotsPorDia: Record<string, Slot[]> = {}
-    for (const s of slotsDisponiveis) {
-      if (s.id === agendamento.slot_id) continue
-      if (!slotsPorDia[s.data]) slotsPorDia[s.data] = []
-      slotsPorDia[s.data].push(s)
-    }
-
     return (
       <div className="acam-card">
         <h3>Escolher novo horário</h3>
@@ -113,31 +132,41 @@ export function AcoesAgendamento({
           </div>
         )}
 
-        <div style={{ marginTop: "var(--spacing-4)", display: "flex", flexDirection: "column", gap: "var(--spacing-4)" }}>
-          {Object.keys(slotsPorDia).length === 0 && (
-            <p>Não há outros horários disponíveis no momento.</p>
-          )}
-          {Object.entries(slotsPorDia).map(([data, slots]) => (
-            <div key={data}>
-              <div style={{ fontWeight: 600, marginBottom: "var(--spacing-2)" }}>{formatarDia(data)}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--spacing-2)" }}>
-                {slots.map((s) => {
-                  const selecionado = novoSlot === s.id
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => setNovoSlot(s.id)}
-                      className={`acam-btn acam-btn-sm ${selecionado ? "acam-btn-primary" : "acam-btn-outline"}`}
-                    >
-                      {s.hora_inicio.slice(0, 5)} – {s.hora_fim.slice(0, 5)}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
+        <div className="acam-form-group" style={{ marginTop: "var(--spacing-4)", maxWidth: "16rem" }}>
+          <label className="acam-form-label" htmlFor="data-reagendar">Data</label>
+          <DatePicker value={dataEscolhida} onChange={handleDataChange} />
         </div>
+
+        {dataISO && (
+          <div style={{ marginTop: "var(--spacing-4)" }}>
+            {slotsDoDia.length > 0 ? (
+              <>
+                <div style={{ fontWeight: 600, marginBottom: "var(--spacing-2)" }}>
+                  Horários disponíveis — {formatarCabecalhoDia(dataISO)}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--spacing-2)" }}>
+                  {slotsDoDia.map((s) => {
+                    const selecionado = novoSlot === s.id
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setNovoSlot(s.id)}
+                        className={`acam-btn acam-btn-sm ${selecionado ? "acam-btn-primary" : "acam-btn-outline"}`}
+                      >
+                        {s.hora_inicio.slice(0, 5)} – {s.hora_fim.slice(0, 5)}
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Não há horários disponíveis nesta data. Por favor, escolha outra.
+              </p>
+            )}
+          </div>
+        )}
 
         <div style={{ display: "flex", gap: "var(--spacing-3)", marginTop: "var(--spacing-5)" }}>
           <button
@@ -150,7 +179,7 @@ export function AcoesAgendamento({
           </button>
           <button
             type="button"
-            onClick={() => { setModo("ver"); setNovoSlot(null); setErro(null) }}
+            onClick={() => { setModo("ver"); setNovoSlot(null); setDataEscolhida(""); setErro(null) }}
             disabled={processando}
             className="acam-btn acam-btn-ghost"
           >
