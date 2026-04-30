@@ -23,6 +23,12 @@ export const metadata: Metadata = {
   },
   description:
     "Plataforma de análise de compensações ambientais para Minas Gerais. Ferramentas para profissionais que lidam com compensações ambientais.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/acam-simbolo.svg",
+  },
 }
 
 export default function RootLayout({

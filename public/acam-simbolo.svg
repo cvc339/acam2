@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="ACAM">
+  <title>ACAM — símbolo</title>
+  <desc>Símbolo monograma "A" geométrico ACAM com curvas de nível e base em cobre, em quadrado 200x200 sobre fundo creme. Para uso em ícone de aplicativo, cartão de visita, padrão decorativo.</desc>
+  <defs>
+    <clipPath id="acam-symbol-clip">
+      <path clip-rule="evenodd" d="M 60 150 L 140 150 L 100 50 Z M 92 110 L 108 110 L 100 75 Z M 80 135 L 120 135 L 108 118 L 92 118 Z"/>
+    </clipPath>
+  </defs>
+  <rect width="200" height="200" fill="#f5f0e8"/>
+  <path d="M 60 150 L 140 150 L 100 50 Z M 92 110 L 108 110 L 100 75 Z M 80 135 L 120 135 L 108 118 L 92 118 Z" fill="#1a3a2a" fill-rule="evenodd"/>
+  <rect x="55" y="135" width="90" height="16" fill="#c17f59" clip-path="url(#acam-symbol-clip)"/>
+  <line x1="55" y1="85" x2="145" y2="85" stroke="#f5f0e8" stroke-width="2"/>
+  <line x1="55" y1="114" x2="145" y2="114" stroke="#f5f0e8" stroke-width="2"/>
+  <line x1="55" y1="127" x2="145" y2="127" stroke="#f5f0e8" stroke-width="2"/>
+</svg>

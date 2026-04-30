@@ -1,0 +1,346 @@
+/* ============================================================
+   ACAM — Sistema de Design
+   Tokens de identidade visual Vieira Castro Advogados
+   v1.0 — 2026
+   ============================================================ */
+
+:root {
+  /* ----- Cores primárias da marca ----- */
+  --acam-verde-floresta: #1a3a2a;     /* Cor principal, símbolo, texto institucional */
+  --acam-verde-medio: #2d5a3f;        /* Variação: hover, fundos secundários */
+  --acam-verde-profundo: #0d2018;     /* Variação: dark mode background */
+  --acam-cobre: #c17f59;              /* Acento, base do símbolo, ornamentos */
+  --acam-cobre-claro: #d99a78;        /* Hover de cobre, estados ativos */
+  --acam-cobre-escuro: #9a6044;       /* Variação para contraste em fundos claros */
+  --acam-creme: #f5f0e8;              /* Fundo principal */
+  --acam-creme-elevado: #fbf8f1;      /* Fundo de cards, superfícies elevadas */
+  --acam-creme-recuado: #ebe4d6;      /* Fundo de seções alternadas, recuos */
+
+  /* ----- Tokens semânticos (modo claro) ----- */
+  --color-bg-primary: var(--acam-creme);
+  --color-bg-elevated: var(--acam-creme-elevado);
+  --color-bg-recessed: var(--acam-creme-recuado);
+  --color-bg-inverse: var(--acam-verde-floresta);
+
+  --color-text-primary: var(--acam-verde-floresta);
+  --color-text-secondary: #4a5d52;
+  --color-text-muted: #7a8881;
+  --color-text-inverse: var(--acam-creme);
+  --color-text-accent: var(--acam-cobre-escuro);
+
+  --color-accent: var(--acam-cobre);
+  --color-accent-hover: var(--acam-cobre-claro);
+  --color-accent-active: var(--acam-cobre-escuro);
+
+  --color-border-subtle: #e0d7c8;
+  --color-border-default: #c4b8a4;
+  --color-border-strong: var(--acam-verde-floresta);
+
+  --color-state-success: var(--acam-verde-medio);
+  --color-state-warning: var(--acam-cobre);
+  --color-state-danger: #8b3a2e;
+  --color-state-info: #4a6c8b;
+
+  /* ----- Tipografia ----- */
+  --font-serif: 'Cormorant Garamond', 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+
+  /* ----- Tamanhos tipográficos ----- */
+  --text-xs: 0.75rem;       /* 12px — small caption, nota de rodapé */
+  --text-sm: 0.875rem;      /* 14px — body small, label de form */
+  --text-base: 1rem;        /* 16px — body padrão */
+  --text-lg: 1.125rem;      /* 18px — body destaque, intro */
+  --text-xl: 1.25rem;       /* 20px — h3, subtítulo */
+  --text-2xl: 1.5rem;       /* 24px — h2 secundário */
+  --text-3xl: 2rem;         /* 32px — h2, seção */
+  --text-4xl: 2.5rem;       /* 40px — h1 secundário */
+  --text-5xl: 3rem;         /* 48px — h1, hero */
+  --text-6xl: 4rem;         /* 64px — display, landing hero */
+
+  /* ----- Pesos tipográficos ----- */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ----- Espaçamento ----- */
+  --space-1: 0.25rem;       /* 4px */
+  --space-2: 0.5rem;        /* 8px */
+  --space-3: 0.75rem;       /* 12px */
+  --space-4: 1rem;          /* 16px */
+  --space-6: 1.5rem;        /* 24px */
+  --space-8: 2rem;          /* 32px */
+  --space-12: 3rem;         /* 48px */
+  --space-16: 4rem;         /* 64px */
+  --space-24: 6rem;         /* 96px */
+
+  /* ----- Cantos arredondados ----- */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;     /* 4px */
+  --radius-md: 0.5rem;      /* 8px */
+  --radius-lg: 0.75rem;     /* 12px */
+  --radius-xl: 1rem;        /* 16px */
+  --radius-full: 9999px;
+
+  /* ----- Sombras (sutis, alinhadas com a paleta) ----- */
+  --shadow-sm: 0 1px 2px rgba(26, 58, 42, 0.05);
+  --shadow-md: 0 2px 6px rgba(26, 58, 42, 0.08);
+  --shadow-lg: 0 4px 12px rgba(26, 58, 42, 0.10);
+  --shadow-xl: 0 8px 24px rgba(26, 58, 42, 0.12);
+
+  /* ----- Linhas e traços ----- */
+  --hairline: 0.5px;
+  --line-thin: 1px;
+  --line-medium: 1.5px;
+  --line-thick: 2px;
+
+  /* ----- Transições ----- */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* ----- Modo escuro ----- */
+[data-theme="dark"] {
+  --color-bg-primary: var(--acam-verde-profundo);
+  --color-bg-elevated: var(--acam-verde-floresta);
+  --color-bg-recessed: #050f0a;
+  --color-bg-inverse: var(--acam-creme);
+
+  --color-text-primary: var(--acam-creme);
+  --color-text-secondary: #c4b8a4;
+  --color-text-muted: #8b9290;
+  --color-text-inverse: var(--acam-verde-floresta);
+  --color-text-accent: var(--acam-cobre-claro);
+
+  --color-border-subtle: #2d4a3a;
+  --color-border-default: #4a6358;
+  --color-border-strong: var(--acam-creme);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   Estilos base
+   ============================================================ */
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2 {
+  font-family: var(--font-serif);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.01em;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-xl); }
+h4 { font-size: var(--text-lg); }
+
+a {
+  color: var(--color-text-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* ============================================================
+   Componentes utilitários da marca
+   ============================================================ */
+
+/* Tagline editorial — padrão "Compensação ambiental" abaixo de qualquer marca */
+.tagline-editorial {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+/* Wordmark serif — replicar tipografia do logo em qualquer header */
+.wordmark {
+  font-family: var(--font-serif);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.08em;
+  color: var(--color-text-primary);
+}
+
+/* Separador com ponto de cobre — usar entre seções e abaixo de títulos hero */
+.divider-copper-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: var(--space-6) 0;
+}
+
+.divider-copper-dot::before,
+.divider-copper-dot::after {
+  content: '';
+  flex: 0 0 60px;
+  height: 1px;
+  background-color: var(--color-text-primary);
+  opacity: 0.5;
+}
+
+.divider-copper-dot-mark {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+/* Botão primário — CTA, ações principais */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  background-color: var(--acam-verde-floresta);
+  color: var(--acam-creme);
+  border: 1px solid var(--acam-verde-floresta);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+  background-color: var(--acam-verde-medio);
+  border-color: var(--acam-verde-medio);
+}
+
+/* Botão secundário — ações secundárias */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  background-color: transparent;
+  color: var(--acam-verde-floresta);
+  border: 1px solid var(--acam-verde-floresta);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  background-color: var(--acam-verde-floresta);
+  color: var(--acam-creme);
+}
+
+/* Botão terciário em cobre — uso muito específico, ações premium */
+.btn-copper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  background-color: var(--acam-cobre);
+  color: var(--acam-creme);
+  border: 1px solid var(--acam-cobre);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-copper:hover {
+  background-color: var(--acam-cobre-claro);
+  border-color: var(--acam-cobre-claro);
+}
+
+/* Card padrão — para seções de conteúdo */
+.card {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Input de formulário */
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--acam-verde-floresta);
+  box-shadow: 0 0 0 3px rgba(26, 58, 42, 0.1);
+}
+
+/* Badge — para status, tags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-full);
+}
+
+.badge-success {
+  background-color: rgba(45, 90, 63, 0.12);
+  color: var(--acam-verde-medio);
+}
+
+.badge-warning {
+  background-color: rgba(193, 127, 89, 0.15);
+  color: var(--acam-cobre-escuro);
+}
+
+.badge-danger {
+  background-color: rgba(139, 58, 46, 0.12);
+  color: #8b3a2e;
+}
+
+.badge-neutral {
+  background-color: var(--color-bg-recessed);
+  color: var(--color-text-secondary);
+}

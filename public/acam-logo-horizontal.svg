@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100" role="img" aria-label="ACAM — Compensação ambiental">
+  <title>ACAM — Compensação ambiental</title>
+  <desc>Marca horizontal ACAM. Símbolo simplificado à esquerda (sem curvas de nível, para escalas pequenas), wordmark em serifa e tagline em itálico à direita.</desc>
+  <defs>
+    <clipPath id="acam-horizontal-clip">
+      <path clip-rule="evenodd" d="M 26 80 L 74 80 L 50 20 Z M 45 56 L 55 56 L 50 35 Z M 38 71 L 62 71 L 55 61 L 45 61 Z"/>
+    </clipPath>
+  </defs>
+  <rect width="360" height="100" fill="#f5f0e8"/>
+  <path d="M 26 80 L 74 80 L 50 20 Z M 45 56 L 55 56 L 50 35 Z M 38 71 L 62 71 L 55 61 L 45 61 Z" fill="#1a3a2a" fill-rule="evenodd"/>
+  <rect x="20" y="71" width="60" height="10" fill="#c17f59" clip-path="url(#acam-horizontal-clip)"/>
+  <text x="115" y="52" font-family="Cormorant Garamond, EB Garamond, Georgia, serif" font-size="30" font-weight="400" letter-spacing="3" fill="#1a3a2a">ACAM</text>
+  <text x="115" y="72" font-family="Cormorant Garamond, EB Garamond, Georgia, serif" font-size="13" font-style="italic" font-weight="400" fill="#1a3a2a">Compensação ambiental</text>
+</svg>
