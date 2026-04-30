@@ -136,8 +136,8 @@ export default async function Home() {
           <Image
             src="/acam-logo-horizontal-dark.svg"
             alt="ACAM — Compensação ambiental"
-            width={180}
-            height={50}
+            width={288}
+            height={80}
             priority
           />
         </Link>
@@ -758,12 +758,12 @@ export default async function Home() {
         <div className="landing-grid-footer" style={{ maxWidth: "1100px", margin: "0 auto" }}>
           {/* Coluna 1: Marca */}
           <div>
-            <div style={{ marginBottom: "12px" }}>
+            <div style={{ marginBottom: "16px" }}>
               <Image
                 src="/acam-logo-horizontal-dark.svg"
                 alt="ACAM — Compensação ambiental"
-                width={180}
-                height={50}
+                width={234}
+                height={65}
               />
             </div>
             <p style={{
