@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { LeadCaptureForm } from "@/components/acam/lead-capture-form"
 
@@ -131,14 +132,15 @@ export default async function Home() {
 
       {/* NAV */}
       <nav className="landing-nav">
-        <span style={{
-          fontFamily: "var(--font-family)",
-          fontWeight: 800, fontSize: "0.95rem",
-          color: "var(--text-on-dark)",
-          letterSpacing: "0.25em", textTransform: "uppercase",
-        }}>
-          ACAM
-        </span>
+        <Link href="/" aria-label="ACAM" style={{ display: "inline-flex", alignItems: "center" }}>
+          <Image
+            src="/acam-logo-horizontal-dark.svg"
+            alt="ACAM — Compensação ambiental"
+            width={180}
+            height={50}
+            priority
+          />
+        </Link>
         <Link href="/login" style={{
           fontFamily: "var(--font-family)", fontSize: "0.78rem", fontWeight: 600,
           color: "var(--text-on-dark)", textDecoration: "none",
@@ -756,12 +758,13 @@ export default async function Home() {
         <div className="landing-grid-footer" style={{ maxWidth: "1100px", margin: "0 auto" }}>
           {/* Coluna 1: Marca */}
           <div>
-            <div style={{
-              fontWeight: 800, fontSize: "0.95rem",
-              color: "var(--text-on-dark)",
-              letterSpacing: "0.2em", marginBottom: "12px",
-            }}>
-              ACAM
+            <div style={{ marginBottom: "12px" }}>
+              <Image
+                src="/acam-logo-horizontal-dark.svg"
+                alt="ACAM — Compensação ambiental"
+                width={180}
+                height={50}
+              />
             </div>
             <p style={{
               fontSize: "0.78rem", color: "rgba(245,240,232,0.4)",
