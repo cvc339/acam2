@@ -2352,9 +2352,33 @@ body.page-public {
 }
 
 .acam-ferramenta-card-mockup-imagem {
+    position: relative;
     border-radius: var(--radius-sm);
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(26, 58, 42, 0.08);
+}
+
+/* Máscara LGPD — tarja semitransparente sobreposta à imagem para
+   ocultar dados de terceiros nos prints reais. */
+.acam-ferramenta-card-mascara-lgpd {
+    position: absolute;
+    background: rgba(26, 58, 42, 0.92);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(245, 240, 232, 0.75);
+    font-family: var(--font-family);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0 var(--spacing-2);
+    pointer-events: none;
+}
+
+.acam-ferramenta-card-mascara-lgpd span {
+    line-height: 1.2;
 }
 
 .acam-ferramenta-card-conteudo {

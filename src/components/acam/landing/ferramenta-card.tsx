@@ -1,6 +1,17 @@
 import Link from "next/link"
 import Image from "next/image"
 
+/** Coordenadas de uma máscara de proteção LGPD aplicada sobre a imagem.
+ *  Valores em percentual (string com "%") relativos à imagem renderizada. */
+export interface MascaraLGPD {
+  top: string
+  left: string
+  width: string
+  height: string
+  /** Texto opcional exibido dentro da tarja (ex.: "Dados protegidos") */
+  label?: string
+}
+
 interface FerramentaCardProps {
   /** Nome editorial da ferramenta (ex.: "Análise de viabilidade de área") */
   nome: string
@@ -10,6 +21,8 @@ interface FerramentaCardProps {
   mockupImage?: string
   mockupImageAlt?: string
   mockup?: React.ReactNode
+  /** Tarjas de proteção LGPD sobrepostas à imagem em coordenadas percentuais */
+  mascaras?: MascaraLGPD[]
   /** 3-4 bullets do que o usuário recebe */
   entregas: string[]
   /** Linha de ancoragem (créditos, tempo, comparação) */
@@ -26,6 +39,7 @@ export function FerramentaCard({
   mockupImage,
   mockupImageAlt,
   mockup,
+  mascaras,
   entregas,
   ancoragem,
   href,
@@ -43,6 +57,21 @@ export function FerramentaCard({
               height={600}
               style={{ width: "100%", height: "auto", display: "block" }}
             />
+            {mascaras?.map((m, i) => (
+              <div
+                key={i}
+                className="acam-ferramenta-card-mascara-lgpd"
+                style={{
+                  top: m.top,
+                  left: m.left,
+                  width: m.width,
+                  height: m.height,
+                }}
+                aria-hidden="true"
+              >
+                {m.label && <span>{m.label}</span>}
+              </div>
+            ))}
           </div>
         ) : (
           mockup

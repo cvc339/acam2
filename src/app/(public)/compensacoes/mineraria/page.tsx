@@ -109,6 +109,18 @@ export default function MinerariaPage() {
           tagline="Antes de comprometer recursos em estudos preliminares, descubra em minutos se o imóvel candidato realmente serve."
           mockupImage="/landing/print-destinacao-uc-base.png"
           mockupImageAlt="Tela de resultado da Análise de viabilidade — semáforo verde Risco Baixo, identificação de UCs sobrepostas e mapa do imóvel"
+          mascaras={[
+            // Identificação do imóvel no header verde (nome fictício mas município real)
+            { top: "6.2%", left: "17%", width: "44%", height: "8.5%" },
+            // Card 1: nome específico da UC
+            { top: "31%", left: "10%", width: "80%", height: "6.5%" },
+            // Card 2: nome específico da UC
+            { top: "38.5%", left: "10%", width: "80%", height: "6.5%" },
+            // Bloco de regime UC (cita a UC específica em texto longo)
+            { top: "48.5%", left: "10%", width: "80%", height: "10%" },
+            // Mapa (forma e localização identificáveis do imóvel)
+            { top: "60%", left: "10%", width: "80%", height: "36%", label: "Mapa do imóvel — dados protegidos (LGPD)" },
+          ]}
           entregas={[
             "Cruzamento com IDE-Sisema para identificar UCs sobrepostas",
             "Extração automática dos dados da matrícula (cartório, área, ônus)",
@@ -141,6 +153,14 @@ export default function MinerariaPage() {
           tagline="Doação de imóvel exige matrícula limpa. Saiba antes de protocolar — não depois."
           mockupImage="/landing/print-analise-matricula.png"
           mockupImageAlt="Tela da Análise de Matrícula — semáforo Risco Baixo, MVAR pontuação 90/100 nas dimensões jurídica, fiscal, titularidade e técnica"
+          mascaras={[
+            // Nome do imóvel no header (proteção LGPD)
+            { top: "13.5%", left: "32%", width: "32%", height: "2.8%" },
+            // Bloco "Dados do Imóvel" inteiro (matrícula, cartório, comarca, área, CCIR, NIRF, CAR, INCRA — identificadores únicos)
+            { top: "53.5%", left: "21.5%", width: "65%", height: "23%", label: "Dados do imóvel — protegidos (LGPD)" },
+            // Linha de Proprietários (CNPJ + razão social)
+            { top: "79%", left: "21.5%", width: "62%", height: "2.8%" },
+          ]}
           entregas={[
             "Pareamento de ônus, gravames e cancelamentos",
             "MVAR — pontuação de viabilidade em 4 dimensões (jurídica, fiscal, titularidade, técnica)",
