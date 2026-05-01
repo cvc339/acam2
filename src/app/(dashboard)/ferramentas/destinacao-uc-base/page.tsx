@@ -331,17 +331,16 @@ export default function DestinacaoUCBasePage() {
           ← Voltar ao dashboard
         </Link>
 
-        {/* Semáforo */}
-        <div className={`acam-card acam-card-dark acam-semaforo-${p.semaforo}`}>
-          <p className="text-xs" style={{ opacity: 0.8 }}>Análise Preliminar de Viabilidade</p>
-          <h2 className="text-xl font-semibold">{p.imovel.nome || p.imovel.municipio || "Imóvel Analisado"}</h2>
-          <p className="text-sm" style={{ opacity: 0.9 }}>
+        {/* Resultado: badge inline + texto (padrão alinhado com Análise de Matrícula) */}
+        <AlertResult
+          status={temVeto ? "error" : p.semaforo === "verde" ? "success" : p.semaforo === "amarelo" ? "warning" : "error"}
+          statusLabel={temVeto ? "Impedimentos identificados" : p.semaforo === "verde" ? "Risco Baixo" : p.semaforo === "amarelo" ? "Risco Médio" : "Risco Alto"}
+        >
+          <strong>Análise Preliminar de Viabilidade — {p.imovel.nome || p.imovel.municipio || "Imóvel"}.</strong> {p.semaforo_justificativa}
+          <div className="text-sm mt-1 text-muted-foreground">
             {p.imovel.municipio}/{p.imovel.estado} — {p.imovel.area_hectares?.toFixed(2)} ha
-          </p>
-          <div className="acam-semaforo-label">
-            <strong>{temVeto ? "Impedimentos identificados" : p.semaforo === "verde" ? "Risco Baixo" : p.semaforo === "amarelo" ? "Risco Médio" : "Risco Alto"}</strong> — {p.semaforo_justificativa}
           </div>
-        </div>
+        </AlertResult>
 
         {/* Disclaimer principal */}
         <div className="acam-alert acam-alert-warning">

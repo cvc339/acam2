@@ -2071,35 +2071,6 @@ body.page-public {
     color: var(--primary-600);
 }
 
-/* Semáforo card */
-.acam-semaforo-verde {
-    background: linear-gradient(135deg, var(--success) 0%, var(--success) 80%);
-}
-
-.acam-semaforo-amarelo {
-    background: linear-gradient(135deg, var(--warning) 0%, #d97706 80%);
-}
-
-.acam-semaforo-vermelho {
-    background: linear-gradient(135deg, var(--error) 0%, var(--error) 80%);
-}
-
-.acam-semaforo-verde,
-.acam-semaforo-amarelo,
-.acam-semaforo-vermelho {
-    color: white;
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-6);
-}
-
-.acam-semaforo-label {
-    margin-top: var(--spacing-4);
-    padding: var(--spacing-3) var(--spacing-4);
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: var(--radius-lg);
-    font-size: 0.875rem;
-}
-
 /* ============================================
    CTA Consultoria — fim de páginas de resultado
    ============================================ */
