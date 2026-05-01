@@ -2590,6 +2590,193 @@ body.page-public {
     color: var(--neutral-700);
 }
 
+/* App bar do dashboard ACAM (linha do topo do mockup) */
+.acam-mockup-app-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    background: white;
+    border-bottom: 1px solid var(--neutral-200);
+    margin-bottom: var(--spacing-3);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.acam-mockup-app-bar-logo {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--primary-100);
+    color: var(--primary-600);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.acam-mockup-app-bar-marca {
+    font-weight: 700;
+    color: var(--primary-600);
+    letter-spacing: 0.05em;
+    flex: 1;
+}
+
+.acam-mockup-app-bar-creditos {
+    font-size: 0.7rem;
+    color: var(--neutral-500);
+}
+
+/* Aviso amarelo claro (disclaimer) */
+.acam-mockup-aviso {
+    background: #fef7e6;
+    border-left: 3px solid #d99c43;
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    color: var(--neutral-700);
+    margin-bottom: var(--spacing-3);
+}
+
+/* Banner com badge inline + texto (cabeçalho da Análise de Matrícula real) */
+.acam-mockup-badge-banner {
+    display: flex;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-3);
+    align-items: flex-start;
+}
+
+.acam-mockup-badge-banner strong {
+    color: var(--primary-600);
+    font-size: 0.78rem;
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* UC card (estrutura igual à do app real) */
+.acam-mockup-uc-card {
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-2) var(--spacing-3);
+    margin-bottom: var(--spacing-2);
+}
+
+/* Bloco "Regime de UC" com label lateral em coluna estreita */
+.acam-mockup-regime {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: var(--spacing-2);
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-3);
+    margin-top: var(--spacing-2);
+}
+
+.acam-mockup-regime-label {
+    font-weight: 600;
+    color: var(--primary-600);
+    font-size: 0.7rem;
+    line-height: 1.2;
+}
+
+.acam-mockup-regime-corpo {
+    font-size: 0.72rem;
+    color: var(--neutral-700);
+    line-height: 1.5;
+}
+
+/* Mapa esquemático em SVG */
+.acam-mockup-mapa {
+    margin-top: var(--spacing-3);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--neutral-200);
+}
+
+.acam-mockup-mapa svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* MVAR — pontuação grande + barras horizontais */
+.acam-mockup-mvar-pontuacao {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: var(--spacing-3);
+}
+
+.acam-mockup-mvar-num {
+    font-family: var(--font-family-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-600);
+    line-height: 1;
+}
+
+.acam-mockup-mvar-de {
+    font-size: 0.85rem;
+    color: var(--neutral-500);
+    margin-left: 2px;
+}
+
+.acam-mockup-mvar-linha {
+    margin-bottom: var(--spacing-2);
+}
+
+.acam-mockup-mvar-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--neutral-700);
+    margin-bottom: 3px;
+}
+
+.acam-mockup-mvar-barra {
+    height: 5px;
+    background: var(--neutral-200);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.acam-mockup-mvar-fill {
+    height: 100%;
+    background: var(--primary-600);
+    border-radius: 3px;
+}
+
+/* Linha de propriedade (proprietários) */
+.acam-mockup-prop-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-2) 0;
+    font-size: 0.74rem;
+    border-bottom: 1px solid var(--neutral-100);
+}
+
+.acam-mockup-prop-linha strong {
+    color: var(--primary-600);
+}
+
+/* Status line (Ônus e Gravames, Georreferenciamento) */
+.acam-mockup-status-line {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2);
+    background: rgba(45, 90, 63, 0.06);
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+}
+
 .acam-mockup-eyebrow {
     font-size: 0.65rem;
     text-transform: uppercase;
