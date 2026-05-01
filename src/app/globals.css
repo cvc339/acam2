@@ -2342,6 +2342,21 @@ body.page-public {
     overflow-y: auto;
 }
 
+/* Wrapper para imagem real (print de tela): sem padding, sem scroll —
+   imagem preenche o card naturalmente, com border-radius interno e
+   sombra leve para destacar do fundo creme da seção. */
+.acam-ferramenta-card-mockup:has(.acam-ferramenta-card-mockup-imagem) {
+    padding: 0;
+    max-height: none;
+    overflow: hidden;
+}
+
+.acam-ferramenta-card-mockup-imagem {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(26, 58, 42, 0.08);
+}
+
 .acam-ferramenta-card-conteudo {
     display: flex;
     flex-direction: column;

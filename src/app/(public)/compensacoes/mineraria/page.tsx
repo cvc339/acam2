@@ -8,10 +8,6 @@ import {
   CTAEspecialista,
   FaqRapido,
   LegislacaoItem,
-  MockupDestinacaoUCBase,
-  MockupCalculoModalidade2,
-  MockupAnaliseMatricula,
-  MockupRequerimentoMineraria,
 } from "@/components/acam"
 
 export const metadata: Metadata = {
@@ -111,7 +107,8 @@ export default function MinerariaPage() {
         <FerramentaCard
           nome="Análise de viabilidade de área"
           tagline="Antes de comprometer recursos em estudos preliminares, descubra em minutos se o imóvel candidato realmente serve."
-          mockup={<MockupDestinacaoUCBase />}
+          mockupImage="/landing/print-destinacao-uc-base.png"
+          mockupImageAlt="Tela de resultado da Análise de viabilidade — semáforo verde Risco Baixo, identificação de UCs sobrepostas e mapa do imóvel"
           entregas={[
             "Cruzamento com IDE-Sisema para identificar UCs sobrepostas",
             "Extração automática dos dados da matrícula (cartório, área, ônus)",
@@ -126,7 +123,8 @@ export default function MinerariaPage() {
         <FerramentaCard
           nome="Cálculo de implantação / manutenção UC"
           tagline="Saiba o valor exato em UFEMG antes da reunião com o órgão — sem planilha, sem suposição."
-          mockup={<MockupCalculoModalidade2 />}
+          mockupImage="/landing/print-calculo-modalidade2.png"
+          mockupImageAlt="Tela do Cálculo Modalidade 2 — área a suprimir, valor em UFEMGs e em reais, fluxo administrativo etapa a etapa"
           entregas={[
             "Cálculo em UFEMG com valor vigente automaticamente atualizado",
             "Conversão direta para reais",
@@ -141,7 +139,8 @@ export default function MinerariaPage() {
         <FerramentaCard
           nome="Análise registral da área candidata"
           tagline="Doação de imóvel exige matrícula limpa. Saiba antes de protocolar — não depois."
-          mockup={<MockupAnaliseMatricula />}
+          mockupImage="/landing/print-analise-matricula.png"
+          mockupImageAlt="Tela da Análise de Matrícula — semáforo Risco Baixo, MVAR pontuação 90/100 nas dimensões jurídica, fiscal, titularidade e técnica"
           entregas={[
             "Pareamento de ônus, gravames e cancelamentos",
             "MVAR — pontuação de viabilidade em 4 dimensões (jurídica, fiscal, titularidade, técnica)",
@@ -156,7 +155,8 @@ export default function MinerariaPage() {
         <FerramentaCard
           nome="Requerimento de compensação minerária"
           tagline="O formulário oficial preenchido a partir dos seus dados — pronto para protocolo."
-          mockup={<MockupRequerimentoMineraria />}
+          mockupImage="/landing/print-requerimento-mineraria.png"
+          mockupImageAlt="Tela do wizard de Requerimento Compensação Minerária — formulário guiado em 5 etapas (Responsável, Empreendedor, Correspondência, Processo, Gerar)"
           entregas={[
             "Wizard guiado em etapas (responsável, empreendedor, processo)",
             "PDF idêntico ao modelo aceito pelo Estado",
