@@ -1,38 +1,59 @@
 import type { Metadata } from "next"
-import { LegislacaoItem, CompensacaoIcon } from "@/components/acam"
+import {
+  HeroCompensacao,
+  PerfisAlvo,
+  ContextoEducativo,
+  CaminhosPossiveis,
+  CTAEspecialista,
+  FaqRapido,
+  LegislacaoItem,
+} from "@/components/acam"
 
-export const metadata: Metadata = { title: "Compensação por Espécies Imunes" }
+export const metadata: Metadata = {
+  title: "Compensação por Espécies Imunes de Corte — Minas Gerais",
+  description:
+    "Compensação por supressão de espécies imunes de corte (Pequizeiro, Ipê-amarelo, Buriti) em MG. Critérios, modalidades e fundamentação normativa.",
+}
 
 export default function EspeciesImunesPage() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-8)" }}>
-      <div className="flex items-start gap-4">
-        <div style={{ color: "var(--primary-500)", marginTop: "4px" }}><CompensacaoIcon compensacao="imunes" size={32} /></div>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-2xl)", fontWeight: 600 }}>Compensação por Espécies Imunes de Corte</h1>
-          <p className="text-sm text-muted-foreground mt-1">Legislações específicas de MG</p>
-        </div>
-      </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-12)" }}>
+      <HeroCompensacao
+        compensacao="imunes"
+        eyebrow="Compensação ambiental · Imunes de corte"
+        titulo="Espécies Imunes de Corte em Minas Gerais"
+        tagline="Pequizeiro, Ipê-amarelo e Buriti têm proteção especial. Quando a supressão é autorizada, há compensação obrigatória — por plantio ou por pagamento em UFEMG."
+        fatosRapidos="Lei 9.743/1988 · Lei 13.635/2000 · Lei 20.308/2012"
+      />
 
-      <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
-        <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-3)" }}>O que é?</h2>
-        <p className="text-sm" style={{ lineHeight: 1.8, color: "var(--neutral-700)" }}>
-          As espécies imunes de corte são aquelas que possuem proteção especial estabelecida em legislação específica. Em Minas Gerais, destacam-se o Pequizeiro, o Ipê-amarelo e o Buriti. Quando há necessidade de supressão autorizada, deve haver compensação.
+      <PerfisAlvo
+        perfis={[
+          {
+            titulo: "Empreendimento com supressão necessária",
+            descricao: "Sua área de intervenção tem indivíduos imunes e você precisa dimensionar a compensação.",
+          },
+          {
+            titulo: "Consultoria orçando o caso",
+            descricao: "O EIA mapeou árvores imunes na ADA e você precisa calcular o passivo.",
+          },
+          {
+            titulo: "Jurídico revendo condicionante",
+            descricao: "Há licença com condicionante de plantio compensatório por imunes e você precisa entender o caminho.",
+          },
+        ]}
+      />
+
+      <ContextoEducativo titulo="A obrigação em três minutos">
+        <p>
+          Espécies imunes de corte são aquelas declaradas de <strong>preservação permanente</strong> por leis específicas — Pequizeiro, Ipê-amarelo e Buriti em Minas Gerais. A regra é: <strong>não pode cortar</strong>. Quando a supressão é autorizada (em situações excepcionais, com licenciamento), surge a obrigação de compensar.
         </p>
-      </div>
+        <p>
+          A compensação tem duas modalidades possíveis (plantio ou pagamento em UFEMG), e o empreendedor pode até <strong>combiná-las</strong> — pagar parte e plantar parte. A escolha depende da disponibilidade de área para plantio, do horizonte de cumprimento e do custo comparativo.
+        </p>
+      </ContextoEducativo>
 
-      <div className="acam-card acam-card-primary" style={{ padding: "var(--spacing-6)" }}>
-        <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-3)" }}>Quando se aplica?</h2>
-        <ul style={{ listStyle: "disc", paddingLeft: "1.25rem", fontSize: "var(--font-size-sm)", color: "var(--neutral-700)", lineHeight: 1.8 }}>
-          <li>Supressão autorizada de Pequizeiro (Caryocar brasiliense)</li>
-          <li>Supressão autorizada de Ipê-amarelo (Tabebuia spp.)</li>
-          <li>Supressão autorizada de Buriti (Mauritia flexuosa)</li>
-        </ul>
-      </div>
-
-      {/* Espécies */}
-      <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
-        <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Principais Espécies Protegidas em MG</h2>
+      <section>
+        <h2 className="acam-landing-section-titulo">Principais espécies protegidas em MG</h2>
         <div className="overflow-x-auto">
           <table className="acam-normas-table">
             <thead>
@@ -61,48 +82,74 @@ export default function EspeciesImunesPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      {/* Modalidades */}
-      <div>
-        <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-xl)", fontWeight: 600, marginBottom: "var(--spacing-6)" }}>Modalidades de Compensação</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="acam-modalidade-card">
-            <span className="acam-modalidade-badge">Modalidade 1</span>
-            <div className="acam-modalidade-titulo">Plantio de Mudas</div>
-            <div className="acam-modalidade-subtitulo">Mesma espécie suprimida</div>
-            <div className="acam-modalidade-desc">
-              Plantio de mudas da mesma espécie suprimida, em proporção definida pela legislação específica.
-            </div>
-            <div className="acam-modalidade-requisitos">
-              <h4>Locais:</h4>
-              <ul>
-                <li>Mesma sub-bacia hidrográfica</li>
-                <li>Em APP, Reserva Legal ou UC de domínio público</li>
-              </ul>
-            </div>
-          </div>
-          <div className="acam-modalidade-card">
-            <span className="acam-modalidade-badge">Modalidade 2</span>
-            <div className="acam-modalidade-titulo">Pagamento em UFEMGs</div>
-            <div className="acam-modalidade-subtitulo">100 UFEMGs por árvore suprimida</div>
-            <div className="acam-modalidade-desc">
-              Alternativamente ao plantio, recolhimento de valor em UFEMGs por cada indivíduo suprimido.
-            </div>
-            <div className="acam-modalidade-destaque">
-              <strong>Dica:</strong> O empreendedor pode optar por uma das modalidades ou combiná-las (ex: pagar 50% em UFEMGs e plantar mudas referentes aos outros 50%).
-            </div>
-          </div>
-        </div>
-      </div>
+      <CaminhosPossiveis
+        titulo="Modalidades de compensação"
+        intro="Duas opções, combináveis. A escolha depende de disponibilidade de área para plantio e do horizonte de cumprimento da obrigação."
+        caminhos={[
+          {
+            badge: "Modalidade 1",
+            titulo: "Plantio de mudas",
+            subtitulo: "Mesma espécie suprimida",
+            descricao: "Plantio em proporção definida pela legislação específica, na mesma sub-bacia, em APP, Reserva Legal ou UC de domínio público.",
+            tradeoff: "Exige área disponível, projeto de plantio e monitoramento. Custo recorrente até consolidação.",
+          },
+          {
+            badge: "Modalidade 2",
+            titulo: "Pagamento em UFEMG",
+            subtitulo: "Valor fixo por exemplar suprimido",
+            descricao: "Recolhimento de valor em UFEMGs por cada indivíduo suprimido — referência: 100 UFEMGs por árvore.",
+            tradeoff: "Mais ágil e previsível, sem custo de manutenção. Mas o valor pode ser alto em casos com muitas árvores.",
+          },
+        ]}
+      />
 
-      <div className="acam-card" style={{ padding: "var(--spacing-6)" }}>
-        <h2 style={{ fontFamily: "var(--font-family-heading)", fontSize: "var(--font-size-lg)", fontWeight: 600, marginBottom: "var(--spacing-4)" }}>Legislação Aplicável</h2>
-        <LegislacaoItem titulo="Lei Estadual nº 9.743/1988" descricao="Declara de interesse comum e imune de corte o Ipê-amarelo" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/9743/1988/?cons=1" />
-        <LegislacaoItem titulo="Lei Estadual nº 20.308/2012" descricao="Altera a Lei nº 13.965/2001, que dispõe sobre proteção do Pequizeiro" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/20308/2012/?cons=1" />
-        <LegislacaoItem titulo="Lei Estadual nº 13.635/2000" descricao="Declara de preservação permanente e imune de corte o Buriti" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/13635/2000/?cons=1" />
-        <LegislacaoItem titulo="Decreto Estadual nº 47.749/2019" descricao="Dispõe sobre os processos de autorização para intervenção ambiental" linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1" />
-      </div>
+      <CTAEspecialista
+        pergunta="A condicionante é específica e exige interpretação?"
+        descricao="A compensação por imunes de corte se cruza com licenciamento, EIA e por vezes com TAC. Para definir estratégia (plantio? pagamento? combinação?) ou para responder a exigência específica do órgão, agende 30 minutos com o especialista responsável técnico do ACAM."
+      />
+
+      <FaqRapido
+        itens={[
+          {
+            pergunta: "Posso pagar tudo em UFEMG e nada plantar?",
+            resposta: "Em geral, sim — a Modalidade 2 é alternativa autônoma. Mas alguns órgãos exigem combinação mínima quando há disponibilidade de área. Confirme no ato autorizativo.",
+          },
+          {
+            pergunta: "Onde posso plantar?",
+            resposta: "Mesma sub-bacia hidrográfica, em APP, Reserva Legal ou UC de domínio público. O órgão pode definir restrições adicionais — verifique a condicionante específica.",
+          },
+          {
+            pergunta: "Tenho que plantar a mesma espécie suprimida?",
+            resposta: "Sim. Plantio compensatório de imune segue espécie por espécie — Pequizeiro por Pequizeiro, Ipê-amarelo por Ipê-amarelo. Não se troca espécie.",
+          },
+        ]}
+      />
+
+      <section>
+        <h2 className="acam-landing-section-titulo">Legislação aplicável</h2>
+        <LegislacaoItem
+          titulo="Lei Estadual nº 9.743/1988"
+          descricao="Declara de interesse comum e imune de corte o Ipê-amarelo"
+          linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/9743/1988/?cons=1"
+        />
+        <LegislacaoItem
+          titulo="Lei Estadual nº 13.635/2000"
+          descricao="Declara de preservação permanente e imune de corte o Buriti"
+          linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/13635/2000/?cons=1"
+        />
+        <LegislacaoItem
+          titulo="Lei Estadual nº 20.308/2012"
+          descricao="Altera a Lei nº 13.965/2001, que dispõe sobre proteção do Pequizeiro"
+          linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/LEI/20308/2012/?cons=1"
+        />
+        <LegislacaoItem
+          titulo="Decreto Estadual nº 47.749/2019"
+          descricao="Processos de autorização para intervenção ambiental"
+          linkUrl="https://www.almg.gov.br/legislacao-mineira/texto/DEC/47749/2019/?cons=1"
+        />
+      </section>
     </div>
   )
 }

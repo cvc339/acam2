@@ -27,6 +27,9 @@ export { FaqRapido } from "./landing/faq-rapido"
 
 // Mockups dos outputs (para uso em landings)
 export { MockupDestinacaoUCBase } from "./mockups/mockup-destinacao-uc-base"
+export { MockupDestinacaoUCApp } from "./mockups/mockup-destinacao-uc-app"
 export { MockupCalculoModalidade2 } from "./mockups/mockup-calculo-modalidade2"
 export { MockupAnaliseMatricula } from "./mockups/mockup-analise-matricula"
+export { MockupAnaliseServidao } from "./mockups/mockup-analise-servidao"
+export { MockupReposicaoFlorestal } from "./mockups/mockup-reposicao-florestal"
 export { MockupRequerimentoMineraria } from "./mockups/mockup-requerimento-mineraria"
