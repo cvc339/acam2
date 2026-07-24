@@ -31,7 +31,7 @@ jobs:
             --max-time 300 \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://acam.com.br/api/admin/newsletter/coletar-dou
+            https://www.acam.com.br/api/admin/newsletter/coletar-dou
 
       - name: Coletar MG
         # So roda no primeiro horario do dia (07h BRT) ou em disparo manual.
@@ -43,4 +43,4 @@ jobs:
             --max-time 420 \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://acam.com.br/api/admin/newsletter/coletar-mg
+            https://www.acam.com.br/api/admin/newsletter/coletar-mg

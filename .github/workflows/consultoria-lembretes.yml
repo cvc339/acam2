@@ -28,4 +28,4 @@ jobs:
             --max-time 60 \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://acam.com.br/api/cron/consultoria-lembretes
+            https://www.acam.com.br/api/cron/consultoria-lembretes

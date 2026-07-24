@@ -28,4 +28,4 @@ jobs:
             --max-time 180 \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://acam.com.br/api/admin/newsletter/coletar
+            https://www.acam.com.br/api/admin/newsletter/coletar
