@@ -13,7 +13,7 @@ const todasCompensacoes: { id: Compensacao; nome: string; lei: string; slug: str
   { id: "app", nome: "APP", lei: "Decreto 47.749/2019", slug: "app" },
   { id: "snuc", nome: "SNUC", lei: "Lei 9.985/2000", slug: "snuc" },
   { id: "reserva-legal", nome: "Reserva Legal", lei: "Lei 12.651/2012", slug: "reserva-legal" },
-  { id: "reposicao-florestal", nome: "Reposição Florestal", lei: "Lei 20.308/2012", slug: "reposicao-florestal" },
+  { id: "reposicao-florestal", nome: "Reposição Florestal", lei: "Lei 20.922/2013", slug: "reposicao-florestal" },
   { id: "ameacadas", nome: "Espécies Ameaçadas", lei: "Decreto 47.749/2019", slug: "especies-ameacadas" },
   { id: "imunes", nome: "Espécies Imunes de Corte", lei: "Normas diversas", slug: "especies-imunes" },
 ]
