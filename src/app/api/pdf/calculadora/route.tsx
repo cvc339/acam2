@@ -31,10 +31,13 @@ export async function POST(request: Request) {
     const {
       totalExpediente, totalFlorestal, totalReposicao, total,
       itensExpediente, itensFlorestal, itensReposicao,
+      florestalPrevia, florestalCorretiva, reposicaoPrevia, reposicaoCorretiva,
       ufemgAno, ufemgValor,
       nome, documento, municipio, processo,
-      dentroLicenciamento,
+      dentroLicenciamento, tipoAia,
     } = body
+
+    const mista = tipoAia === "mista"
 
     const data = new Date().toLocaleDateString("pt-BR", {
       day: "2-digit", month: "long", year: "numeric",
@@ -52,9 +55,14 @@ export async function POST(request: Request) {
       `${i.nome} (${i.codigo}): ${i.qtd} ${un(i.unidade, i.qtd)}`
     ).join("; ")
 
-    const descFlorestal = (itensFlorestal || []).map((i: { nome: string; codigo: string; vol: number; unidade: string }) =>
-      `${i.nome} (${i.codigo}): ${i.vol} ${un(i.unidade, i.vol)}`
-    ).join("; ")
+    const listaProdutos = (itens: { nome: string; codigo: string; vol: number; unidade: string }[]) =>
+      (itens || []).map((i) => `${i.nome} (${i.codigo}): ${i.vol} ${un(i.unidade, i.vol)}`).join("; ")
+
+    const descFlorestal = (tipoAia === "corretiva" ? "AIA corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " : "")
+      + listaProdutos(itensFlorestal)
+
+    const descFlorestalPrevia = "AIA mista, frente prévia. " + listaProdutos(florestalPrevia?.itens)
+    const descFlorestalCorretiva = "AIA mista, frente corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " + listaProdutos(florestalCorretiva?.itens)
 
     function montarInfo(desc: string) {
       let texto = `Nome: ${nome || "[NOME DO EMPREENDIMENTO]"}\nCPF/CNPJ: ${documento || "[CPF/CNPJ]"}\nMunicípio: ${municipio ? municipio + "/MG" : "[MUNICÍPIO]"}`
@@ -62,6 +70,58 @@ export async function POST(request: Request) {
       texto += `\n\nDescrição da solicitação:\n${desc}`
       return texto
     }
+
+    const tabelaFlorestal = (
+      itens: { nome: string; codigo: string; vol: number; unidade: string; valor: number }[],
+      subtotalLabel: string,
+      subtotal: number
+    ) => (
+      <>
+        <View style={styles.tabelaHeader}>
+          <Text style={[styles.tabelaHeaderTexto, { flex: 3 }]}>Produto</Text>
+          <Text style={[styles.tabelaHeaderTexto, { flex: 1, textAlign: "center" }]}>Código</Text>
+          <Text style={[styles.tabelaHeaderTexto, { flex: 1, textAlign: "center" }]}>Volume</Text>
+          <Text style={[styles.tabelaHeaderTexto, { flex: 1.5, textAlign: "right" }]}>Valor</Text>
+        </View>
+        {itens.map((i) => (
+          <View key={i.codigo} style={styles.tabelaLinha}>
+            <Text style={[styles.tabelaTexto, { flex: 3 }]}>{i.nome}</Text>
+            <Text style={[styles.tabelaTexto, { flex: 1, textAlign: "center" }]}>{i.codigo}</Text>
+            <Text style={[styles.tabelaTexto, { flex: 1, textAlign: "center" }]}>{i.vol} {i.unidade}</Text>
+            <Text style={[styles.tabelaValor, { flex: 1.5 }]}>{fmt(i.valor)}</Text>
+          </View>
+        ))}
+        <View style={[styles.tabelaLinha, { borderBottomWidth: 0, paddingTop: 8 }]}>
+          <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Source Sans 3", fontWeight: 700 }]}>{subtotalLabel}</Text>
+          <Text style={[styles.tabelaValor, { flex: 1.5, fontSize: 10 }]}>{fmt(subtotal)}</Text>
+        </View>
+      </>
+    )
+
+    const tabelaReposicao = (
+      itens: { nome: string; codigo: string; vol: number; unidade: string; arvores: number; totalArvores: number; valor: number }[],
+      subtotalLabel: string,
+      subtotal: number
+    ) => (
+      <>
+        <View style={styles.tabelaHeader}>
+          <Text style={[styles.tabelaHeaderTexto, { flex: 3 }]}>Produto</Text>
+          <Text style={[styles.tabelaHeaderTexto, { flex: 2, textAlign: "center" }]}>Cálculo</Text>
+          <Text style={[styles.tabelaHeaderTexto, { flex: 1.5, textAlign: "right" }]}>Valor</Text>
+        </View>
+        {itens.map((i) => (
+          <View key={i.codigo} style={styles.tabelaLinha}>
+            <Text style={[styles.tabelaTexto, { flex: 3 }]}>{i.nome}</Text>
+            <Text style={[styles.tabelaTexto, { flex: 2, textAlign: "center" }]}>{i.vol} {i.unidade} × {i.arvores} = {i.totalArvores} árv.</Text>
+            <Text style={[styles.tabelaValor, { flex: 1.5 }]}>{fmt(i.valor)}</Text>
+          </View>
+        ))}
+        <View style={[styles.tabelaLinha, { borderBottomWidth: 0, paddingTop: 8 }]}>
+          <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Source Sans 3", fontWeight: 700 }]}>{subtotalLabel}</Text>
+          <Text style={[styles.tabelaValor, { flex: 1.5, fontSize: 10 }]}>{fmt(subtotal)}</Text>
+        </View>
+      </>
+    )
 
     const pdf = (
       <Document>
@@ -107,48 +167,44 @@ export async function POST(request: Request) {
           )}
 
           {/* Taxa Florestal */}
-          {itensFlorestal && itensFlorestal.length > 0 && (
+          {!mista && itensFlorestal && itensFlorestal.length > 0 && (
             <Secao titulo="Taxa Florestal">
-              <View style={styles.tabelaHeader}>
-                <Text style={[styles.tabelaHeaderTexto, { flex: 3 }]}>Produto</Text>
-                <Text style={[styles.tabelaHeaderTexto, { flex: 1, textAlign: "center" }]}>Código</Text>
-                <Text style={[styles.tabelaHeaderTexto, { flex: 1, textAlign: "center" }]}>Volume</Text>
-                <Text style={[styles.tabelaHeaderTexto, { flex: 1.5, textAlign: "right" }]}>Valor</Text>
-              </View>
-              {itensFlorestal.map((i: { nome: string; codigo: string; vol: number; unidade: string; valor: number }) => (
-                <View key={i.codigo} style={styles.tabelaLinha}>
-                  <Text style={[styles.tabelaTexto, { flex: 3 }]}>{i.nome}</Text>
-                  <Text style={[styles.tabelaTexto, { flex: 1, textAlign: "center" }]}>{i.codigo}</Text>
-                  <Text style={[styles.tabelaTexto, { flex: 1, textAlign: "center" }]}>{i.vol} {i.unidade}</Text>
-                  <Text style={[styles.tabelaValor, { flex: 1.5 }]}>{fmt(i.valor)}</Text>
-                </View>
-              ))}
-              <View style={[styles.tabelaLinha, { borderBottomWidth: 0, paddingTop: 8 }]}>
-                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Source Sans 3", fontWeight: 700 }]}>Subtotal Taxa Florestal</Text>
-                <Text style={[styles.tabelaValor, { flex: 1.5, fontSize: 10 }]}>{fmt(totalFlorestal)}</Text>
-              </View>
+              {tipoAia === "corretiva" && (
+                <Text style={[styles.tabelaTexto, { marginBottom: 6 }]}>
+                  AIA corretiva: valores com acréscimo de 100%, art. 69 da Lei nº 4.747/1968.
+                </Text>
+              )}
+              {tabelaFlorestal(itensFlorestal, "Subtotal Taxa Florestal", totalFlorestal)}
+            </Secao>
+          )}
+          {mista && florestalPrevia && florestalPrevia.itens.length > 0 && (
+            <Secao titulo="Taxa Florestal (frente prévia)">
+              {tabelaFlorestal(florestalPrevia.itens, "Subtotal frente prévia", florestalPrevia.total)}
+            </Secao>
+          )}
+          {mista && florestalCorretiva && florestalCorretiva.itens.length > 0 && (
+            <Secao titulo="Taxa Florestal (frente corretiva)">
+              <Text style={[styles.tabelaTexto, { marginBottom: 6 }]}>
+                Valores com acréscimo de 100%, art. 69 da Lei nº 4.747/1968.
+              </Text>
+              {tabelaFlorestal(florestalCorretiva.itens, "Subtotal frente corretiva", florestalCorretiva.total)}
             </Secao>
           )}
 
           {/* Reposição Florestal */}
-          {itensReposicao && itensReposicao.length > 0 && (
+          {!mista && itensReposicao && itensReposicao.length > 0 && (
             <Secao titulo="Reposição Florestal">
-              <View style={styles.tabelaHeader}>
-                <Text style={[styles.tabelaHeaderTexto, { flex: 3 }]}>Produto</Text>
-                <Text style={[styles.tabelaHeaderTexto, { flex: 2, textAlign: "center" }]}>Cálculo</Text>
-                <Text style={[styles.tabelaHeaderTexto, { flex: 1.5, textAlign: "right" }]}>Valor</Text>
-              </View>
-              {itensReposicao.map((i: { nome: string; codigo: string; vol: number; unidade: string; arvores: number; totalArvores: number; valor: number }) => (
-                <View key={i.codigo} style={styles.tabelaLinha}>
-                  <Text style={[styles.tabelaTexto, { flex: 3 }]}>{i.nome}</Text>
-                  <Text style={[styles.tabelaTexto, { flex: 2, textAlign: "center" }]}>{i.vol} {i.unidade} × {i.arvores} = {i.totalArvores} árv.</Text>
-                  <Text style={[styles.tabelaValor, { flex: 1.5 }]}>{fmt(i.valor)}</Text>
-                </View>
-              ))}
-              <View style={[styles.tabelaLinha, { borderBottomWidth: 0, paddingTop: 8 }]}>
-                <Text style={[styles.tabelaTexto, { flex: 5, fontFamily: "Source Sans 3", fontWeight: 700 }]}>Subtotal Reposição Florestal</Text>
-                <Text style={[styles.tabelaValor, { flex: 1.5, fontSize: 10 }]}>{fmt(totalReposicao)}</Text>
-              </View>
+              {tabelaReposicao(itensReposicao, "Subtotal Reposição Florestal", totalReposicao)}
+            </Secao>
+          )}
+          {mista && reposicaoPrevia && reposicaoPrevia.itens.length > 0 && (
+            <Secao titulo="Reposição Florestal (frente prévia)">
+              {tabelaReposicao(reposicaoPrevia.itens, "Subtotal frente prévia", reposicaoPrevia.total)}
+            </Secao>
+          )}
+          {mista && reposicaoCorretiva && reposicaoCorretiva.itens.length > 0 && (
+            <Secao titulo="Reposição Florestal (frente corretiva)">
+              {tabelaReposicao(reposicaoCorretiva.itens, "Subtotal frente corretiva", reposicaoCorretiva.total)}
             </Secao>
           )}
         </Pagina>
@@ -175,13 +231,31 @@ export async function POST(request: Request) {
             />
           )}
 
-          {totalFlorestal > 0 && (
+          {!mista && totalFlorestal > 0 && (
             <FichaDAE
               titulo="Taxa Florestal"
               orgao={orgaoFlorestal}
               servico="TAXA FLORESTAL"
               valor={fmt(totalFlorestal)}
               infoComplementares={montarInfo(descFlorestal)}
+            />
+          )}
+          {mista && florestalPrevia && florestalPrevia.total > 0 && (
+            <FichaDAE
+              titulo="Taxa Florestal (frente prévia)"
+              orgao={orgaoFlorestal}
+              servico="TAXA FLORESTAL"
+              valor={fmt(florestalPrevia.total)}
+              infoComplementares={montarInfo(descFlorestalPrevia)}
+            />
+          )}
+          {mista && florestalCorretiva && florestalCorretiva.total > 0 && (
+            <FichaDAE
+              titulo="Taxa Florestal (frente corretiva)"
+              orgao={orgaoFlorestal}
+              servico="TAXA FLORESTAL"
+              valor={fmt(florestalCorretiva.total)}
+              infoComplementares={montarInfo(descFlorestalCorretiva)}
             />
           )}
 

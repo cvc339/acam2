@@ -1,11 +1,35 @@
 /**
  * Calculadora de Intervenção Ambiental
  * Base legal: Lei 20.922/2013, Decreto 47.749/2019
- * Última verificação: 2026-04-07
+ * Última verificação: 2026-09-02
  *
  * Calcula: Taxa de Expediente, Taxa Florestal e Reposição Florestal
  * UFEMG é valor dinâmico (configurações do banco)
+ *
+ * AIA prévia × AIA corretiva: na intervenção corretiva (regularização de
+ * supressão realizada sem autorização), a Taxa Florestal é devida com
+ * acréscimo de 100%, por força do art. 69 da Lei 4.747/1968 (texto atualizado
+ * conferido na ALMG em 2026-09-02). O acréscimo alcança somente a Taxa
+ * Florestal; a Taxa de Expediente e a Reposição Florestal não dobram.
+ *
+ * Rodada mista: um mesmo processo pode reunir frente prévia e frente
+ * corretiva (RC SEMAD/IEF 3.102/2021, arts. 4º e 26). Prática adotada: uma
+ * guia de Taxa de Expediente e duas guias de Taxa Florestal, a da frente
+ * corretiva em dobro. Ver calcularIntervencaoMista.
  */
+
+// ============================================
+// TIPO DE AIA
+// ============================================
+
+/** Frente de cálculo: prévia (antes da intervenção) ou corretiva (regularização). */
+export type FrenteAia = "previa" | "corretiva"
+
+/** Tipo do processo no assistente; "mista" reúne as duas frentes no mesmo processo. */
+export type TipoAia = FrenteAia | "mista"
+
+/** Fator do art. 69 da Lei 4.747/1968: taxa devida com 100% de acréscimo. */
+export const FATOR_CORRETIVA = 2
 
 // ============================================
 // ATIVIDADES (Taxa de Expediente)
@@ -93,6 +117,7 @@ export interface ResultadoIntervencao {
   total: number
   ufemgValor: number
   ufemgAno: number
+  tipoAia: FrenteAia
 }
 
 /**
@@ -110,13 +135,16 @@ export function calcularTaxaExpedienteItem(
 /**
  * Calcula Taxa Florestal para um produto
  * Fórmula: UFEMG × volume × coeficiente do produto
+ * Na AIA corretiva, aplica o acréscimo de 100% do art. 69 da Lei 4.747/1968.
  */
 export function calcularTaxaFlorestalItem(
   produto: Produto,
   volume: number,
-  ufemgValor: number
+  ufemgValor: number,
+  tipoAia: FrenteAia = "previa"
 ): number {
-  return ufemgValor * volume * produto.ufemg
+  const fator = tipoAia === "corretiva" ? FATOR_CORRETIVA : 1
+  return ufemgValor * volume * produto.ufemg * fator
 }
 
 /**
@@ -139,7 +167,8 @@ export function calcularIntervencao(
   atividadesSelecionadas: { atividade: Atividade; quantidade: number }[],
   produtosSelecionados: { produto: Produto; volume: number }[],
   ufemgValor: number,
-  ufemgAno: number
+  ufemgAno: number,
+  tipoAia: FrenteAia = "previa"
 ): ResultadoIntervencao {
   // Taxa de Expediente
   const itensExpediente: ItemCalculado[] = []
@@ -164,13 +193,14 @@ export function calcularIntervencao(
 
   for (const { produto, volume } of produtosSelecionados) {
     if (volume > 0) {
-      const valor = calcularTaxaFlorestalItem(produto, volume, ufemgValor)
+      const valor = calcularTaxaFlorestalItem(produto, volume, ufemgValor, tipoAia)
       totalFlorestal += valor
       itensFlorestal.push({
         nome: produto.nome,
         codigo: produto.codigo,
         valor,
-        detalhe: `${volume} ${produto.unidade}`,
+        detalhe: `${volume} ${produto.unidade}` +
+          (tipoAia === "corretiva" ? " · acréscimo de 100% (art. 69 da Lei 4.747/1968)" : ""),
       })
     }
   }
@@ -202,5 +232,34 @@ export function calcularIntervencao(
     total: totalExpediente + totalFlorestal + totalReposicao,
     ufemgValor,
     ufemgAno,
+    tipoAia,
   }
+}
+
+export interface ResultadoIntervencaoMista {
+  /** Frente prévia; carrega também a Taxa de Expediente única do processo. */
+  previa: ResultadoIntervencao
+  /** Frente corretiva, Taxa Florestal em dobro; sem Taxa de Expediente. */
+  corretiva: ResultadoIntervencao
+  totalGeral: number
+}
+
+/**
+ * Rodada mista: AIA prévia e corretiva no mesmo processo.
+ * A Taxa de Expediente é devida uma vez só, por atividade, sem divisão por
+ * frente (guia única na prática adotada), e sai no resultado da frente prévia.
+ * A Taxa Florestal é calculada por frente, com o acréscimo do art. 69 da
+ * Lei 4.747/1968 apenas na corretiva. A Reposição Florestal de cada frente
+ * não dobra.
+ */
+export function calcularIntervencaoMista(
+  atividadesSelecionadas: { atividade: Atividade; quantidade: number }[],
+  produtosPrevia: { produto: Produto; volume: number }[],
+  produtosCorretiva: { produto: Produto; volume: number }[],
+  ufemgValor: number,
+  ufemgAno: number
+): ResultadoIntervencaoMista {
+  const previa = calcularIntervencao(atividadesSelecionadas, produtosPrevia, ufemgValor, ufemgAno, "previa")
+  const corretiva = calcularIntervencao([], produtosCorretiva, ufemgValor, ufemgAno, "corretiva")
+  return { previa, corretiva, totalGeral: previa.total + corretiva.total }
 }

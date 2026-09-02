@@ -5,8 +5,10 @@ import Link from "next/link"
 import {
   ATIVIDADES,
   PRODUTOS,
+  FATOR_CORRETIVA,
   type Atividade,
   type Produto,
+  type TipoAia,
 } from "@/lib/calculo/intervencao"
 import { CTAConsultoria } from "@/components/acam"
 
@@ -76,6 +78,7 @@ export default function CalculadoraPage() {
 
   // Estado do wizard — idêntico ao ACAM1
   const [state, setState] = useState({
+    tipoAia: null as TipoAia | null,
     tipoVegetacao: null as string | null,
     temManejo: null as boolean | null,
     temAPP: null as boolean | null,
@@ -86,6 +89,7 @@ export default function CalculadoraPage() {
     dentroLicenciamento: null as boolean | null,
     quantidades: {} as Record<string, number>,
     volumes: {} as Record<string, number>,
+    volumesCorretiva: {} as Record<string, number>,
   })
 
   const [documento, setDocumento] = useState("")
@@ -112,7 +116,7 @@ export default function CalculadoraPage() {
 
   // Etapas — mesma lógica do ACAM1
   const getEtapas = useCallback((): string[] => {
-    const lista = ["intro", "tipoVegetacao"]
+    const lista = ["intro", "tipoAia", "tipoVegetacao"]
     if (state.tipoVegetacao === "nativa" || state.tipoVegetacao === "ambas") {
       lista.push("temManejo")
     }
@@ -169,6 +173,7 @@ export default function CalculadoraPage() {
 
   function podeAvancar(): boolean {
     if (stepId === "intro" || stepId === "introFlorestal") return true
+    if (stepId === "tipoAia") return state.tipoAia !== null
     if (stepId === "tipoVegetacao") return state.tipoVegetacao !== null
     if (stepId === "temManejo") return state.temManejo !== null
     if (stepId === "temAPP") return state.temAPP !== null
@@ -193,9 +198,9 @@ export default function CalculadoraPage() {
 
   function reiniciar() {
     setState({
-      tipoVegetacao: null, temManejo: null, temAPP: null, tiposAPP: [],
+      tipoAia: null, tipoVegetacao: null, temManejo: null, temAPP: null, tiposAPP: [],
       temAproveitamento: null, temProdutos: null, produtosSelecionados: [],
-      dentroLicenciamento: null, quantidades: {}, volumes: {},
+      dentroLicenciamento: null, quantidades: {}, volumes: {}, volumesCorretiva: {},
     })
     setDocumento(""); setNome(""); setMunicipio(""); setProcesso("")
     setCnpjStatus("")
@@ -247,29 +252,60 @@ export default function CalculadoraPage() {
       }
     })
 
-    let totalFlorestal = 0
-    const itensFlorestal: { nome: string; codigo: string; vol: number; unidade: string; valor: number }[] = []
-    produtos.forEach((p) => {
-      const vol = state.volumes[p.id] || 0
-      if (vol > 0) {
-        const valor = ufemg.valor * vol * p.ufemg
-        totalFlorestal += valor
-        itensFlorestal.push({ nome: p.nome, codigo: p.codigo, vol, unidade: p.unidade, valor })
-      }
-    })
+    function frenteFlorestal(volumes: Record<string, number>, fator: number) {
+      let total = 0
+      const itens: { nome: string; codigo: string; vol: number; unidade: string; valor: number }[] = []
+      produtos.forEach((p) => {
+        const vol = volumes[p.id] || 0
+        if (vol > 0) {
+          const valor = ufemg.valor * vol * p.ufemg * fator
+          total += valor
+          itens.push({ nome: p.nome, codigo: p.codigo, vol, unidade: p.unidade, valor })
+        }
+      })
+      return { total, itens }
+    }
 
-    let totalReposicao = 0
-    const itensReposicao: { nome: string; codigo: string; vol: number; unidade: string; arvores: number; totalArvores: number; valor: number }[] = []
-    produtos.forEach((p) => {
-      const vol = state.volumes[p.id] || 0
-      if (vol > 0 && p.arvores > 0) {
-        const valor = ufemg.valor * vol * p.arvores
-        totalReposicao += valor
-        itensReposicao.push({ nome: p.nome, codigo: p.codigo, vol, unidade: p.unidade, arvores: p.arvores, totalArvores: Math.ceil(vol * p.arvores), valor })
-      }
-    })
+    function frenteReposicao(volumes: Record<string, number>) {
+      let total = 0
+      const itens: { nome: string; codigo: string; vol: number; unidade: string; arvores: number; totalArvores: number; valor: number }[] = []
+      produtos.forEach((p) => {
+        const vol = volumes[p.id] || 0
+        if (vol > 0 && p.arvores > 0) {
+          const valor = ufemg.valor * vol * p.arvores
+          total += valor
+          itens.push({ nome: p.nome, codigo: p.codigo, vol, unidade: p.unidade, arvores: p.arvores, totalArvores: Math.ceil(vol * p.arvores), valor })
+        }
+      })
+      return { total, itens }
+    }
 
-    return { total: totalExpediente + totalFlorestal + totalReposicao, totalExpediente, totalFlorestal, totalReposicao, itensExpediente, itensFlorestal, itensReposicao }
+    if (state.tipoAia === "mista") {
+      const florestalPrevia = frenteFlorestal(state.volumes, 1)
+      const florestalCorretiva = frenteFlorestal(state.volumesCorretiva, FATOR_CORRETIVA)
+      const reposicaoPrevia = frenteReposicao(state.volumes)
+      const reposicaoCorretiva = frenteReposicao(state.volumesCorretiva)
+      const totalFlorestal = florestalPrevia.total + florestalCorretiva.total
+      const totalReposicao = reposicaoPrevia.total + reposicaoCorretiva.total
+      return {
+        total: totalExpediente + totalFlorestal + totalReposicao,
+        totalExpediente, totalFlorestal, totalReposicao,
+        itensExpediente,
+        itensFlorestal: [...florestalPrevia.itens, ...florestalCorretiva.itens],
+        itensReposicao: [...reposicaoPrevia.itens, ...reposicaoCorretiva.itens],
+        florestalPrevia, florestalCorretiva, reposicaoPrevia, reposicaoCorretiva,
+      }
+    }
+
+    const fatorFlorestal = state.tipoAia === "corretiva" ? FATOR_CORRETIVA : 1
+    const florestal = frenteFlorestal(state.volumes, fatorFlorestal)
+    const reposicao = frenteReposicao(state.volumes)
+    return {
+      total: totalExpediente + florestal.total + reposicao.total,
+      totalExpediente, totalFlorestal: florestal.total, totalReposicao: reposicao.total,
+      itensExpediente, itensFlorestal: florestal.itens, itensReposicao: reposicao.itens,
+      florestalPrevia: null, florestalCorretiva: null, reposicaoPrevia: null, reposicaoCorretiva: null,
+    }
   }
 
   function copiar(texto: string, btn: HTMLButtonElement) {
@@ -281,7 +317,7 @@ export default function CalculadoraPage() {
   }
 
   // Progresso
-  const parte = stepId === "intro" || stepId === "tipoVegetacao" || stepId === "temManejo" || stepId === "temAPP" || stepId === "tiposAPP" || stepId === "temAproveitamento" || stepId === "quantidades" ? 1
+  const parte = stepId === "intro" || stepId === "tipoAia" || stepId === "tipoVegetacao" || stepId === "temManejo" || stepId === "temAPP" || stepId === "tiposAPP" || stepId === "temAproveitamento" || stepId === "quantidades" ? 1
     : stepId === "introFlorestal" || stepId === "temProdutos" || stepId === "produtosSelecionados" || stepId === "volumes" ? 2 : 3
 
   // Agrupar produtos por grupo
@@ -354,6 +390,26 @@ export default function CalculadoraPage() {
               <div className="acam-alert-result">
                 <strong>Como funciona:</strong> Responda às perguntas sobre a sua intervenção e a calculadora determinará automaticamente as atividades aplicáveis e os valores devidos.
               </div>
+            </div>
+          )}
+
+          {stepId === "tipoAia" && (
+            <div>
+              <h2 className="text-lg font-semibold mb-4">A intervenção já foi realizada?</h2>
+              <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-lg)", padding: "1rem", fontSize: "0.85rem", lineHeight: 1.6, color: "var(--neutral-600)", marginBottom: "1rem" }}>
+                <p style={{ marginBottom: "0.5rem" }}>Na <strong>AIA corretiva</strong>, que regulariza supressão realizada sem autorização, a Taxa Florestal é devida com <strong>acréscimo de 100%</strong>. A Taxa de Expediente e a Reposição Florestal não sofrem o acréscimo.</p>
+                <p style={{ marginBottom: "0.5rem" }}>Quando o mesmo processo reúne uma frente prévia e uma frente corretiva (<strong>AIA mista</strong>), emite-se uma única guia de Taxa de Expediente e duas guias de Taxa Florestal, com o acréscimo apenas na frente corretiva.</p>
+                <p style={{ fontSize: "0.75rem", color: "var(--neutral-400)" }}>Base legal: art. 69 da Lei nº 4.747/1968. A regularização não afasta as sanções pela intervenção irregular (art. 13 do Decreto nº 47.749/2019).</p>
+              </div>
+              {[
+                { valor: "previa", texto: "Não, será realizada após a autorização (AIA prévia)" },
+                { valor: "corretiva", texto: "Sim, já foi realizada sem autorização (AIA corretiva)" },
+                { valor: "mista", texto: "Em parte, o processo reúne frente prévia e frente corretiva (AIA mista)" },
+              ].map((op) => (
+                <OpcaoBtn key={op.valor} selected={state.tipoAia === op.valor} onClick={() => selecionar("tipoAia", op.valor)}>
+                  {op.texto}
+                </OpcaoBtn>
+              ))}
             </div>
           )}
 
@@ -490,16 +546,42 @@ export default function CalculadoraPage() {
           {stepId === "volumes" && (
             <div>
               <h2 className="text-lg font-semibold mb-2">Informe os volumes</h2>
-              <p className="text-sm text-muted-foreground mb-4">Preencha o volume para cada produto selecionado.</p>
+              {state.tipoAia === "mista" ? (
+                <p className="text-sm text-muted-foreground mb-4">Preencha o volume de cada produto em cada frente. Deixe em branco a frente em que o produto não ocorre.</p>
+              ) : (
+                <p className="text-sm text-muted-foreground mb-4">Preencha o volume para cada produto selecionado.</p>
+              )}
               {PRODUTOS.filter((p) => state.produtosSelecionados.includes(p.id)).map((p) => (
-                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1rem", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", marginBottom: "0.75rem" }}>
-                  <label style={{ flex: 1, fontSize: "0.9rem" }}>{p.nome}<br /><span style={{ color: "var(--neutral-400)", fontSize: "0.8rem" }}>Código {p.codigo}</span></label>
-                  <input type="number" min="0" step="0.01" inputMode="decimal" placeholder="0"
-                    value={state.volumes[p.id] || ""}
-                    onChange={(e) => setState((prev) => ({ ...prev, volumes: { ...prev.volumes, [p.id]: parseFloat(e.target.value) || 0 } }))}
-                    style={{ width: "120px", padding: "0.5rem 0.75rem", border: "2px solid var(--neutral-200)", borderRadius: "var(--radius-md)", textAlign: "right", fontSize: "1rem" }} />
-                  <span style={{ fontSize: "0.8rem", color: "var(--neutral-500)", minWidth: "40px" }}>{p.unidade}</span>
-                </div>
+                state.tipoAia === "mista" ? (
+                  <div key={p.id} style={{ padding: "1rem", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", marginBottom: "0.75rem" }}>
+                    <label style={{ fontSize: "0.9rem" }}>{p.nome}<br /><span style={{ color: "var(--neutral-400)", fontSize: "0.8rem" }}>Código {p.codigo}</span></label>
+                    <div style={{ display: "flex", gap: "1rem", marginTop: "0.75rem" }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", marginBottom: "0.25rem" }}>Frente prévia ({p.unidade})</div>
+                        <input type="number" min="0" step="0.01" inputMode="decimal" placeholder="0"
+                          value={state.volumes[p.id] || ""}
+                          onChange={(e) => setState((prev) => ({ ...prev, volumes: { ...prev.volumes, [p.id]: parseFloat(e.target.value) || 0 } }))}
+                          style={{ width: "100%", padding: "0.5rem 0.75rem", border: "2px solid var(--neutral-200)", borderRadius: "var(--radius-md)", textAlign: "right", fontSize: "1rem" }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", marginBottom: "0.25rem" }}>Frente corretiva ({p.unidade})</div>
+                        <input type="number" min="0" step="0.01" inputMode="decimal" placeholder="0"
+                          value={state.volumesCorretiva[p.id] || ""}
+                          onChange={(e) => setState((prev) => ({ ...prev, volumesCorretiva: { ...prev.volumesCorretiva, [p.id]: parseFloat(e.target.value) || 0 } }))}
+                          style={{ width: "100%", padding: "0.5rem 0.75rem", border: "2px solid var(--neutral-200)", borderRadius: "var(--radius-md)", textAlign: "right", fontSize: "1rem" }} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "1rem", border: "1px solid var(--neutral-200)", borderRadius: "var(--radius-lg)", marginBottom: "0.75rem" }}>
+                    <label style={{ flex: 1, fontSize: "0.9rem" }}>{p.nome}<br /><span style={{ color: "var(--neutral-400)", fontSize: "0.8rem" }}>Código {p.codigo}</span></label>
+                    <input type="number" min="0" step="0.01" inputMode="decimal" placeholder="0"
+                      value={state.volumes[p.id] || ""}
+                      onChange={(e) => setState((prev) => ({ ...prev, volumes: { ...prev.volumes, [p.id]: parseFloat(e.target.value) || 0 } }))}
+                      style={{ width: "120px", padding: "0.5rem 0.75rem", border: "2px solid var(--neutral-200)", borderRadius: "var(--radius-md)", textAlign: "right", fontSize: "1rem" }} />
+                    <span style={{ fontSize: "0.8rem", color: "var(--neutral-500)", minWidth: "40px" }}>{p.unidade}</span>
+                  </div>
+                )
               ))}
             </div>
           )}
@@ -542,9 +624,67 @@ export default function CalculadoraPage() {
           )}
 
           {stepId === "resultado" && resultado && (() => {
+            const mista = state.tipoAia === "mista"
+            const listaProdutos = (itens: { nome: string; codigo: string; vol: number; unidade: string }[]) =>
+              itens.map((i) => `${i.nome} (${i.codigo}): ${i.vol} ${un(i.unidade, i.vol)}`).join("; ")
             const descExpediente = resultado.itensExpediente.map((i) => `${i.nome} (${i.codigo}): ${i.qtd} ${un(i.unidade, i.qtd)}`).join("; ")
-            const descFlorestal = resultado.itensFlorestal.map((i) => `${i.nome} (${i.codigo}): ${i.vol} ${un(i.unidade, i.vol)}`).join("; ")
+            const descFlorestal = (state.tipoAia === "corretiva" ? "AIA corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " : "")
+              + listaProdutos(resultado.itensFlorestal)
+            const descFlorestalPrevia = "AIA mista, frente prévia. " + listaProdutos(resultado.florestalPrevia?.itens ?? [])
+            const descFlorestalCorretiva = "AIA mista, frente corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " + listaProdutos(resultado.florestalCorretiva?.itens ?? [])
             const orgaoFlorestal = state.dentroLicenciamento ? "SECRETARIA ESTADO DE MEIO AMBIENTE E DESENVOLVIMENTO SUSTENTÁVEL" : "INSTITUTO ESTADUAL DE FLORESTAS - IEF"
+
+            const tituloFrente = (texto: string) => (
+              <h4 style={{ fontSize: "0.8rem", color: "var(--neutral-500)", textTransform: "uppercase", margin: "0.75rem 0 0.25rem" }}>{texto}</h4>
+            )
+            const subtotalFrente = (texto: string, valor: number) => (
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", fontSize: "0.85rem", fontWeight: 600 }}>
+                <span>{texto}</span><span style={{ color: "var(--primary-700)" }}>{fmt(valor)}</span>
+              </div>
+            )
+            const linhaFlorestal = (i: { nome: string; codigo: string; vol: number; unidade: string; valor: number }, chave: string) => (
+              <div key={chave} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 0", borderBottom: "1px solid var(--neutral-100)", fontSize: "0.9rem" }}>
+                <div><span>{i.nome}</span><br /><span style={{ color: "var(--neutral-400)", fontSize: "0.8rem" }}>Código {i.codigo} · {i.vol} {un(i.unidade, i.vol)}</span></div>
+                <span style={{ fontWeight: 600, color: "var(--primary-700)", whiteSpace: "nowrap" }}>{fmt(i.valor)}</span>
+              </div>
+            )
+            const linhaReposicao = (i: { nome: string; codigo: string; vol: number; unidade: string; arvores: number; totalArvores: number; valor: number }, chave: string) => (
+              <div key={chave} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 0", borderBottom: "1px solid var(--neutral-100)", fontSize: "0.9rem" }}>
+                <div><span>{i.nome}</span><br /><span style={{ color: "var(--neutral-400)", fontSize: "0.8rem" }}>{i.vol} {un(i.unidade, i.vol)} × {i.arvores} árv/{i.unidade} = {i.totalArvores} árvores</span></div>
+                <span style={{ fontWeight: 600, color: "var(--primary-700)", whiteSpace: "nowrap" }}>{fmt(i.valor)}</span>
+              </div>
+            )
+            const fichaFlorestal = (chave: string, titulo: string, valorFicha: number, desc: string) => (
+              <div key={chave} className="acam-card mb-3" style={{ padding: "var(--spacing-4)", background: "var(--neutral-50)", border: "2px solid var(--primary-100)" }}>
+                <h4 className="font-semibold mb-3" style={{ fontSize: "0.95rem", color: "var(--primary-700)" }}>{titulo}</h4>
+                <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", marginBottom: "0.5rem" }}>
+                  <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase", marginBottom: "0.25rem" }}>Órgão Público</div>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 500 }}>{orgaoFlorestal}</div>
+                </div>
+                <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", marginBottom: "0.5rem" }}>
+                  <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase", marginBottom: "0.25rem" }}>Serviço</div>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 500 }}>TAXA FLORESTAL</div>
+                </div>
+                <div style={{ background: "var(--primary-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", marginBottom: "0.5rem", border: "2px solid var(--primary-200)" }}>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase", marginBottom: "0.25rem" }}>Valor da Receita</div>
+                      <div style={{ fontSize: "1.25rem", fontWeight: 500, color: "var(--primary-700)" }}>{fmt(valorFicha)}</div>
+                    </div>
+                    <button className="acam-btn acam-btn-ghost acam-btn-sm" onClick={(e) => copiar(valorFicha.toFixed(2).replace(".", ","), e.currentTarget)}>Copiar</button>
+                  </div>
+                </div>
+                <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem" }}>
+                  <div className="flex justify-between items-center">
+                    <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase" }}>Informações Complementares</div>
+                    <button className="acam-btn acam-btn-ghost acam-btn-sm" onClick={(e) => copiar(montarInfoComplementares(nome, documento, municipio, processo, desc), e.currentTarget)}>Copiar</button>
+                  </div>
+                  <pre style={{ fontSize: "0.78rem", marginTop: "0.25rem", whiteSpace: "pre-line", fontFamily: "monospace", lineHeight: 1.6, maxHeight: "200px", overflowY: "auto", background: "white", padding: "0.75rem", borderRadius: "var(--radius-md)", border: "1px solid var(--neutral-200)" }}>
+                    {montarInfoComplementares(nome, documento, municipio, processo, desc)}
+                  </pre>
+                </div>
+              </div>
+            )
 
             return (
               <div>
@@ -578,12 +718,34 @@ export default function CalculadoraPage() {
                       <h3 className="font-semibold">Taxa Florestal</h3>
                       <span className="font-semibold" style={{ color: "var(--primary-700)" }}>{fmt(resultado.totalFlorestal)}</span>
                     </div>
-                    {resultado.itensFlorestal.map((i) => (
-                      <div key={i.codigo} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 0", borderBottom: "1px solid var(--neutral-100)", fontSize: "0.9rem" }}>
-                        <div><span>{i.nome}</span><br /><span style={{ color: "var(--neutral-400)", fontSize: "0.8rem" }}>Código {i.codigo} · {i.vol} {un(i.unidade, i.vol)}</span></div>
-                        <span style={{ fontWeight: 600, color: "var(--primary-700)", whiteSpace: "nowrap" }}>{fmt(i.valor)}</span>
-                      </div>
-                    ))}
+                    {state.tipoAia === "corretiva" && (
+                      <p className="text-xs mb-3" style={{ color: "var(--neutral-500)" }}>
+                        AIA corretiva: valores com acréscimo de 100%, art. 69 da Lei nº 4.747/1968.
+                      </p>
+                    )}
+                    {mista && resultado.florestalPrevia && resultado.florestalCorretiva ? (
+                      <>
+                        {resultado.florestalPrevia.itens.length > 0 && (
+                          <>
+                            {tituloFrente("Frente prévia")}
+                            {resultado.florestalPrevia.itens.map((i) => linhaFlorestal(i, "previa-" + i.codigo))}
+                            {subtotalFrente("Subtotal frente prévia", resultado.florestalPrevia.total)}
+                          </>
+                        )}
+                        {resultado.florestalCorretiva.itens.length > 0 && (
+                          <>
+                            {tituloFrente("Frente corretiva")}
+                            <p className="text-xs mb-2" style={{ color: "var(--neutral-500)" }}>
+                              Valores com acréscimo de 100%, art. 69 da Lei nº 4.747/1968.
+                            </p>
+                            {resultado.florestalCorretiva.itens.map((i) => linhaFlorestal(i, "corretiva-" + i.codigo))}
+                            {subtotalFrente("Subtotal frente corretiva", resultado.florestalCorretiva.total)}
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      resultado.itensFlorestal.map((i) => linhaFlorestal(i, i.codigo))
+                    )}
                   </div>
                 )}
 
@@ -594,12 +756,26 @@ export default function CalculadoraPage() {
                       <h3 className="font-semibold">Reposição Florestal</h3>
                       <span className="font-semibold" style={{ color: "var(--primary-700)" }}>{fmt(resultado.totalReposicao)}</span>
                     </div>
-                    {resultado.itensReposicao.map((i) => (
-                      <div key={i.codigo} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 0", borderBottom: "1px solid var(--neutral-100)", fontSize: "0.9rem" }}>
-                        <div><span>{i.nome}</span><br /><span style={{ color: "var(--neutral-400)", fontSize: "0.8rem" }}>{i.vol} {un(i.unidade, i.vol)} × {i.arvores} árv/{i.unidade} = {i.totalArvores} árvores</span></div>
-                        <span style={{ fontWeight: 600, color: "var(--primary-700)", whiteSpace: "nowrap" }}>{fmt(i.valor)}</span>
-                      </div>
-                    ))}
+                    {mista && resultado.reposicaoPrevia && resultado.reposicaoCorretiva ? (
+                      <>
+                        {resultado.reposicaoPrevia.itens.length > 0 && (
+                          <>
+                            {tituloFrente("Frente prévia")}
+                            {resultado.reposicaoPrevia.itens.map((i) => linhaReposicao(i, "previa-" + i.codigo))}
+                            {subtotalFrente("Subtotal frente prévia", resultado.reposicaoPrevia.total)}
+                          </>
+                        )}
+                        {resultado.reposicaoCorretiva.itens.length > 0 && (
+                          <>
+                            {tituloFrente("Frente corretiva")}
+                            {resultado.reposicaoCorretiva.itens.map((i) => linhaReposicao(i, "corretiva-" + i.codigo))}
+                            {subtotalFrente("Subtotal frente corretiva", resultado.reposicaoCorretiva.total)}
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      resultado.itensReposicao.map((i) => linhaReposicao(i, i.codigo))
+                    )}
                   </div>
                 )}
 
@@ -661,38 +837,13 @@ export default function CalculadoraPage() {
                     </div>
                   )}
 
-                  {/* Ficha DAE - Florestal */}
-                  {resultado.totalFlorestal > 0 && (
-                    <div className="acam-card mb-3" style={{ padding: "var(--spacing-4)", background: "var(--neutral-50)", border: "2px solid var(--primary-100)" }}>
-                      <h4 className="font-semibold mb-3" style={{ fontSize: "0.95rem", color: "var(--primary-700)" }}>Taxa Florestal</h4>
-                      <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", marginBottom: "0.5rem" }}>
-                        <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase", marginBottom: "0.25rem" }}>Órgão Público</div>
-                        <div style={{ fontSize: "0.9rem", fontWeight: 500 }}>{orgaoFlorestal}</div>
-                      </div>
-                      <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", marginBottom: "0.5rem" }}>
-                        <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase", marginBottom: "0.25rem" }}>Serviço</div>
-                        <div style={{ fontSize: "0.9rem", fontWeight: 500 }}>TAXA FLORESTAL</div>
-                      </div>
-                      <div style={{ background: "var(--primary-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem", marginBottom: "0.5rem", border: "2px solid var(--primary-200)" }}>
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase", marginBottom: "0.25rem" }}>Valor da Receita</div>
-                            <div style={{ fontSize: "1.25rem", fontWeight: 500, color: "var(--primary-700)" }}>{fmt(resultado.totalFlorestal)}</div>
-                          </div>
-                          <button className="acam-btn acam-btn-ghost acam-btn-sm" onClick={(e) => copiar(resultado.totalFlorestal.toFixed(2).replace(".", ","), e.currentTarget)}>Copiar</button>
-                        </div>
-                      </div>
-                      <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-md)", padding: "0.75rem 1rem" }}>
-                        <div className="flex justify-between items-center">
-                          <div style={{ fontSize: "0.75rem", color: "var(--neutral-500)", textTransform: "uppercase" }}>Informações Complementares</div>
-                          <button className="acam-btn acam-btn-ghost acam-btn-sm" onClick={(e) => copiar(montarInfoComplementares(nome, documento, municipio, processo, descFlorestal), e.currentTarget)}>Copiar</button>
-                        </div>
-                        <pre style={{ fontSize: "0.78rem", marginTop: "0.25rem", whiteSpace: "pre-line", fontFamily: "monospace", lineHeight: 1.6, maxHeight: "200px", overflowY: "auto", background: "white", padding: "0.75rem", borderRadius: "var(--radius-md)", border: "1px solid var(--neutral-200)" }}>
-                          {montarInfoComplementares(nome, documento, municipio, processo, descFlorestal)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
+                  {/* Fichas DAE - Florestal (uma por frente quando mista) */}
+                  {mista && resultado.florestalPrevia && resultado.florestalPrevia.total > 0 &&
+                    fichaFlorestal("florestal-previa", "Taxa Florestal (frente prévia)", resultado.florestalPrevia.total, descFlorestalPrevia)}
+                  {mista && resultado.florestalCorretiva && resultado.florestalCorretiva.total > 0 &&
+                    fichaFlorestal("florestal-corretiva", "Taxa Florestal (frente corretiva)", resultado.florestalCorretiva.total, descFlorestalCorretiva)}
+                  {!mista && resultado.totalFlorestal > 0 &&
+                    fichaFlorestal("florestal", "Taxa Florestal", resultado.totalFlorestal, descFlorestal)}
                 </Accordion>
 
                 {/* UFEMG ref */}
@@ -714,6 +865,7 @@ export default function CalculadoraPage() {
                           ufemgValor: ufemg.valor,
                           nome, documento, municipio, processo,
                           dentroLicenciamento: state.dentroLicenciamento,
+                          tipoAia: state.tipoAia,
                         }),
                       })
                       if (res.ok) {
