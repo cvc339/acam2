@@ -398,13 +398,13 @@ export default function CalculadoraPage() {
               <h2 className="text-lg font-semibold mb-4">A intervenção já foi realizada?</h2>
               <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-lg)", padding: "1rem", fontSize: "0.85rem", lineHeight: 1.6, color: "var(--neutral-600)", marginBottom: "1rem" }}>
                 <p style={{ marginBottom: "0.5rem" }}>Na <strong>AIA corretiva</strong>, que regulariza supressão realizada sem autorização, a Taxa Florestal é devida com <strong>acréscimo de 100%</strong>. A Taxa de Expediente e a Reposição Florestal não sofrem o acréscimo.</p>
-                <p style={{ marginBottom: "0.5rem" }}>Quando o mesmo processo reúne uma frente prévia e uma frente corretiva (<strong>AIA mista</strong>), emite-se uma única guia de Taxa de Expediente e duas guias de Taxa Florestal, com o acréscimo apenas na frente corretiva.</p>
+                <p style={{ marginBottom: "0.5rem" }}>Quando o mesmo processo reúne uma frente com AIA prévia e outra com AIA corretiva, emite-se uma única guia de Taxa de Expediente e duas guias de Taxa Florestal, com o acréscimo apenas na frente corretiva.</p>
                 <p style={{ fontSize: "0.75rem", color: "var(--neutral-400)" }}>Base legal: art. 69 da Lei nº 4.747/1968. A regularização não afasta as sanções pela intervenção irregular (art. 13 do Decreto nº 47.749/2019).</p>
               </div>
               {[
                 { valor: "previa", texto: "Não, será realizada após a autorização (AIA prévia)" },
                 { valor: "corretiva", texto: "Sim, já foi realizada sem autorização (AIA corretiva)" },
-                { valor: "mista", texto: "Em parte, o processo reúne frente prévia e frente corretiva (AIA mista)" },
+                { valor: "mista", texto: "Em parte, o processo reúne uma frente com AIA prévia e outra com AIA corretiva" },
               ].map((op) => (
                 <OpcaoBtn key={op.valor} selected={state.tipoAia === op.valor} onClick={() => selecionar("tipoAia", op.valor)}>
                   {op.texto}
@@ -630,8 +630,8 @@ export default function CalculadoraPage() {
             const descExpediente = resultado.itensExpediente.map((i) => `${i.nome} (${i.codigo}): ${i.qtd} ${un(i.unidade, i.qtd)}`).join("; ")
             const descFlorestal = (state.tipoAia === "corretiva" ? "AIA corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " : "")
               + listaProdutos(resultado.itensFlorestal)
-            const descFlorestalPrevia = "AIA mista, frente prévia. " + listaProdutos(resultado.florestalPrevia?.itens ?? [])
-            const descFlorestalCorretiva = "AIA mista, frente corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " + listaProdutos(resultado.florestalCorretiva?.itens ?? [])
+            const descFlorestalPrevia = "Frente prévia (AIA prévia) do processo. " + listaProdutos(resultado.florestalPrevia?.itens ?? [])
+            const descFlorestalCorretiva = "Frente corretiva (AIA corretiva) do processo, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " + listaProdutos(resultado.florestalCorretiva?.itens ?? [])
             const orgaoFlorestal = state.dentroLicenciamento ? "SECRETARIA ESTADO DE MEIO AMBIENTE E DESENVOLVIMENTO SUSTENTÁVEL" : "INSTITUTO ESTADUAL DE FLORESTAS - IEF"
 
             const tituloFrente = (texto: string) => (

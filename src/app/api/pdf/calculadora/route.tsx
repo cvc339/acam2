@@ -61,8 +61,8 @@ export async function POST(request: Request) {
     const descFlorestal = (tipoAia === "corretiva" ? "AIA corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " : "")
       + listaProdutos(itensFlorestal)
 
-    const descFlorestalPrevia = "AIA mista, frente prévia. " + listaProdutos(florestalPrevia?.itens)
-    const descFlorestalCorretiva = "AIA mista, frente corretiva, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " + listaProdutos(florestalCorretiva?.itens)
+    const descFlorestalPrevia = "Frente prévia (AIA prévia) do processo. " + listaProdutos(florestalPrevia?.itens)
+    const descFlorestalCorretiva = "Frente corretiva (AIA corretiva) do processo, taxa com acréscimo de 100% (art. 69 da Lei 4.747/1968). " + listaProdutos(florestalCorretiva?.itens)
 
     function montarInfo(desc: string) {
       let texto = `Nome: ${nome || "[NOME DO EMPREENDIMENTO]"}\nCPF/CNPJ: ${documento || "[CPF/CNPJ]"}\nMunicípio: ${municipio ? municipio + "/MG" : "[MUNICÍPIO]"}`

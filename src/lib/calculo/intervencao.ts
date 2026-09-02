@@ -25,7 +25,12 @@
 /** Frente de cálculo: prévia (antes da intervenção) ou corretiva (regularização). */
 export type FrenteAia = "previa" | "corretiva"
 
-/** Tipo do processo no assistente; "mista" reúne as duas frentes no mesmo processo. */
+/**
+ * Tipo do processo no assistente; "mista" reúne as duas frentes no mesmo
+ * processo. Rótulo interno: não existe "AIA mista" como categoria legal (as
+ * categorias são AIA prévia e AIA corretiva), e o termo não deve aparecer em
+ * texto visível ao usuário nem em DAE/PDF.
+ */
 export type TipoAia = FrenteAia | "mista"
 
 /** Fator do art. 69 da Lei 4.747/1968: taxa devida com 100% de acréscimo. */
