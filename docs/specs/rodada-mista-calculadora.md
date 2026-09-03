@@ -1,6 +1,21 @@
 # Spec: rodada mista na Calculadora de Intervencao (AIA previa + corretiva)
 
-STATUS: IMPLEMENTADA em 2026-09-02 (sessao seguinte a da escrita), sem commit.
+> CORRECOES POS-IMPLEMENTACAO (03/09/2026, titular):
+> 1. Nao existe "AIA mista" como categoria legal (so previa e corretiva); o termo
+>    nao aparece em texto visivel, DAE ou PDF; "mista" e rotulo interno de estado.
+> 2. A REPOSICAO FLORESTAL E UNICA no processo, como a taxa de expediente; nao se
+>    divide por frente. Calculada sobre os volumes somados por produto das duas
+>    frentes, com o arredondamento de arvores aplicado uma vez por produto
+>    (campo reposicaoFlorestal em ResultadoIntervencaoMista). So a taxa
+>    florestal se divide por frente (duas guias, dobro na corretiva).
+> O item 3 abaixo fica retificado nesses pontos.
+
+STATUS: IMPLEMENTADA em 2026-09-02 (sessao seguinte a da escrita); commits
+2155ce4 (feature) e 1007d9b (correcao de terminologia) na main, com push.
+TERMINOLOGIA (correcao do titular, 2026-09-02): NAO existe "AIA mista" como
+categoria legal; existem AIA previa e AIA corretiva, e o processo pode reunir
+as duas frentes. "Mista"/"rodada mista" e rotulo interno (estado do wizard,
+nomes de funcao, esta spec) e nao aparece em texto visivel, DAE ou PDF.
 Motor: calcularIntervencaoMista + tipo FrenteAia em intervencao.ts; wizard com
 terceira opcao no passo tipoAia e dois campos de volume por produto; resultado,
 fichas DAE e PDF separados por frente (expediente unico). Testes: 13 passando

@@ -283,17 +283,18 @@ export default function CalculadoraPage() {
     if (state.tipoAia === "mista") {
       const florestalPrevia = frenteFlorestal(state.volumes, 1)
       const florestalCorretiva = frenteFlorestal(state.volumesCorretiva, FATOR_CORRETIVA)
-      const reposicaoPrevia = frenteReposicao(state.volumes)
-      const reposicaoCorretiva = frenteReposicao(state.volumesCorretiva)
+      // reposição florestal é única: volumes das duas frentes somados por produto
+      const volumesSomados: Record<string, number> = {}
+      produtos.forEach((p) => { volumesSomados[p.id] = (state.volumes[p.id] || 0) + (state.volumesCorretiva[p.id] || 0) })
+      const reposicao = frenteReposicao(volumesSomados)
       const totalFlorestal = florestalPrevia.total + florestalCorretiva.total
-      const totalReposicao = reposicaoPrevia.total + reposicaoCorretiva.total
       return {
-        total: totalExpediente + totalFlorestal + totalReposicao,
-        totalExpediente, totalFlorestal, totalReposicao,
+        total: totalExpediente + totalFlorestal + reposicao.total,
+        totalExpediente, totalFlorestal, totalReposicao: reposicao.total,
         itensExpediente,
         itensFlorestal: [...florestalPrevia.itens, ...florestalCorretiva.itens],
-        itensReposicao: [...reposicaoPrevia.itens, ...reposicaoCorretiva.itens],
-        florestalPrevia, florestalCorretiva, reposicaoPrevia, reposicaoCorretiva,
+        itensReposicao: reposicao.itens,
+        florestalPrevia, florestalCorretiva,
       }
     }
 
@@ -304,7 +305,7 @@ export default function CalculadoraPage() {
       total: totalExpediente + florestal.total + reposicao.total,
       totalExpediente, totalFlorestal: florestal.total, totalReposicao: reposicao.total,
       itensExpediente, itensFlorestal: florestal.itens, itensReposicao: reposicao.itens,
-      florestalPrevia: null, florestalCorretiva: null, reposicaoPrevia: null, reposicaoCorretiva: null,
+      florestalPrevia: null, florestalCorretiva: null,
     }
   }
 
@@ -398,7 +399,7 @@ export default function CalculadoraPage() {
               <h2 className="text-lg font-semibold mb-4">A intervenção já foi realizada?</h2>
               <div style={{ background: "var(--neutral-50)", borderRadius: "var(--radius-lg)", padding: "1rem", fontSize: "0.85rem", lineHeight: 1.6, color: "var(--neutral-600)", marginBottom: "1rem" }}>
                 <p style={{ marginBottom: "0.5rem" }}>Na <strong>AIA corretiva</strong>, que regulariza supressão realizada sem autorização, a Taxa Florestal é devida com <strong>acréscimo de 100%</strong>. A Taxa de Expediente e a Reposição Florestal não sofrem o acréscimo.</p>
-                <p style={{ marginBottom: "0.5rem" }}>Quando o mesmo processo reúne uma frente com AIA prévia e outra com AIA corretiva, emite-se uma única guia de Taxa de Expediente e duas guias de Taxa Florestal, com o acréscimo apenas na frente corretiva.</p>
+                <p style={{ marginBottom: "0.5rem" }}>Quando o mesmo processo reúne uma frente com AIA prévia e outra com AIA corretiva, emite-se uma única guia de Taxa de Expediente e duas guias de Taxa Florestal, com o acréscimo apenas na frente corretiva; a Reposição Florestal permanece única, calculada sobre os volumes somados das duas frentes.</p>
                 <p style={{ fontSize: "0.75rem", color: "var(--neutral-400)" }}>Base legal: art. 69 da Lei nº 4.747/1968. A regularização não afasta as sanções pela intervenção irregular (art. 13 do Decreto nº 47.749/2019).</p>
               </div>
               {[
@@ -756,26 +757,12 @@ export default function CalculadoraPage() {
                       <h3 className="font-semibold">Reposição Florestal</h3>
                       <span className="font-semibold" style={{ color: "var(--primary-700)" }}>{fmt(resultado.totalReposicao)}</span>
                     </div>
-                    {mista && resultado.reposicaoPrevia && resultado.reposicaoCorretiva ? (
-                      <>
-                        {resultado.reposicaoPrevia.itens.length > 0 && (
-                          <>
-                            {tituloFrente("Frente prévia")}
-                            {resultado.reposicaoPrevia.itens.map((i) => linhaReposicao(i, "previa-" + i.codigo))}
-                            {subtotalFrente("Subtotal frente prévia", resultado.reposicaoPrevia.total)}
-                          </>
-                        )}
-                        {resultado.reposicaoCorretiva.itens.length > 0 && (
-                          <>
-                            {tituloFrente("Frente corretiva")}
-                            {resultado.reposicaoCorretiva.itens.map((i) => linhaReposicao(i, "corretiva-" + i.codigo))}
-                            {subtotalFrente("Subtotal frente corretiva", resultado.reposicaoCorretiva.total)}
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      resultado.itensReposicao.map((i) => linhaReposicao(i, i.codigo))
+                    {mista && (
+                      <p className="text-xs mb-3" style={{ color: "var(--neutral-500)" }}>
+                        Reposição única do processo, calculada sobre os volumes somados das frentes prévia e corretiva.
+                      </p>
                     )}
+                    {resultado.itensReposicao.map((i) => linhaReposicao(i, i.codigo))}
                   </div>
                 )}
 

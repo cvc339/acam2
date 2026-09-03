@@ -246,6 +246,13 @@ export interface ResultadoIntervencaoMista {
   previa: ResultadoIntervencao
   /** Frente corretiva, Taxa Florestal em dobro; sem Taxa de Expediente. */
   corretiva: ResultadoIntervencao
+  /**
+   * Reposição Florestal ÚNICA do processo, calculada sobre os volumes somados
+   * por produto das duas frentes. A reposição não se divide por frente nem
+   * dobra na corretiva; usar este bloco, e não o das frentes, em resultado,
+   * DAE e PDF.
+   */
+  reposicaoFlorestal: { total: number; itens: ItemCalculado[]; arvoresTotal: number }
   totalGeral: number
 }
 
@@ -254,8 +261,9 @@ export interface ResultadoIntervencaoMista {
  * A Taxa de Expediente é devida uma vez só, por atividade, sem divisão por
  * frente (guia única na prática adotada), e sai no resultado da frente prévia.
  * A Taxa Florestal é calculada por frente, com o acréscimo do art. 69 da
- * Lei 4.747/1968 apenas na corretiva. A Reposição Florestal de cada frente
- * não dobra.
+ * Lei 4.747/1968 apenas na corretiva. A Reposição Florestal é única, sobre os
+ * volumes somados por produto, com o arredondamento de árvores aplicado uma
+ * vez por produto.
  */
 export function calcularIntervencaoMista(
   atividadesSelecionadas: { atividade: Atividade; quantidade: number }[],
@@ -266,5 +274,40 @@ export function calcularIntervencaoMista(
 ): ResultadoIntervencaoMista {
   const previa = calcularIntervencao(atividadesSelecionadas, produtosPrevia, ufemgValor, ufemgAno, "previa")
   const corretiva = calcularIntervencao([], produtosCorretiva, ufemgValor, ufemgAno, "corretiva")
-  return { previa, corretiva, totalGeral: previa.total + corretiva.total }
+
+  const volumesPorProduto = new Map<string, { produto: Produto; volume: number }>()
+  for (const lista of [produtosPrevia, produtosCorretiva]) {
+    for (const { produto, volume } of lista) {
+      const atual = volumesPorProduto.get(produto.id)
+      volumesPorProduto.set(produto.id, { produto, volume: (atual?.volume ?? 0) + volume })
+    }
+  }
+
+  const itensReposicao: ItemCalculado[] = []
+  let totalReposicao = 0
+  let arvoresTotal = 0
+  for (const { produto, volume } of volumesPorProduto.values()) {
+    if (volume > 0 && produto.arvores > 0) {
+      const valor = calcularReposicaoItem(produto, volume, ufemgValor)
+      const arvores = Math.ceil(volume * produto.arvores)
+      totalReposicao += valor
+      arvoresTotal += arvores
+      itensReposicao.push({
+        nome: produto.nome,
+        codigo: produto.codigo,
+        valor,
+        detalhe: `${volume} ${produto.unidade} × ${produto.arvores} = ${arvores} árvores`,
+      })
+    }
+  }
+
+  const totalGeral = previa.taxaExpediente.total + previa.taxaFlorestal.total
+    + corretiva.taxaFlorestal.total + totalReposicao
+
+  return {
+    previa,
+    corretiva,
+    reposicaoFlorestal: { total: totalReposicao, itens: itensReposicao, arvoresTotal },
+    totalGeral,
+  }
 }

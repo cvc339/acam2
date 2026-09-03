@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const {
       totalExpediente, totalFlorestal, totalReposicao, total,
       itensExpediente, itensFlorestal, itensReposicao,
-      florestalPrevia, florestalCorretiva, reposicaoPrevia, reposicaoCorretiva,
+      florestalPrevia, florestalCorretiva,
       ufemgAno, ufemgValor,
       nome, documento, municipio, processo,
       dentroLicenciamento, tipoAia,
@@ -191,20 +191,15 @@ export async function POST(request: Request) {
             </Secao>
           )}
 
-          {/* Reposição Florestal */}
-          {!mista && itensReposicao && itensReposicao.length > 0 && (
+          {/* Reposição Florestal (única, também na rodada mista) */}
+          {itensReposicao && itensReposicao.length > 0 && (
             <Secao titulo="Reposição Florestal">
+              {mista && (
+                <Text style={[styles.tabelaTexto, { marginBottom: 6 }]}>
+                  Reposição única do processo, calculada sobre os volumes somados das frentes prévia e corretiva.
+                </Text>
+              )}
               {tabelaReposicao(itensReposicao, "Subtotal Reposição Florestal", totalReposicao)}
-            </Secao>
-          )}
-          {mista && reposicaoPrevia && reposicaoPrevia.itens.length > 0 && (
-            <Secao titulo="Reposição Florestal (frente prévia)">
-              {tabelaReposicao(reposicaoPrevia.itens, "Subtotal frente prévia", reposicaoPrevia.total)}
-            </Secao>
-          )}
-          {mista && reposicaoCorretiva && reposicaoCorretiva.itens.length > 0 && (
-            <Secao titulo="Reposição Florestal (frente corretiva)">
-              {tabelaReposicao(reposicaoCorretiva.itens, "Subtotal frente corretiva", reposicaoCorretiva.total)}
             </Secao>
           )}
         </Pagina>

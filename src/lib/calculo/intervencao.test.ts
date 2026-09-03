@@ -107,6 +107,10 @@ describe("Rodada mista (prévia + corretiva no mesmo processo)", () => {
     expect(mista.previa.total).toBeCloseTo(previa.total, 6)
     expect(mista.corretiva.total).toBeCloseTo(corretiva.total, 6)
     expect(mista.totalGeral).toBeCloseTo(previa.total + corretiva.total, 6)
+    expect(mista.totalGeral).toBeCloseTo(
+      mista.previa.taxaExpediente.total + mista.previa.taxaFlorestal.total
+      + mista.corretiva.taxaFlorestal.total + mista.reposicaoFlorestal.total, 6
+    )
   })
 
   it("a taxa de expediente sai uma vez só, idêntica à de rodada única", () => {
@@ -125,12 +129,29 @@ describe("Rodada mista (prévia + corretiva no mesmo processo)", () => {
     expect(mista.previa.taxaFlorestal.total).toBeCloseTo(previaSimples.taxaFlorestal.total, 6)
   })
 
-  it("a reposição florestal não dobra em nenhuma frente", () => {
-    const repPrevia = calcularReposicaoItem(lenhaNativa, 5570.9538, UFEMG)
-    expect(mista.previa.reposicaoFlorestal.total).toBeCloseTo(repPrevia, 4)
-    const repCorretiva = calcularReposicaoItem(lenhaNativa, 1200.5, UFEMG)
+  it("a reposição florestal é ÚNICA, sobre os volumes somados por produto, sem dobro", () => {
+    const volumeLenha = 5570.9538 + 1200.5
+    const esperado = calcularReposicaoItem(lenhaNativa, volumeLenha, UFEMG)
       + calcularReposicaoItem(madeiraNativa, 346.8499, UFEMG)
-    expect(mista.corretiva.reposicaoFlorestal.total).toBeCloseTo(repCorretiva, 4)
+    expect(mista.reposicaoFlorestal.total).toBeCloseTo(esperado, 4)
+
+    // produto presente nas duas frentes vira UM item só, com o volume somado
+    const itensLenha = mista.reposicaoFlorestal.itens.filter((i) => i.codigo === lenhaNativa.codigo)
+    expect(itensLenha).toHaveLength(1)
+    expect(itensLenha[0].detalhe).toContain(String(volumeLenha))
+
+    // arredondamento de árvores aplicado uma vez por produto, sobre o volume somado
+    const arvoresEsperadas = Math.ceil(volumeLenha * lenhaNativa.arvores)
+      + Math.ceil(346.8499 * madeiraNativa.arvores)
+    expect(mista.reposicaoFlorestal.arvoresTotal).toBe(arvoresEsperadas)
+
+    // equivale à reposição de uma rodada única com os volumes somados
+    const unica = calcularIntervencao([], [
+      { produto: lenhaNativa, volume: volumeLenha },
+      { produto: madeiraNativa, volume: 346.8499 },
+    ], UFEMG, 2026, "previa")
+    expect(mista.reposicaoFlorestal.total).toBeCloseTo(unica.reposicaoFlorestal.total, 6)
+    expect(mista.reposicaoFlorestal.arvoresTotal).toBe(unica.reposicaoFlorestal.arvoresTotal)
   })
 
   it("cada frente registra o próprio tipo e só a corretiva declara o acréscimo", () => {
