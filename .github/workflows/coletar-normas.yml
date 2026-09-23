@@ -38,9 +38,19 @@ jobs:
         # MG raramente falha e e caro (puppeteer) — nao precisa de retries no mesmo dia.
         if: github.event.schedule == '0 10 * * *' || github.event_name == 'workflow_dispatch'
         continue-on-error: true
+        # Janela de 10 dias (o padrao do endpoint era 7). Motivo, diagnostico de
+        # 22/09/2026: a busca no CTL e por data de ASSINATURA, mas a norma so entra
+        # no CTL depois de publicada no Diario. Defasagem medida nas fichas: RC
+        # 3.420/2026 sete dias, RC 3.423/2026 cinco, RC 3.424/2026 seis. Com sete
+        # dias a norma podia nunca ser coletada. Reinsercao e idempotente (23505).
         run: |
+          DATA_FIM=$(date -u +%d/%m/%Y)
+          DATA_INICIO=$(date -u -d "10 days ago" +%d/%m/%Y)
+          echo "Coletando MG de $DATA_INICIO a $DATA_FIM"
           curl --fail-with-body --silent --show-error \
             --max-time 420 \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"dataInicio\":\"$DATA_INICIO\",\"dataFim\":\"$DATA_FIM\"}" \
             https://www.acam.com.br/api/admin/newsletter/coletar-mg
