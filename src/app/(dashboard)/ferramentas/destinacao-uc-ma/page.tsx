@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { BotaoRelatorioPDF } from "@/components/acam/BotaoRelatorioPDF"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { StatusBadge, AlertResult, CTAConsultoria, DocumentoItem } from "@/components/acam"
@@ -417,19 +418,7 @@ export default function DestinacaoUCMaPage() {
 
         {/* Botões */}
         <div className="flex flex-wrap gap-3">
-          <button className="acam-btn acam-btn-primary" onClick={async () => {
-            try {
-              const res = await fetch(`/api/consultas/${consultaId}`)
-              const data = await res.json()
-              if (data.consulta?.pdf_url) {
-                window.open(data.consulta.pdf_url, "_blank")
-              } else {
-                alert("PDF ainda não disponível. O relatório pode estar sendo gerado.")
-              }
-            } catch {
-              alert("Erro ao buscar o PDF. Tente novamente.")
-            }
-          }}>Baixar Relatório PDF</button>
+          <BotaoRelatorioPDF consultaId={consultaId} />
           <Link href="/dashboard" className="acam-btn acam-btn-secondary">Voltar ao dashboard</Link>
         </div>
 

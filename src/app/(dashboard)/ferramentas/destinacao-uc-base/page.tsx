@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { BotaoRelatorioPDF } from "@/components/acam/BotaoRelatorioPDF"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { StatusBadge, AlertResult, CTAConsultoria, DocumentoItem } from "@/components/acam"
@@ -701,13 +702,7 @@ export default function DestinacaoUCBasePage() {
 
         {/* Botões */}
         <div style={{ display: "flex", gap: "var(--spacing-3)", flexWrap: "wrap" }}>
-          <button className="acam-btn acam-btn-primary" onClick={async () => {
-            const res = await fetch(`/api/consultas/${consultaId}`)
-            const data = await res.json()
-            if (data.consulta?.pdf_url) {
-              window.open(data.consulta.pdf_url, "_blank")
-            }
-          }}>Baixar Relatório PDF</button>
+          <BotaoRelatorioPDF consultaId={consultaId} />
           <Link href="/dashboard" className="acam-btn acam-btn-secondary">Voltar ao dashboard</Link>
         </div>
 
