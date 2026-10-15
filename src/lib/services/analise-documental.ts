@@ -103,7 +103,7 @@ export interface ResultadoAnalise<T> {
 async function chamarClaudeComPDF(
   pdfBuffer: Buffer,
   prompt: string,
-  maxTokens = 4096,
+  maxTokens = 16000, // o raciocínio do modelo conta no limite de saída; 4.096 cortava o JSON (14/10/2026)
   modelOverride?: string,
 ): Promise<{ json: Record<string, unknown>; tokens: { input_tokens: number; output_tokens: number } }> {
   const { apiKey, apiUrl, model: defaultModel } = getClaudeConfig()
@@ -156,11 +156,12 @@ async function chamarClaudeComPDF(
   }
 
   const data = await response.json() as {
-    content: { text: string }[]
+    content: { type: string; text?: string }[]
     usage: { input_tokens: number; output_tokens: number }
   }
 
-  const resposta = data.content[0].text
+  // Primeiro bloco de TEXTO: o Opus 5.5 pensa antes de responder e o primeiro bloco é o raciocínio (14/10/2026)
+  const resposta = data.content.find((b) => b.type === "text")?.text ?? ""
   const jsonMatch = resposta.match(/\{[\s\S]*\}/)
   if (!jsonMatch) {
     throw new Error("Claude não retornou JSON válido")
