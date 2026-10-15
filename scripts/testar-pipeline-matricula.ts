@@ -123,11 +123,11 @@ const ESPERADOS: ResultadoEsperado[] = [
 const CONFIGS = {
   sonnet: {
     nome: "Sonnet (A+B+C)",
-    modelo: "claude-sonnet-4-20250514",
+    modelo: "claude-sonnet-5-5",
   },
   opus: {
     nome: "Opus (A+B+C)",
-    modelo: "claude-opus-4-20250514",
+    modelo: "claude-opus-5-5",
   },
   hibrido: {
     nome: "Híbrido (A+B Sonnet, C Opus)",
@@ -256,11 +256,12 @@ function compararResultado(
 function calcularCusto(tokens: Array<{ etapa: string; input: number; output: number }>, modelo: string): number {
   // Preços por 1M tokens (USD)
   const precos: Record<string, { input: number; output: number }> = {
-    "claude-sonnet-4-20250514": { input: 3, output: 15 },
-    "claude-opus-4-20250514": { input: 15, output: 75 },
+    // Preços por 1M de tokens em USD, tabela da Anthropic lida em 14/10/2026
+    "claude-sonnet-5-5": { input: 2, output: 10 },
+    "claude-opus-5-5": { input: 4, output: 20 },
   }
 
-  const preco = precos[modelo] || precos["claude-sonnet-4-20250514"]
+  const preco = precos[modelo] || precos["claude-sonnet-5-5"]
   let custo = 0
   for (const t of tokens) {
     custo += (t.input / 1_000_000) * preco.input + (t.output / 1_000_000) * preco.output

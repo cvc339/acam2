@@ -10,7 +10,10 @@ function getClaudeConfig() {
   return {
     apiKey: process.env.CLAUDE_API_KEY || "",
     apiUrl: process.env.CLAUDE_API_URL || "https://api.anthropic.com/v1/messages",
-    model: process.env.CLAUDE_MODEL || "claude-opus-4-20250514",
+    // Opus 5.5 desde 14/10/2026: o Opus 4 (claude-opus-4-20250514) foi aposentado pela Anthropic em 15/06/2026 e as
+    // chamadas falhavam com "not_found_error" (aviso da Anthropic de 14/10/2026, seis chamadas em 13/10). Trocar o
+    // modelo é definir CLAUDE_MODEL no ambiente; não precisa de publicação
+    model: process.env.CLAUDE_MODEL || "claude-opus-5-5",
   }
 }
 
@@ -140,6 +143,9 @@ async function chamarClaudeComPDF(
       errorMessage = `HTTP ${response.status} — resposta não-JSON (verifique CLAUDE_API_KEY e CLAUDE_API_URL)`
     }
 
+    if (errorType === "not_found_error" && /model/i.test(errorMessage)) {
+      throw new Error(`O modelo de IA configurado (${model}) não existe mais na API da Anthropic: foi descontinuado. Defina CLAUDE_MODEL com um modelo atual (por exemplo, claude-opus-5-5). Detalhe: ${errorMessage}`)
+    }
     if (errorType === "insufficient_quota" || errorMessage?.includes("credit balance")) {
       throw new Error(`Saldo insuficiente na API Claude: ${errorMessage}`)
     } else if (errorType === "rate_limit_error" || response.status === 429) {

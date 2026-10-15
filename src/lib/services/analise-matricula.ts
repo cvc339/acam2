@@ -318,7 +318,10 @@ function getClaudeConfig() {
   return {
     apiKey: process.env.CLAUDE_API_KEY || "",
     apiUrl: process.env.CLAUDE_API_URL || "https://api.anthropic.com/v1/messages",
-    model: process.env.CLAUDE_MODEL || "claude-opus-4-20250514",
+    // Opus 5.5 desde 14/10/2026: o Opus 4 (claude-opus-4-20250514) foi aposentado pela Anthropic em 15/06/2026 e as
+    // chamadas falhavam com "not_found_error" (aviso da Anthropic de 14/10/2026, seis chamadas em 13/10). Trocar o
+    // modelo é definir CLAUDE_MODEL no ambiente; não precisa de publicação
+    model: process.env.CLAUDE_MODEL || "claude-opus-5-5",
   }
 }
 
@@ -381,12 +384,18 @@ async function parsearRespostaClaude(
 ): Promise<{ json: Record<string, unknown>; tokens: { input_tokens: number; output_tokens: number } }> {
   if (!response.ok) {
     const text = await response.text()
+    let errorType = ""
     let errorMessage = ""
     try {
-      const errorData = JSON.parse(text)
+      const errorData = JSON.parse(text) as { error?: { type?: string; message?: string } }
+      errorType = errorData.error?.type || ""
       errorMessage = errorData.error?.message || ""
     } catch {
       errorMessage = `HTTP ${response.status}`
+    }
+    const { model } = getClaudeConfig()
+    if (errorType === "not_found_error" && /model/i.test(errorMessage)) {
+      throw new Error(`O modelo de IA configurado (${model}) não existe mais na API da Anthropic: foi descontinuado. Defina CLAUDE_MODEL com um modelo atual (por exemplo, claude-opus-5-5). Detalhe: ${errorMessage}`)
     }
     throw new Error(`API Claude: ${errorMessage}`)
   }
